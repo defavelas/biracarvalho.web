@@ -48,6 +48,17 @@ class MapDataService
                 "surroundings_accessible" => false,
                 "surroundings_issues" => "Buraco na calçada não é possível transitar",
                 "url" => asset('images/buraco.png')
+            ],
+            [
+                "name" => "R. Aymore, 86 - Maré",
+                "type" => "Espaço comunitário, calçada",
+                "lat" => -22.854679,
+                "lng" => -43.244958,
+                "accessible" => false,
+                "accessibility_features" => ['inacessível', 'calçada irregular', 'obstáculos'],
+                "surroundings_accessible" => false,
+                "surroundings_issues" => "Calçada irregular e bloqueios, não acessível para cadeirantes",
+                "url" => asset('images/aymore.png')
             ]
         ];
     }
