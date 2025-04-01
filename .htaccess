@@ -1,0 +1,16 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Block all requests containing 'wp' in the URL
+    RewriteCond %{REQUEST_URI} wp [NC]
+    RewriteRule ^ - [F,L]
+
+    # Redirect to public/ directory for both naked domain and www
+    RewriteCond %{HTTP_HOST} ^(www\.)?ingressos\.com\.br$ [NC]
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ /public/$1 [L,NC]
+</IfModule>
+
+<FilesMatch "\.(css|js|jpg|jpeg|png|gif|svg)$">
+    Header set Cache-Control "max-age=2592000, public"
+</FilesMatch>
