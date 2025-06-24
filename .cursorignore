@@ -1,0 +1,40 @@
+# Vendor dependencies (Composer)
+./vendor
+
+# Node.js dependencies
+./node_modules
+
+# Build output and compiled assets
+./public/build/
+./public/js/
+./public/css/
+./public/mix-manifest.json
+
+# Storage and cache files
+./storage/framework/
+./storage/logs/
+./storage/app/public/
+
+# Environment files (sensitive data)
+.env
+.env.example
+
+# Laravel-specific generated files
+bootstrap/cache/
+
+# Common version control and IDE files
+.git/
+.gitignore
+.gitattributes
+.idea/
+.vscode/
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Frontend build tools
+package.json
+package-lock.json
+yarn.lock
+composer.lock

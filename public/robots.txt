@@ -1,2 +1,185 @@
+# Robots.txt for Programa Bira Carvalho - Favela da Maré
+# Optimized for SEO and Generative Engine Optimization (GEO)
+# https://biracarvalho.com.br
+
+# Default rules for all crawlers
 User-agent: *
-Disallow:
+Allow: /
+
+# Allow access to essential resources for proper rendering
+Allow: /assets/
+Allow: /css/
+Allow: /js/
+Allow: /images/
+Allow: /fonts/
+Allow: /*.css$
+Allow: /*.js$
+Allow: /*.png$
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.gif$
+Allow: /*.svg$
+Allow: /*.webp$
+Allow: /*.avif$
+Allow: /*.woff$
+Allow: /.well-known/
+
+# Block sensitive directories and files
+Disallow: /storage/
+Disallow: /vendor/
+Disallow: /bootstrap/
+Disallow: /config/
+Disallow: /database/
+Disallow: /lang/
+Disallow: /resources/
+Disallow: /routes/
+Disallow: /tests/
+Disallow: /.env
+Disallow: /artisan
+Disallow: /composer.json
+Disallow: /composer.lock
+Disallow: /package.json
+Disallow: /package-lock.json
+Disallow: /phpunit.xml
+Disallow: /README.md
+Disallow: /.git/
+Disallow: /.github/
+Disallow: /node_modules/
+
+# Block temporary and cache files
+Disallow: /tmp/
+Disallow: /cache/
+Disallow: /*.log$
+Disallow: /*.bak$
+Disallow: /*.tmp$
+
+# Google-specific crawlers
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Googlebot-Image
+Allow: /assets/images/
+Allow: /*.png$
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.gif$
+Allow: /*.svg$
+Allow: /*.webp$
+Allow: /*.avif$
+
+# Bing crawler
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Yandex crawler
+User-agent: YandexBot
+Allow: /
+Crawl-delay: 2
+
+# DuckDuckGo crawler
+User-agent: DuckDuckBot
+Allow: /
+Crawl-delay: 1
+
+# AI and Language Model Crawlers (GEO Optimization)
+# OpenAI's GPT crawler
+User-agent: GPTBot
+Allow: /
+Crawl-delay: 1
+
+# Anthropic's Claude crawler
+User-agent: Claude-Web
+Allow: /
+Crawl-delay: 1
+
+# Google's Bard/Gemini crawler
+User-agent: Google-Extended
+Allow: /
+Crawl-delay: 1
+
+# Common AI training crawlers
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: CCBot
+Allow: /
+Crawl-delay: 2
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+# Academic and research crawlers
+User-agent: ia_archiver
+Allow: /
+
+User-agent: Wayback
+Allow: /
+
+User-agent: archive.org_bot
+Allow: /
+
+# Social media crawlers for better sharing
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+# Accessibility testing crawlers
+User-agent: axe-core
+Allow: /
+
+User-agent: Pa11y
+Allow: /
+
+User-agent: WAVE
+Allow: /
+
+# Block malicious or unwanted crawlers
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MajesticSEO
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+# Crawl delay for general bots to prevent server overload
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://biracarvalho.com.br/sitemap.xml
+
+# Host directive (preferred domain)
+Host: biracarvalho.com.br
+
+# Clean-param directive for dynamic URLs
+Clean-param: utm_source&utm_medium&utm_campaign&utm_term&utm_content
+
+# Additional information for crawlers
+# This site contains collaborative mapping data about urban accessibility conditions
+# for people with disabilities in Favela da Maré, Rio de Janeiro, Brazil
+# Part of the "Programa Bira Carvalho - Território, Acessibilidade e Tecnologia na Maré"
+# Content is primarily in Portuguese (pt-BR)
+# Site follows WCAG 4.0 accessibility guidelines
