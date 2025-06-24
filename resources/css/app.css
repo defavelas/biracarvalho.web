@@ -6,6 +6,113 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-sans: 'Libre Franklin', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    
+    /* Color combinations for Maré accessibility project */
+    --color-primary: #653089;
+    --color-secondary: #CED842;
+    --color-accent-orange: #D55229;
+    --color-accent-pink: #E499AC;
+    --color-accent-dark: #2B433C;
+}
+
+/* Custom scrollbar for search results */
+.soft-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.soft-scrollbar::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+}
+
+.soft-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 3px;
+}
+
+.soft-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+/* Map container */
+.map-container {
+    height: 100vh;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+/* Ensure map div has proper dimensions */
+#accessibility-map {
+    height: 100vh;
+    width: 100%;
+}
+
+/* Floating sidebar */
+.floating-sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 400px;
+    height: 100vh;
+    background: white;
+    z-index: 1000;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    transform: translateX(0);
+    transition: transform 0.3s ease-in-out;
+}
+
+.floating-sidebar.collapsed {
+    transform: translateX(-100%);
+}
+
+/* Floating buttons */
+.floating-btn {
+    position: absolute;
+    z-index: 1001;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.floating-btn:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transform: translateY(-1px);
+}
+
+.floating-btn-toggle {
+    top: 20px;
+    left: 20px;
+}
+
+.floating-btn-settings {
+    top: 20px;
+    right: 20px;
+}
+
+/* Additional styles for result highlighting */
+.result-highlighted {
+    background-color: #f3f4f6 !important;
+    border-left: 4px solid #653089 !important;
+}
+
+/* Disabled button styling */
+.floating-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.floating-btn:disabled:hover {
+    transform: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }

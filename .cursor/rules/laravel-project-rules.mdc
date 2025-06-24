@@ -57,7 +57,7 @@ Actions Cursor's AI Agent can perform or suggest:
 - Generate **migration files** using correct Laravel 12 syntax, ensuring all foreign keys are UUIDs and that searchable text/relation columns have indexes (`->index()`). Suggest spatial indexes for coordinate pairs.
 - Suggest **caching strategies** (`Cache::remember`) for frequently accessed data, like location categories or GeoJSON layers.
 - Automatically **import required classes** and Facades (`Log`, `Cache`, `Http`, `Schema`, `Storage`, project Models, Services, Jobs, and Form Requests).
-- Scaffold **Livewire components** (`.php` and `.blade.php` files) for key UI sections like the map view, search sidebar, or upload modal, ensuring templates use semantic HTML5 and are accessible. The livewire components live at (`resources/views`) root folder, when using namespace must create in a subdirectory.
+- Scaffold **Livewire components** (`.php` and `.blade.php` files) for key UI sections like the map view, search sidebar, or upload modal, ensuring templates use semantic HTML5 and are accessible.
 - Suggest refactoring complex logic into dedicated **Service classes** (`app/Services/`). Specifically, structure the CSV import logic within a `CsvImportService`. This service should be responsible for validating the file, mapping flexible CSV headers to database columns, and dispatching a Job for each row or batch.
 - Suggest creating **custom validation rules** for complex scenarios, like validating specific columns in a CSV file or checking geocoordinate validity.
 - Suggest adding **PestPHP tests** for Livewire components (`Livewire::test(...)`), feature tests for file uploads and API endpoints, and unit tests for Service classes like `CsvImportService`.
