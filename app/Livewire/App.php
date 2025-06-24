@@ -19,6 +19,12 @@ class App extends Component
         $this->dispatch('sidebar-toggled', collapsed: $this->sidebarCollapsed);
     }
 
+    public function openSettings(): void
+    {
+        // Future implementation for authentication/settings modal
+        $this->dispatch('show-notification', message: 'Configurações em breve!', type: 'info');
+    }
+
     public function render()
     {
         return view('livewire.app')

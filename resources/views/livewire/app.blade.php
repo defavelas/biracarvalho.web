@@ -4,41 +4,39 @@
         Pular para o conteúdo principal
     </a>
 
-    <!-- Map Container -->
-    <main id="main-content" class="w-full h-screen relative z-[1]" role="main" aria-label="Mapa interativo de acessibilidade">
+    <!-- Map Container - Fixed positioning to prevent interference with sidebar -->
+    <main id="main-content" class="fixed inset-0 w-full h-screen z-0" role="main" aria-label="Mapa interativo de acessibilidade" wire:ignore>
         <x-osm-map 
             id="accessibility-map" 
-            class="w-full h-screen"
+            class="w-full h-full"
         />
     </main>
 
     <!-- Search Sidebar -->
     <livewire:search-sidebar :collapsed="$sidebarCollapsed" />
 
-    <!-- Floating Buttons -->
-    <div class="floating-controls">
-        <!-- Toggle Sidebar Button -->
-        <x-floating-btn 
-            position="top-left"
-            aria-label="Alternar painel de pesquisa"
-            wire:click="toggleSidebar"
-        >
-            <span class="text-lg">{{ $sidebarCollapsed ? '☰' : '✕' }}</span>
-        </x-floating-btn>
+    <!-- Sidebar Toggle Button - Positioned relative to sidebar -->
+    <button 
+        type="button"
+        class="absolute z-[1002] w-11 h-11 rounded-full bg-white shadow-lg border-0 cursor-pointer flex items-center justify-center transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5 top-5 {{ $sidebarCollapsed ? 'left-5' : 'left-[25.5rem]' }}"
+        wire:click="toggleSidebar"
+        aria-label="{{ $sidebarCollapsed ? 'Abrir painel de pesquisa' : 'Fechar painel de pesquisa' }}"
+    >
+        @if($sidebarCollapsed)
+            @svg('heroicon-o-bars-3', 'w-5 h-5 text-gray-600 transition-transform duration-200')
+        @else
+            @svg('heroicon-o-x-mark', 'w-5 h-5 text-gray-600 transition-transform duration-200')
+        @endif
+    </button>
 
-        <!-- Settings Button (Future Authentication) -->
-        <x-floating-btn 
-            position="top-right"
-            aria-label="Configurações (em breve)"
-            disabled
-        >
-            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-        </x-floating-btn>
-    </div>
+    <!-- Settings Button (Future Authentication) -->
+    <x-floating-btn 
+        position="top-right"
+        aria-label="Configurações"
+        wire:click="openSettings"
+    >
+        @svg('heroicon-o-cog-6-tooth', 'w-5 h-5 text-gray-600')
+    </x-floating-btn>
 
         <!-- Screen Reader Status Updates -->
     <div aria-live="polite" aria-atomic="true" class="sr-only" id="status-updates">

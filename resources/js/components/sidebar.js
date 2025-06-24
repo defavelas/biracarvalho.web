@@ -15,7 +15,7 @@ class SidebarComponent {
     init() {
         // Find sidebar and toggle button
         this.sidebar = document.querySelector('aside[role="complementary"]');
-        this.toggleButton = document.querySelector('button[aria-label*="painel"]');
+        this.toggleButton = document.querySelector('button[aria-label*="painel de pesquisa"]');
         
         if (!this.sidebar) {
             console.warn('Sidebar not found');
