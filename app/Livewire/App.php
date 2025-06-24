@@ -12,14 +12,10 @@ class App extends Component
 {
     public bool $sidebarCollapsed = false;
 
-    public function mount(): void
-    {
-        // Initialize app state
-    }
-
     public function toggleSidebar(): void
     {
         $this->sidebarCollapsed = !$this->sidebarCollapsed;
+        
         $this->dispatch('sidebar-toggled', collapsed: $this->sidebarCollapsed);
     }
 

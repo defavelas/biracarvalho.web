@@ -2,11 +2,11 @@
 
 <div 
     id="{{ $id }}" 
-    class="w-full h-full {{ $class }}"
+    class="w-full h-screen relative z-[1] {{ $class }}"
     {{ $attributes }}
-    data-map-center-lat="-22.8666"
-    data-map-center-lng="-43.2338"
-    data-map-zoom="14"
+    data-map-center-lat="-22.851860351512137"
+    data-map-center-lng="-43.24313600267501"
+    data-map-zoom="20"
     aria-label="Mapa interativo de acessibilidade da Maré"
     role="application"
 >

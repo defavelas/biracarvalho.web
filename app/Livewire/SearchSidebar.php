@@ -22,8 +22,9 @@ class SearchSidebar extends Component
     public array $results = [];
     public int $totalResults = 0;
 
-    public function mount(): void
+    public function mount($collapsed = false): void
     {
+        $this->collapsed = $collapsed;
         $this->loadResults();
     }
 

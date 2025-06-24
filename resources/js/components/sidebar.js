@@ -14,8 +14,8 @@ class SidebarComponent {
     
     init() {
         // Find sidebar and toggle button
-        this.sidebar = document.querySelector('.floating-sidebar');
-        this.toggleButton = document.querySelector('.floating-btn-toggle');
+        this.sidebar = document.querySelector('aside[role="complementary"]');
+        this.toggleButton = document.querySelector('button[aria-label*="painel"]');
         
         if (!this.sidebar) {
             console.warn('Sidebar not found');
@@ -106,9 +106,11 @@ class SidebarComponent {
         if (!this.sidebar) return;
         
         if (this.isCollapsed) {
-            this.sidebar.classList.add('collapsed');
+            this.sidebar.classList.add('-translate-x-full');
+            this.sidebar.classList.remove('translate-x-0');
         } else {
-            this.sidebar.classList.remove('collapsed');
+            this.sidebar.classList.add('translate-x-0');
+            this.sidebar.classList.remove('-translate-x-full');
         }
     }
     

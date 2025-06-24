@@ -5,12 +5,10 @@
     </a>
 
     <!-- Map Container -->
-    <main id="main-content" class="map-container" role="main" aria-label="Mapa interativo de acessibilidade">
+    <main id="main-content" class="w-full h-screen relative z-[1]" role="main" aria-label="Mapa interativo de acessibilidade">
         <x-osm-map 
             id="accessibility-map" 
-            data-map-center-lat="-22.8666"
-            data-map-center-lng="-43.2338"
-            data-map-zoom="14"
+            class="w-full h-screen"
         />
     </main>
 
@@ -24,16 +22,14 @@
             position="top-left"
             aria-label="Alternar painel de pesquisa"
             wire:click="toggleSidebar"
-            class="floating-btn-toggle"
         >
-            <span style="font-size: 18px;">{{ $sidebarCollapsed ? '☰' : '✕' }}</span>
+            <span class="text-lg">{{ $sidebarCollapsed ? '☰' : '✕' }}</span>
         </x-floating-btn>
 
         <!-- Settings Button (Future Authentication) -->
         <x-floating-btn 
             position="top-right"
             aria-label="Configurações (em breve)"
-            class="floating-btn-settings"
             disabled
         >
             <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
