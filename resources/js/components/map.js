@@ -35,9 +35,14 @@ class MapComponent {
             zoom: this.options.zoom,
             maxZoom: this.options.maxZoom,
             minZoom: this.options.minZoom,
-            zoomControl: true,
+            zoomControl: false, // Disable default zoom control
             attributionControl: true
         });
+        
+        // Add zoom control to bottom right
+        L.control.zoom({
+            position: 'bottomright'
+        }).addTo(this.map);
         
         // Add OpenStreetMap tiles
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

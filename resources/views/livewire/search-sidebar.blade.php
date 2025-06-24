@@ -1,14 +1,13 @@
 <aside 
-    class="absolute top-0 left-0 w-96 h-screen bg-white z-[1000] shadow-xl transform transition-transform duration-300 ease-in-out {{ $collapsed ? '-translate-x-full' : 'translate-x-0' }}" 
+    class="absolute top-2 left-2 bottom-2 w-96 bg-white z-[100] shadow-xl transform transition-transform duration-300 ease-in-out rounded-lg overflow-hidden {{ $collapsed ? '-translate-x-full' : 'translate-x-0' }}" 
     aria-label="Painel de pesquisa e filtros"
     role="complementary"
     aria-hidden="{{ $collapsed ? 'true' : 'false' }}"
 >
     <div class="flex flex-col h-full">
-        <!-- Search Header -->
         <header class="p-4 border-b border-gray-200 bg-white">
             <div class="space-y-4">
-                <!-- Search Input -->
+                <img src="{{ asset('assets/images/logo.svg') }}" alt="Logo" class="w-32 m-2 mb-4">
                 <div class="relative">
                     <label for="search-input" class="sr-only">Pesquisar locais</label>
                     <input type="search" id="search-input" wire:model.live.debounce.300ms="search"
@@ -22,56 +21,58 @@
                 <div id="search-help" class="sr-only">
                     Digite para pesquisar por nome ou endereço de locais
                 </div>
-
-                <fieldset class="space-y-3">
-                    <legend class="text-sm font-semibold text-gray-900">Filtros de Acessibilidade</legend>
-
-                    <div class="space-y-2">
-                        <label class="flex items-center space-x-3 cursor-pointer">
-                            <input type="checkbox" wire:model.live="accessibilityFilters.acessivel"
-                                class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500">
-                            <div class="flex items-center space-x-2">
-                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                                <span class="text-sm text-gray-700">Acessível</span>
-                            </div>
-                        </label>
-
-                        <label class="flex items-center space-x-3 cursor-pointer">
-                            <input type="checkbox" wire:model.live="accessibilityFilters.parcial_acessivel"
-                                class="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500">
-                            <div class="flex items-center space-x-2">
-                                <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                                <span class="text-sm text-gray-700">Parcialmente Acessível</span>
-                            </div>
-                        </label>
-
-                        <label class="flex items-center space-x-3 cursor-pointer">
-                            <input type="checkbox" wire:model.live="accessibilityFilters.nao_acessivel"
-                                class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
-                            <div class="flex items-center space-x-2">
-                                <div class="w-3 h-3 bg-red-500 rounded-full"></div>
-                                <span class="text-sm text-gray-700">Não Acessível</span>
-                            </div>
-                        </label>
-                    </div>
-
-                    @if (array_sum($accessibilityFilters) > 0 || !empty($search))
-                        <button wire:click="clearFilters"
-                            class="text-sm text-purple-600 hover:text-purple-800 focus:outline-none focus:underline"
-                            aria-label="Limpar todos os filtros">
-                            Limpar filtros
-                        </button>
-                    @endif
-                </fieldset>
-
-                <div class="pt-2 border-t border-gray-100">
-                    <p class="text-sm text-gray-600" aria-live="polite">
-                        {{ $totalResults }}
-                        {{ $totalResults === 1 ? 'resultado encontrado' : 'resultados encontrados' }}
-                    </p>
-                </div>
             </div>
         </header>
+
+        <section class="p-4 bg-gray-50 border-b border-gray-200">
+            <fieldset class="space-y-3">
+                <legend class="text-sm font-semibold text-gray-900">Filtros de Acessibilidade</legend>
+
+                <div class="space-y-2">
+                    <label class="flex items-center space-x-3 cursor-pointer">
+                        <input type="checkbox" wire:model.live="accessibilityFilters.acessivel"
+                            class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <span class="text-sm text-gray-700">Acessível</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-center space-x-3 cursor-pointer">
+                        <input type="checkbox" wire:model.live="accessibilityFilters.parcial_acessivel"
+                            class="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                            <span class="text-sm text-gray-700">Parcialmente Acessível</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-center space-x-3 cursor-pointer">
+                        <input type="checkbox" wire:model.live="accessibilityFilters.nao_acessivel"
+                            class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                            <span class="text-sm text-gray-700">Não Acessível</span>
+                        </div>
+                    </label>
+                </div>
+
+                @if (array_sum($accessibilityFilters) > 0 || !empty($search))
+                    <button wire:click="clearFilters"
+                        class="text-sm text-purple-600 hover:text-purple-800 focus:outline-none focus:underline"
+                        aria-label="Limpar todos os filtros">
+                        Limpar filtros
+                    </button>
+                @endif
+            </fieldset>
+
+            <div class="py-4">
+                <p class="text-sm text-gray-600" aria-live="polite">
+                    {{ $totalResults }}
+                    {{ $totalResults === 1 ? 'resultado encontrado' : 'resultados encontrados' }}
+                </p>
+            </div>
+        </section>
 
         <main class="flex-1 overflow-y-auto soft-scrollbar">
             <div class="divide-y divide-gray-100">
