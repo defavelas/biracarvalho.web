@@ -74,30 +74,94 @@
             </div>
         </section>
 
-        <main class="flex-1 overflow-y-auto soft-scrollbar">
-            <div class="divide-y divide-gray-100">
+        <main class="flex-1 overflow-y-auto soft-scrollbar p-4">
+            <div class="space-y-3">
                 @forelse($results as $result)
-                    <article class="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
-                        data-location-id="{{ $result['id'] }}">
-                        <div class="space-y-2">
-                            <div class="flex items-start justify-between">
-                                <h3 class="font-semibold text-gray-900 text-sm">{{ $result['name'] }}</h3>
-                                <div class="flex items-center space-x-1 ml-2">
+                    <article 
+                        class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-purple-300 cursor-pointer transition-all duration-200 focus-within:ring-2 focus-within:ring-purple-500 focus-within:ring-offset-1"
+                        data-location-id="{{ $result['id'] }}"
+                        role="button"
+                        tabindex="0"
+                        aria-label="Ver {{ $result['name'] }} no mapa - {{ $result['accessibility_level'] === 'acessivel' ? 'Acessível' : '' }}{{ $result['accessibility_level'] === 'parcial_acessivel' ? 'Parcialmente Acessível' : '' }}{{ $result['accessibility_level'] === 'nao_acessivel' ? 'Não Acessível' : '' }}"
+                        wire:click="focusLocation('{{ $result['id'] }}')"
+                        wire:keydown.enter="focusLocation('{{ $result['id'] }}')"
+                        wire:keydown.space="focusLocation('{{ $result['id'] }}')"
+                    >
+                        <div class="flex items-start justify-between space-x-3">
+                            <div class="flex-1 space-y-3">
+                                <div class="flex items-start space-x-2">
                                     <div
-                                        class="w-2 h-2 rounded-full 
+                                        class="w-3 h-3 rounded-full mt-1 flex-shrink-0
                                         {{ $result['accessibility_level'] === 'acessivel' ? 'bg-green-500' : '' }}
                                         {{ $result['accessibility_level'] === 'parcial_acessivel' ? 'bg-yellow-500' : '' }}
-                                        {{ $result['accessibility_level'] === 'nao_acessivel' ? 'bg-red-500' : '' }}
-                                    ">
+                                        {{ $result['accessibility_level'] === 'nao_acessivel' ? 'bg-red-500' : '' }}"
+                                        aria-hidden="true">
+                                    </div>
+                                    <div class="flex-1">
+                                        <h3 class="font-semibold text-gray-900 text-sm leading-tight">{{ $result['name'] }}</h3>
+                                        <p class="text-sm text-gray-600 mt-1">{{ $result['address'] }}</p>
                                     </div>
                                 </div>
+
+                                {{-- Image Gallery --}}
+                                @if(isset($result['images']) && count($result['images']) > 0)
+                                    <div class="flex space-x-1" aria-label="Imagens do local">
+                                        @php
+                                            $images = $result['images'];
+                                            $totalImages = count($images);
+                                            $displayImages = array_slice($images, 0, 3);
+                                            $remainingCount = max(0, $totalImages - 3);
+                                        @endphp
+                                        
+                                        @foreach($displayImages as $index => $image)
+                                            <div class="relative w-12 h-12 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
+                                                <img src="{{ $image }}" 
+                                                     alt="Imagem {{ $index + 1 }} de {{ $result['name'] }}" 
+                                                     class="w-full h-full object-cover"
+                                                     loading="lazy">
+                                            </div>
+                                        @endforeach
+                                        
+                                        @if($remainingCount > 0)
+                                            <div class="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                                <span class="text-xs font-medium text-gray-500" aria-label="{{ $remainingCount }} imagens adicionais">
+                                                    +{{ $remainingCount }}
+                                                </span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @else
+                                    {{-- Placeholder when no images --}}
+                                    <div class="flex space-x-1">
+                                        @for($i = 0; $i < 3; $i++)
+                                            <div class="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                                @svg('heroicon-o-photo', 'w-5 h-5 text-gray-400')
+                                            </div>
+                                        @endfor
+                                    </div>
+                                @endif
+                                
+                                <div class="flex items-center justify-between">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                        {{ $result['accessibility_level'] === 'acessivel' ? 'bg-green-100 text-green-800' : '' }}
+                                        {{ $result['accessibility_level'] === 'parcial_acessivel' ? 'bg-yellow-100 text-yellow-800' : '' }}
+                                        {{ $result['accessibility_level'] === 'nao_acessivel' ? 'bg-red-100 text-red-800' : '' }}">
+                                        {{ $result['accessibility_level'] === 'acessivel' ? 'Acessível' : '' }}
+                                        {{ $result['accessibility_level'] === 'parcial_acessivel' ? 'Parcialmente Acessível' : '' }}
+                                        {{ $result['accessibility_level'] === 'nao_acessivel' ? 'Não Acessível' : '' }}
+                                    </span>
+                                    
+                                    @if(isset($result['latitude']) && isset($result['longitude']))
+                                        <span class="text-xs text-gray-500 font-mono" aria-label="Coordenadas: Latitude {{ number_format($result['latitude'], 4) }}, Longitude {{ number_format($result['longitude'], 4) }}">
+                                            {{ number_format($result['latitude'], 4) }}, {{ number_format($result['longitude'], 4) }}
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
-                            <p class="text-sm text-gray-600">{{ $result['address'] }}</p>
-                            <p class="text-xs text-gray-500">
-                                {{ $result['accessibility_level'] === 'acessivel' ? 'Acessível' : '' }}
-                                {{ $result['accessibility_level'] === 'parcial_acessivel' ? 'Parcialmente Acessível' : '' }}
-                                {{ $result['accessibility_level'] === 'nao_acessivel' ? 'Não Acessível' : '' }}
-                            </p>
+                            
+                            <div class="flex-shrink-0 self-center ml-2">
+                                @svg('heroicon-o-arrow-right', 'w-5 h-5 text-gray-400 group-hover:text-purple-600 transition-colors', ['aria-hidden' => 'true'])
+                            </div>
                         </div>
                     </article>
                 @empty

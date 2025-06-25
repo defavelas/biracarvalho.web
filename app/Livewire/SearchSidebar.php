@@ -54,35 +54,16 @@ class SearchSidebar extends Component
         $this->loadResults();
     }
 
+    public function focusLocation($locationId): void
+    {
+        // Dispatch event to focus on the location on the map
+        $this->dispatch('focus-location', locationId: $locationId);
+    }
+
     private function loadResults(): void
     {
-        // Mock data for now - in real implementation, this would query the database
-        $mockResults = [
-            [
-                'id' => 1,
-                'name' => 'Centro de Saúde da Maré',
-                'address' => 'Rua Principal, 123',
-                'accessibility_level' => 'acessivel',
-                'latitude' => -22.8666,
-                'longitude' => -43.2338,
-            ],
-            [
-                'id' => 2,
-                'name' => 'Escola Municipal',
-                'address' => 'Av. Brasil, 456',
-                'accessibility_level' => 'parcial_acessivel',
-                'latitude' => -22.8700,
-                'longitude' => -43.2300,
-            ],
-            [
-                'id' => 3,
-                'name' => 'Mercado Local',
-                'address' => 'Rua das Flores, 789',
-                'accessibility_level' => 'nao_acessivel',
-                'latitude' => -22.8630,
-                'longitude' => -43.2370,
-            ],
-        ];
+        // Load mock data from config - in real implementation, this would query the database
+        $mockResults = config('places.mock_locations', []);
 
         // Filter by search term
         if (!empty($this->search)) {
