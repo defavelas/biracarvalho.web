@@ -1,10 +1,8 @@
 <div class="relative w-full h-screen overflow-hidden">
-    <!-- Skip Link for Accessibility -->
     <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-white px-4 py-2 rounded-md shadow-lg z-50 text-purple-600">
         Pular para o conteúdo principal
     </a>
 
-    <!-- Map Container - Fixed positioning to prevent interference with sidebar -->
     <main id="main-content" class="fixed inset-0 w-full h-screen z-0" role="main" aria-label="Mapa interativo de acessibilidade" wire:ignore>
         <x-osm-map 
             id="accessibility-map" 
@@ -36,7 +34,6 @@
         @svg('heroicon-o-cog-6-tooth', 'w-5 h-5 text-primary')
     </button>
 
-    <!-- Authentication Modal -->
     <livewire:auth-modal />
 
     <div aria-live="polite" aria-atomic="true" class="sr-only" id="status-updates">

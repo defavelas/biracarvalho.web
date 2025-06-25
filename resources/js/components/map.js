@@ -14,7 +14,7 @@ class MapComponent {
         this.options = {
             center: [-22.8666, -43.2338], // Maré coordinates
             zoom: 14,
-            maxZoom: 19,
+            maxZoom: 18,
             minZoom: 10,
             ...options
         };
@@ -47,7 +47,7 @@ class MapComponent {
         // Add OpenStreetMap base tiles
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            maxZoom: 19
+            maxZoom: 18
         }).addTo(this.map);
         
         // Create marker layer group
