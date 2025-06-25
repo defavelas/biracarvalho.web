@@ -157,7 +157,7 @@
 
                             <div
                                 class="flex-shrink-0 self-start ml-auto group-hover:translate-x-1 transition-transform duration-200">
-                                @svg('heroicon-o-arrow-right', 'w-5 h-5 text-white/50 group-hover:text-primary', ['aria-hidden' => 'true'])
+                                @svg('heroicon-o-arrow-right', 'w-4 h-4 text-white/50 group-hover:text-primary', ['aria-hidden' => 'true'])
                             </div>
                         </div>
                     </article>
