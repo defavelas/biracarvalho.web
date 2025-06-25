@@ -64,3 +64,9 @@
     background-color: #CED842 !important;
     color: #653089 !important;
 }
+
+/* Minimal custom CSS for map card positioning */
+#map-card-container {
+    position: absolute;
+    z-index: 200;
+}

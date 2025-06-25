@@ -56,6 +56,13 @@ class SidebarComponent {
         document.addEventListener('marker-clicked', (e) => {
             this.highlightResult(e.detail.id);
         });
+
+        // Handle highlight requests from map card
+        document.addEventListener('highlight-sidebar-location', (e) => {
+            if (typeof Livewire !== 'undefined') {
+                Livewire.dispatch('highlight-sidebar-location', { locationId: e.detail.locationId });
+            }
+        });
     }
     
     toggle() {

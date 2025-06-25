@@ -6,6 +6,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\Attributes\Reactive;
+use Livewire\Attributes\On;
 
 class SearchSidebar extends Component
 {
@@ -21,11 +22,18 @@ class SearchSidebar extends Component
     
     public array $results = [];
     public int $totalResults = 0;
+    public ?string $selectedLocationId = null;
 
     public function mount($collapsed = false): void
     {
         $this->collapsed = $collapsed;
         $this->loadResults();
+    }
+
+    #[On('highlight-sidebar-location')]
+    public function highlightLocation($locationId): void
+    {
+        $this->selectedLocationId = $locationId;
     }
 
     public function updatedSearch(): void
@@ -51,11 +59,15 @@ class SearchSidebar extends Component
             'parcial_acessivel' => false,
         ];
         $this->search = '';
+        $this->selectedLocationId = null;
         $this->loadResults();
     }
 
     public function focusLocation($locationId): void
     {
+        // Set selected location for highlighting
+        $this->selectedLocationId = $locationId;
+        
         // Dispatch event to focus on the location on the map
         $this->dispatch('focus-location', locationId: $locationId);
     }

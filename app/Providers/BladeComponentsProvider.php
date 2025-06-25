@@ -27,5 +27,7 @@ class BladeComponentsProvider extends ServiceProvider
         
         // Register UI components
         Blade::component('components.floating-button', 'floating-btn');
+        Blade::component('components.map-card', 'map-card');
+        Blade::component('components.image-slideshow', 'image-slideshow');
     }
 } 
