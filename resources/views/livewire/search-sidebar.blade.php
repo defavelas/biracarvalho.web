@@ -19,46 +19,47 @@
             </div>
         </header>
 
-        <section class="p-4 bg-no-repeat bg-cover bg-center bg-primary" style="background-image: url('{{ asset('assets/images/filter-bg.jpg') }}')">
-            <fieldset class="space-y-2 mb-2">
+        <section class="p-4 bg-no-repeat bg-cover bg-center bg-fixed bg-primary min-h-[200px]" style="background-image: url('{{ asset('assets/images/filter-bg.jpg') }}'); background-attachment: local;">
+            <fieldset class="space-y-3 mb-4">
                 <legend class="text-base font-semibold text-secondary">Acessibilidade</legend>
 
-                <div class="space-y-2">
-                    <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="checkbox" wire:model.live="accessibilityFilters.acessivel"
-                            class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                            <span class="text-sm text-secondary">Acessível</span>
-                        </div>
-                    </label>
+                <div class="space-y-3">
+                    <x-toggle-button 
+                        wire:model.live="accessibilityFilters.acessivel"
+                        :value="$accessibilityFilters['acessivel']"
+                        label="Acessível"
+                        trackClass="bg-primary border-secondary"
+                        thumbClass="bg-green-500"
+                        labelClass="text-secondary"
+                    />
 
-                    <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="checkbox" wire:model.live="accessibilityFilters.parcial_acessivel"
-                            class="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                            <span class="text-sm text-secondary">Parcialmente Acessível</span>
-                        </div>
-                    </label>
+                    <x-toggle-button 
+                        wire:model.live="accessibilityFilters.parcial_acessivel"
+                        :value="$accessibilityFilters['parcial_acessivel']"
+                        label="Parcialmente Acessível"
+                        trackClass="bg-primary border-secondary"
+                        thumbClass="bg-yellow-500"
+                        labelClass="text-secondary"
+                    />
 
-                    <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="checkbox" wire:model.live="accessibilityFilters.nao_acessivel"
-                            class="w-4 h-4 text-rose-600 border-gray-300 rounded focus:ring-rose-500">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-3 h-3 bg-rose-500 rounded-full"></div>
-                            <span class="text-sm text-secondary">Não Acessível</span>
-                        </div>
-                    </label>
+                    <x-toggle-button 
+                        wire:model.live="accessibilityFilters.nao_acessivel"
+                        :value="$accessibilityFilters['nao_acessivel']"
+                        label="Não Acessível"
+                        trackClass="bg-primary border-secondary"
+                        thumbClass="bg-rose-500"
+                        labelClass="text-secondary"
+                    />
                 </div>
             </fieldset>
 
-            <p class="text-sm text-secondary" aria-live="polite">
-                {{ $totalResults }}
-                {{ $totalResults === 1 ? 'resultado encontrado' : 'resultados encontrados' }}
-            </p>
+            <div class="space-y-3">
+                <p class="text-sm text-secondary" aria-live="polite">
+                    {{ $totalResults }}
+                    {{ $totalResults === 1 ? 'resultado encontrado' : 'resultados encontrados' }}
+                </p>
 
-            @if (array_sum($accessibilityFilters) > 0 || !empty($search))
+                @if (array_sum($accessibilityFilters) > 0 || !empty($search))
                     <button wire:click="clearFilters"
                         class="flex flex-row gap-2 items-center justify-center text-sm text-secondary font-semibold hover:underline cursor-pointer focus:outline-none focus:underline"
                         aria-label="Limpar todos os filtros">
@@ -66,6 +67,7 @@
                         Limpar filtros
                     </button>
                 @endif
+            </div>
         </section>
 
         <main class="flex-1 overflow-y-auto soft-scrollbar p-2">

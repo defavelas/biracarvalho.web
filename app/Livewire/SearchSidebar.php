@@ -60,7 +60,21 @@ class SearchSidebar extends Component
         ];
         $this->search = '';
         $this->selectedLocationId = null;
+        
+        // Force reload of results
         $this->loadResults();
+        
+        // Dispatch events to update the map
+        $this->dispatch('filters-cleared');
+        $this->dispatch('results-updated', results: $this->results);
+        
+        // Also dispatch a browser event for direct JavaScript handling
+        $this->js("
+            if (window.mapComponentInstance) {
+                window.mapComponentInstance.closeMapCard();
+                window.mapComponentInstance.updateMarkers();
+            }
+        ");
     }
 
     public function focusLocation($locationId): void
