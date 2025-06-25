@@ -21,8 +21,7 @@ class App extends Component
 
     public function openSettings(): void
     {
-        // Future implementation for authentication/settings modal
-        $this->dispatch('show-notification', message: 'Configurações em breve!', type: 'info');
+        $this->dispatch('show-auth-modal');
     }
 
     public function render()

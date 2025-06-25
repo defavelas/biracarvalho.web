@@ -27,13 +27,17 @@
         @endif
     </button>
 
-    <x-floating-btn 
-        position="top-right"
-        aria-label="Configurações"
+    <button 
+        type="button"
+        class="absolute z-[1002] w-11 h-11 rounded-full bg-secondary shadow-lg border-0 cursor-pointer flex items-center justify-center transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5 top-5 right-5"
         wire:click="openSettings"
+        aria-label="Abrir configurações e login"
     >
-        @svg('heroicon-o-cog-6-tooth', 'w-5 h-5 text-gray-600')
-    </x-floating-btn>
+        @svg('heroicon-o-cog-6-tooth', 'w-5 h-5 text-primary')
+    </button>
+
+    <!-- Authentication Modal -->
+    <livewire:auth-modal />
 
     <div aria-live="polite" aria-atomic="true" class="sr-only" id="status-updates">
         @if($sidebarCollapsed)
