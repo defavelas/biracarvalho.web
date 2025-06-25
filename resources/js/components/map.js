@@ -144,7 +144,7 @@ class MapComponent {
                 height: ${size}px;
                 border-radius: 50%;
                 background-color: ${color};
-                border: ${borderWidth}px solid ${isSelected ? '#CED842' : 'white'};
+                                    border: ${borderWidth}px solid ${isSelected ? '#653089' : 'white'};
                 box-shadow: 0 2px 8px rgba(0,0,0,${isSelected ? '0.5' : '0.3'});
                 transform: ${isSelected ? 'scale(1.1)' : 'scale(1)'};
                 transition: all 0.2s ease;
@@ -437,7 +437,7 @@ class MapComponent {
                     width: 44px;
                     height: 44px;
                     border-radius: 50%;
-                    background-color: #653089;
+                    background-color: #CED842;
                     box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
                     cursor: pointer;
                     transition: all 300ms ease-in-out;
@@ -458,7 +458,7 @@ class MapComponent {
                     height="20" 
                     viewBox="0 0 24 24" 
                     fill="none" 
-                    stroke="#CED842" 
+                    stroke="#653089" 
                     style="
                         stroke-width: 2;
                         stroke-linecap: round;

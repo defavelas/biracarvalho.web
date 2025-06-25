@@ -1,17 +1,17 @@
 <aside
-    class="absolute top-2 left-2 bottom-2 w-96 bg-secondary border-4 border-black/15 z-[100] shadow-xl transform transition-transform duration-300 ease-in-out rounded-lg overflow-hidden {{ $collapsed ? '-translate-x-full' : 'translate-x-0' }}"
-    aria-label="Painel de pesquisa e filtros" role="complementary" aria-hidden="{{ $collapsed ? 'true' : 'false' }}">
+    class="absolute top-2 left-2 bottom-2 w-96 bg-primary bg-no-repeat bg-top border-4 border-black/15 z-[100] shadow-xl transform transition-transform duration-300 ease-in-out rounded-xl overflow-hidden {{ $collapsed ? '-translate-x-full' : 'translate-x-0' }}"
+    aria-label="Painel de pesquisa e filtros" style="background-image: url('{{ asset('assets/images/search-bg.jpg') }}');" role="complementary" aria-hidden="{{ $collapsed ? 'true' : 'false' }}">
     <div class="flex flex-col h-full">
-        <header class="p-2 bg-secondary">
+        <header class="p-2">
             <img src="{{ asset('assets/images/logo.svg') }}" alt="Logo" class="w-32 m-2 mb-4">
             <div class="relative">
                 <label for="search-input" class="sr-only">Pesquisar locais</label>
                 <input type="search" id="search-input" wire:model.live.debounce.300ms="search"
                     placeholder="Pesquisar locais..."
-                    class="bg-white w-full px-4 py-3 pr-10 text-sm border-2 border-secondary rounded-lg focus:outline-none focus:ring-4 focus:ring-black/25 transition-all duration-200"
+                    class="bg-white w-full px-4 py-3 pr-10 text-sm border-2 border-primary rounded-lg focus:outline-none focus:ring-4 focus:ring-black/25 transition-all duration-200"
                     aria-describedby="search-help">
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                    @svg('heroicon-o-magnifying-glass', 'w-5 h-5 text-secondary')
+                    @svg('heroicon-o-magnifying-glass', 'w-5 h-5 text-primary')
                 </div>
             </div>
             <div id="search-help" class="sr-only">
@@ -19,16 +19,17 @@
             </div>
         </header>
 
-        <section class="p-2.5 bg-no-repeat bg-top bg-primary border-b-2 border-[#361A48]"
-            style="background-image: url('{{ asset('assets/images/filter-bg.jpg') }}')">
+        <section class="p-2.5 bg-no-repeat bg-top bg-black/20">
             <fieldset class="space-y-2 mb-2">
                 <div class="flex items-center justify-between">
-                    <legend class="text-base font-semibold text-secondary">Acessibilidade</legend>
+                    <legend class="text-base font-semibold text-white">
+                        Acessibilidade
+                    </legend>
                     @if (array_sum($accessibilityFilters) > 0 || !empty($search))
                         <button wire:click="clearFilters"
-                            class="items-center justify-center text-sm text-secondary font-semibold hover:underline cursor-pointer focus:outline-none focus:underline"
+                            class="items-center justify-center text-sm text-primary font-semibold hover:underline cursor-pointer focus:outline-none focus:underline"
                             aria-label="Limpar todos os filtros">
-                            @svg('heroicon-o-trash', 'w-5 h-5 text-secondary')
+                            @svg('heroicon-o-trash', 'w-5 h-5 text-primary')
                         </button>
                     @endif
                 </div>
@@ -49,7 +50,7 @@
             </fieldset>
 
             <div class="space-y-2">
-                <p class="text-xs font-mono text-secondary" aria-live="polite">
+                <p class="text-xs font-mono text-white" aria-live="polite">
                     Mostrando {{ $totalResults }} {{ $totalResults === 1 ? 'resultado' : 'resultados' }}
                 </p>
             </div>
@@ -59,7 +60,7 @@
             <div class="space-y-2">
                 @forelse($results as $result)
                     <article
-                        class="bg-black/25 border-2 {{ $selectedLocationId == $result['id'] ? 'border-primary shadow-md bg-black/35' : 'border-black/30' }} rounded-lg p-2.5 hover:shadow-md hover:border-primary cursor-pointer transition-all duration-200 group"
+                        class="bg-black/25 border-2 {{ $selectedLocationId == $result['id'] ? 'border-secondary shadow-md bg-black/35' : 'border-black/30' }} rounded-lg p-2.5 hover:shadow-md hover:border-secondary cursor-pointer transition-all duration-200 group"
                         data-location-id="{{ $result['id'] }}" role="button" tabindex="0"
                         aria-label="Ver {{ $result['name'] }} no mapa - {{ $result['accessibility_level'] === 'acessivel' ? 'Acessível' : '' }}{{ $result['accessibility_level'] === 'parcial_acessivel' ? 'Parcialmente Acessível' : '' }}{{ $result['accessibility_level'] === 'nao_acessivel' ? 'Não Acessível' : '' }}"
                         wire:click="focusLocation('{{ $result['id'] }}')"
@@ -76,7 +77,7 @@
                                         aria-hidden="true">
                                     </div>
                                     <div class="flex-1">
-                                        <h3 class="font-semibold text-primary text-sm leading-tight mb-1">
+                                        <h3 class="font-semibold text-secondary text-sm leading-tight mb-1">
                                             {{ $result['name'] }}
                                         </h3>
                                         <p class="text-xs text-white/80">
@@ -147,16 +148,16 @@
 
                             <div
                                 class="flex-shrink-0 self-start ml-auto group-hover:translate-x-1 transition-transform duration-200">
-                                @svg('heroicon-o-arrow-right', 'w-4 h-4 text-white/50 group-hover:text-primary', ['aria-hidden' => 'true'])
+                                @svg('heroicon-o-arrow-right', 'w-4 h-4 text-white/50 group-hover:text-secondary', ['aria-hidden' => 'true'])
                             </div>
                         </div>
                     </article>
                 @empty
                     <div class="p-8 text-center">
                         <div class="mx-auto w-16 h-16 bg-black/25 rounded-full flex items-center justify-center mb-4">
-                            @svg('heroicon-o-magnifying-glass', 'w-8 h-8 text-primary')
+                            @svg('heroicon-o-magnifying-glass', 'w-8 h-8 text-secondary')
                         </div>
-                        <h3 class="text-base font-semibold text-primary mb-1">Nenhum resultado encontrado</h3>
+                        <h3 class="text-base font-semibold text-secondary mb-1">Nenhum resultado encontrado</h3>
                         <p class="text-sm text-white/50">Tente ajustar seus filtros ou termo de pesquisa</p>
                     </div>
                 @endforelse
