@@ -28,8 +28,8 @@
             role="switch"
             aria-checked="{{ $isChecked ? 'true' : 'false' }}"
         >
-        <div class="w-7 h-3.5 rounded-full border transition-colors duration-200 ease-in-out {{ $trackClass }} {{ $isChecked ? 'bg-opacity-100' : 'bg-opacity-50' }} relative flex items-center">
-            <div class="absolute left-0.5 w-2.5 h-2.5 rounded-full transition-transform duration-200 ease-in-out {{ $thumbClass }} {{ $isChecked ? 'transform translate-x-3.5' : 'transform translate-x-0' }} shadow-sm"></div>
+        <div class="w-[29px] h-4 rounded-full border-2 transition-colors duration-200 ease-in-out {{ $trackClass }} {{ $isChecked ? 'bg-opacity-100' : 'bg-opacity-50' }} relative flex items-center">
+            <div class="absolute left-0.5 w-2.5 border-1 h-2.5 rounded-full transition-transform duration-200 ease-in-out {{ $thumbClass }} {{ $isChecked ? 'transform translate-x-3' : 'transform translate-x-0' }} shadow-sm"></div>
         </div>
     </div>
     <span class="text-sm font-medium {{ $labelClass }}">{{ $label }}</span>

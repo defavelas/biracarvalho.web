@@ -2,16 +2,16 @@
     class="absolute top-2 left-2 bottom-2 w-96 bg-secondary border-4 border-black/15 z-[100] shadow-xl transform transition-transform duration-300 ease-in-out rounded-lg overflow-hidden {{ $collapsed ? '-translate-x-full' : 'translate-x-0' }}"
     aria-label="Painel de pesquisa e filtros" role="complementary" aria-hidden="{{ $collapsed ? 'true' : 'false' }}">
     <div class="flex flex-col h-full">
-        <header class="p-4 bg-secondary">
+        <header class="p-2 bg-secondary">
             <img src="{{ asset('assets/images/logo.svg') }}" alt="Logo" class="w-32 m-2 mb-4">
             <div class="relative">
                 <label for="search-input" class="sr-only">Pesquisar locais</label>
                 <input type="search" id="search-input" wire:model.live.debounce.300ms="search"
                     placeholder="Pesquisar locais..."
-                    class="bg-white w-full px-4 py-3 pr-10 text-sm border-2 border-primary rounded-lg focus:outline-none focus:ring-4 focus:ring-black/25 focus:border-primary transition-all duration-200"
+                    class="bg-white w-full px-4 py-3 pr-10 text-sm border-2 border-secondary rounded-lg focus:outline-none focus:ring-4 focus:ring-black/25 transition-all duration-200"
                     aria-describedby="search-help">
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                    @svg('heroicon-o-magnifying-glass', 'w-5 h-5 text-gray-400')
+                    @svg('heroicon-o-magnifying-glass', 'w-5 h-5 text-secondary')
                 </div>
             </div>
             <div id="search-help" class="sr-only">
@@ -19,62 +19,47 @@
             </div>
         </header>
 
-        <section class="p-4 bg-no-repeat bg-cover bg-center bg-fixed bg-primary min-h-[200px]" style="background-image: url('{{ asset('assets/images/filter-bg.jpg') }}'); background-attachment: local;">
-            <fieldset class="space-y-3 mb-4">
-                <legend class="text-base font-semibold text-secondary">Acessibilidade</legend>
+        <section class="p-2.5 bg-no-repeat bg-top bg-primary border-b-2 border-[#361A48]"
+            style="background-image: url('{{ asset('assets/images/filter-bg.jpg') }}')">
+            <fieldset class="space-y-2 mb-2">
+                <div class="flex items-center justify-between">
+                    <legend class="text-base font-semibold text-secondary">Acessibilidade</legend>
+                    @if (array_sum($accessibilityFilters) > 0 || !empty($search))
+                        <button wire:click="clearFilters"
+                            class="items-center justify-center text-sm text-secondary font-semibold hover:underline cursor-pointer focus:outline-none focus:underline"
+                            aria-label="Limpar todos os filtros">
+                            @svg('heroicon-o-trash', 'w-5 h-5 text-secondary')
+                        </button>
+                    @endif
+                </div>
 
-                <div class="space-y-3">
-                    <x-toggle-button 
-                        wire:model.live="accessibilityFilters.acessivel"
-                        :value="$accessibilityFilters['acessivel']"
-                        label="Acessível"
-                        trackClass="bg-primary border-secondary"
-                        thumbClass="bg-green-500"
-                        labelClass="text-secondary"
-                    />
+                <div class="space-y-2 mb-2">
+                    <x-toggle-button wire:model.live="accessibilityFilters.acessivel" :value="$accessibilityFilters['acessivel']"
+                        label="Acessível" trackClass="bg-primary border-secondary" thumbClass="bg-green-500"
+                        labelClass="text-secondary" />
 
-                    <x-toggle-button 
-                        wire:model.live="accessibilityFilters.parcial_acessivel"
-                        :value="$accessibilityFilters['parcial_acessivel']"
-                        label="Parcialmente Acessível"
-                        trackClass="bg-primary border-secondary"
-                        thumbClass="bg-yellow-500"
-                        labelClass="text-secondary"
-                    />
+                    <x-toggle-button wire:model.live="accessibilityFilters.parcial_acessivel" :value="$accessibilityFilters['parcial_acessivel']"
+                        label="Parcialmente Acessível" trackClass="bg-primary border-secondary"
+                        thumbClass="bg-yellow-500" labelClass="text-secondary" />
 
-                    <x-toggle-button 
-                        wire:model.live="accessibilityFilters.nao_acessivel"
-                        :value="$accessibilityFilters['nao_acessivel']"
-                        label="Não Acessível"
-                        trackClass="bg-primary border-secondary"
-                        thumbClass="bg-rose-500"
-                        labelClass="text-secondary"
-                    />
+                    <x-toggle-button wire:model.live="accessibilityFilters.nao_acessivel" :value="$accessibilityFilters['nao_acessivel']"
+                        label="Não Acessível" trackClass="bg-primary border-secondary" thumbClass="bg-rose-500"
+                        labelClass="text-secondary" />
                 </div>
             </fieldset>
 
-            <div class="space-y-3">
-                <p class="text-sm text-secondary" aria-live="polite">
-                    {{ $totalResults }}
-                    {{ $totalResults === 1 ? 'resultado encontrado' : 'resultados encontrados' }}
+            <div class="space-y-2">
+                <p class="text-xs font-mono text-secondary" aria-live="polite">
+                    Mostrando {{ $totalResults }} {{ $totalResults === 1 ? 'resultado' : 'resultados' }}
                 </p>
-
-                @if (array_sum($accessibilityFilters) > 0 || !empty($search))
-                    <button wire:click="clearFilters"
-                        class="flex flex-row gap-2 items-center justify-center text-sm text-secondary font-semibold hover:underline cursor-pointer focus:outline-none focus:underline"
-                        aria-label="Limpar todos os filtros">
-                        @svg('heroicon-o-trash', 'w-4 h-4 text-secondary')
-                        Limpar filtros
-                    </button>
-                @endif
             </div>
         </section>
 
         <main class="flex-1 overflow-y-auto soft-scrollbar p-2">
-            <div class="space-y-3">
+            <div class="space-y-2">
                 @forelse($results as $result)
                     <article
-                        class="bg-black/25 border-2 {{ $selectedLocationId == $result['id'] ? 'border-primary shadow-md bg-black/35' : 'border-black/30' }} rounded-lg p-4 hover:shadow-md hover:border-primary cursor-pointer transition-all duration-200 group"
+                        class="bg-black/25 border-2 {{ $selectedLocationId == $result['id'] ? 'border-primary shadow-md bg-black/35' : 'border-black/30' }} rounded-lg p-2.5 hover:shadow-md hover:border-primary cursor-pointer transition-all duration-200 group"
                         data-location-id="{{ $result['id'] }}" role="button" tabindex="0"
                         aria-label="Ver {{ $result['name'] }} no mapa - {{ $result['accessibility_level'] === 'acessivel' ? 'Acessível' : '' }}{{ $result['accessibility_level'] === 'parcial_acessivel' ? 'Parcialmente Acessível' : '' }}{{ $result['accessibility_level'] === 'nao_acessivel' ? 'Não Acessível' : '' }}"
                         wire:click="focusLocation('{{ $result['id'] }}')"
@@ -92,8 +77,11 @@
                                     </div>
                                     <div class="flex-1">
                                         <h3 class="font-semibold text-primary text-sm leading-tight mb-1">
-                                            {{ $result['name'] }}</h3>
-                                        <p class="text-xs text-white/80">{{ $result['address'] }}</p>
+                                            {{ $result['name'] }}
+                                        </h3>
+                                        <p class="text-xs text-white/80">
+                                            {{ $result['address'] }}
+                                        </p>
                                     </div>
                                 </div>
 
@@ -138,7 +126,7 @@
 
                                 <div class="flex items-center justify-between">
                                     <span
-                                        class="inline-flex items-center px-2.5 py-0.5 font-semibold rounded-full text-xs text-black/75
+                                        class="inline-flex items-center px-2 leading-5 font-semibold rounded-full text-xs text-black/75
                                         {{ $result['accessibility_level'] === 'acessivel' ? 'bg-green-500' : '' }}
                                         {{ $result['accessibility_level'] === 'parcial_acessivel' ? 'bg-yellow-500' : '' }}
                                         {{ $result['accessibility_level'] === 'nao_acessivel' ? 'bg-rose-500' : '' }}">

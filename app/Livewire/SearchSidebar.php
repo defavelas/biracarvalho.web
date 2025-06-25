@@ -24,33 +24,51 @@ class SearchSidebar extends Component
     public int $totalResults = 0;
     public ?string $selectedLocationId = null;
 
+    /**
+     * Initialize the component with optional collapsed state.
+     */
     public function mount($collapsed = false): void
     {
         $this->collapsed = $collapsed;
         $this->loadResults();
     }
 
+    /**
+     * Highlight a specific location in the sidebar.
+     */
     #[On('highlight-sidebar-location')]
     public function highlightLocation($locationId): void
     {
         $this->selectedLocationId = $locationId;
     }
 
+    /**
+     * Handle search input updates.
+     */
     public function updatedSearch(): void
     {
         $this->loadResults();
     }
 
+    /**
+     * Handle accessibility filter updates.
+     */
     public function updatedAccessibilityFilters(): void
     {
         $this->loadResults();
     }
 
+    /**
+     * Toggle the sidebar collapsed state.
+     */
     public function toggleSidebar(): void
     {
         $this->collapsed = !$this->collapsed;
     }
 
+    /**
+     * Clear all filters and reset search.
+     */
     public function clearFilters(): void
     {
         $this->accessibilityFilters = [
@@ -58,17 +76,15 @@ class SearchSidebar extends Component
             'nao_acessivel' => false,
             'parcial_acessivel' => false,
         ];
+
         $this->search = '';
         $this->selectedLocationId = null;
         
-        // Force reload of results
         $this->loadResults();
         
-        // Dispatch events to update the map
         $this->dispatch('filters-cleared');
         $this->dispatch('results-updated', results: $this->results);
         
-        // Also dispatch a browser event for direct JavaScript handling
         $this->js("
             if (window.mapComponentInstance) {
                 window.mapComponentInstance.closeMapCard();
@@ -77,31 +93,30 @@ class SearchSidebar extends Component
         ");
     }
 
+    /**
+     * Focus on a specific location and update the map.
+     */
     public function focusLocation($locationId): void
     {
-        // Convert to string to ensure consistency
         $this->selectedLocationId = (string) $locationId;
         
-        // Dispatch event to focus on the location on the map
         $this->dispatch('focus-location', locationId: (string) $locationId);
         
-        // Also dispatch a browser event for direct JavaScript handling with card closing
         $this->js("
             if (window.mapComponentInstance) {
-                // Close all existing cards first
                 window.mapComponentInstance.closeMapCard();
-                // Then focus on the new location
                 window.mapComponentInstance.focusLocation('$locationId');
             }
         ");
     }
 
+    /**
+     * Load and filter results based on current search and filter criteria.
+     */
     private function loadResults(): void
     {
-        // Load mock data from config - in real implementation, this would query the database
         $mockResults = config('places.mock_locations', []);
 
-        // Filter by search term
         if (!empty($this->search)) {
             $mockResults = array_filter($mockResults, function ($result) {
                 return stripos($result['name'], $this->search) !== false ||
@@ -109,7 +124,6 @@ class SearchSidebar extends Component
             });
         }
 
-        // Filter by accessibility levels
         $activeFilters = array_keys(array_filter($this->accessibilityFilters));
         if (!empty($activeFilters)) {
             $mockResults = array_filter($mockResults, function ($result) use ($activeFilters) {
@@ -120,10 +134,12 @@ class SearchSidebar extends Component
         $this->results = array_values($mockResults);
         $this->totalResults = count($this->results);
         
-        // Dispatch event to update map markers
         $this->dispatch('results-updated', results: $this->results);
     }
 
+    /**
+     * Render the component view.
+     */
     public function render()
     {
         return view('livewire.search-sidebar');

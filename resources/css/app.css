@@ -40,12 +40,9 @@
     background: rgba(0, 0, 0, 0.5);
 }
 
-.leaflet-tile {
-    filter: grayscale(100%) sepia(100%) hue-rotate(240deg) saturate(0.5) brightness(0.525) contrast(1.5) !important;
-}
 
 .leaflet-layer {
-    filter: grayscale(100%) sepia(100%) hue-rotate(240deg) saturate(1.25) brightness(0.5) contrast(1.5) !important;
+    filter: grayscale(100%) sepia(100%) hue-rotate(235deg) saturate(1.25) brightness(0.5) contrast(1.25) !important;
 }
 
 .leaflet-container {
