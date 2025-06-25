@@ -5,10 +5,10 @@ return [
         [
             'id' => 1,
             'name' => 'Centro de Saúde da Maré',
-            'address' => 'Rua Principal, 123',
+            'address' => 'R. Carlos Lacerda, 52',
             'accessibility_level' => 'acessivel',
-            'latitude' => -22.8666,
-            'longitude' => -43.2338,
+            'latitude' => -22.855247,
+            'longitude' => -43.241945,
             'images' => [
                 'https://picsum.photos/300/200?random=1',
                 'https://picsum.photos/300/200?random=2',
@@ -20,10 +20,10 @@ return [
         [
             'id' => 2,
             'name' => 'Escola Municipal',
-            'address' => 'Av. Brasil, 456',
+            'address' => 'R. Srg. Silva Nunes, 100',
             'accessibility_level' => 'parcial_acessivel',
-            'latitude' => -22.8700,
-            'longitude' => -43.2300,
+            'latitude' => -22.854695,
+            'longitude' => -43.245143,
             'images' => [
                 'https://picsum.photos/300/200?random=6',
                 'https://picsum.photos/300/200?random=7',
@@ -32,10 +32,10 @@ return [
         [
             'id' => 3,
             'name' => 'Mercado Local',
-            'address' => 'Rua das Flores, 789',
+            'address' => 'R. Guanabara, 42',
             'accessibility_level' => 'nao_acessivel',
-            'latitude' => -22.8630,
-            'longitude' => -43.2370,
+            'latitude' => -22.858245,
+            'longitude' => -43.243123,
             'images' => [
                 'https://picsum.photos/300/200?random=8',
                 'https://picsum.photos/300/200?random=9',
@@ -45,11 +45,11 @@ return [
         ],
         [
             'id' => 4,
-            'name' => 'Farmácia Popular',
-            'address' => 'Rua Nova Descoberta, 321',
+            'name' => 'Posto de Saúde Hélio Smidt',
+            'address' => 'Av. Pres. Tancredo Neves, s/n',
             'accessibility_level' => 'acessivel',
-            'latitude' => -22.8650,
-            'longitude' => -43.2320,
+            'latitude' => -22.856858,
+            'longitude' => -43.240468,
             'images' => [
                 'https://picsum.photos/300/200?random=12',
             ],
@@ -66,10 +66,10 @@ return [
         [
             'id' => 6,
             'name' => 'Centro Comunitário',
-            'address' => 'Rua da Comunidade, 987',
+            'address' => 'R. 17 de Fevereiro, 200',
             'accessibility_level' => 'parcial_acessivel',
-            'latitude' => -22.8620,
-            'longitude' => -43.2380,
+            'latitude' => -22.858831,
+            'longitude' => -43.246714,
             'images' => [
                 'https://picsum.photos/300/200?random=13',
                 'https://picsum.photos/300/200?random=14',
