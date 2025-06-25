@@ -2,7 +2,6 @@
  * Map Component for Maré Accessibility Mapping
  * Handles OpenStreetMap integration with Leaflet.js
  */
-
 class MapComponent {
     constructor(containerId, options = {}) {
         this.containerId = containerId;
@@ -12,7 +11,7 @@ class MapComponent {
         this.currentMapCard = null;
         this.currentCloseButton = null;
         this.selectedLocationId = null;
-        
+
         this.options = {
             center: [-22.8666, -43.2338],
             zoom: 14,
@@ -20,17 +19,17 @@ class MapComponent {
             minZoom: 10,
             ...options
         };
-        
+
         this.init();
     }
-    
+
     init() {
         const container = document.getElementById(this.containerId);
         if (!container) {
             console.error(`Map container with ID '${this.containerId}' not found`);
             return;
         }
-        
+
         this.map = L.map(this.containerId, {
             center: this.options.center,
             zoom: this.options.zoom,
@@ -39,35 +38,35 @@ class MapComponent {
             zoomControl: false,
             attributionControl: true
         });
-        
+
         L.control.zoom({
             position: 'bottomright'
         }).addTo(this.map);
-        
+
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             maxZoom: 18
         }).addTo(this.map);
-        
+
         this.markerLayer = L.layerGroup().addTo(this.map);
-        
+
         this.setupEventListeners();
     }
-    
+
     setupEventListeners() {
         document.addEventListener('livewire:init', () => {
             Livewire.on('results-updated', (event) => {
                 this.updateMarkers(event.results);
             });
-            
+
             Livewire.on('focus-location', (event) => {
                 this.focusLocation(event.locationId);
             });
         });
-        
+
         this.map.on('zoomend', () => {
         });
-        
+
         this.map.on('moveend', () => {
         });
 
@@ -77,51 +76,51 @@ class MapComponent {
             }
         });
     }
-    
+
     updateMarkers(results) {
         this.markerLayer.clearLayers();
         this.markers.clear();
-        
+
         if (!results || results.length === 0) {
             this.closeMapCard();
             return;
         }
-        
+
         results.forEach(result => {
             this.addMarker(result);
         });
-        
+
         if (results.length > 0) {
             const group = new L.featureGroup(Array.from(this.markers.values()));
             this.map.fitBounds(group.getBounds().pad(0.1));
         }
     }
-    
+
     addMarker(location) {
         const { id, name, address, accessibility_level, latitude, longitude } = location;
-        
+
         const locationId = String(id);
-        
+
         const icon = this.createAccessibilityIcon(accessibility_level, locationId === this.selectedLocationId);
-        
+
         const marker = L.marker([latitude, longitude], { icon })
             .addTo(this.markerLayer);
-        
+
         marker.locationData = location;
-        
+
         this.markers.set(locationId, marker);
-        
+
         marker.on('click', (e) => {
             e.originalEvent.preventDefault();
             this.onMarkerClick(location);
         });
-        
+
         return marker;
     }
-    
+
     createAccessibilityIcon(accessibilityLevel, isSelected = false) {
         let color = '#666666';
-        
+
         switch (accessibilityLevel) {
             case 'acessivel':
                 color = '#10B981';
@@ -133,10 +132,10 @@ class MapComponent {
                 color = '#EF4444';
                 break;
         }
-        
+
         const size = isSelected ? 28 : 20;
         const borderWidth = isSelected ? 3 : 2;
-        
+
         return L.divIcon({
             className: 'custom-marker',
             html: `<div style="
@@ -150,74 +149,77 @@ class MapComponent {
                 transition: all 0.2s ease;
             "></div>`,
             iconSize: [size, size],
-            iconAnchor: [size/2, size/2]
+            iconAnchor: [size / 2, size / 2]
         });
     }
-    
+
     onMarkerClick(location) {
         this.closeMapCard();
-        
+
         this.selectedLocationId = String(location.id);
         this.updateMarkerStyles();
-        
+
         const targetZoom = this.markers.size === 1 ? 18 : Math.max(this.map.getZoom(), 16);
         this.map.setView([location.latitude, location.longitude], targetZoom);
-        
+
         setTimeout(() => {
             this.showMapCard(location);
         }, 100);
     }
-    
+
     showMapCard(location) {
         this.closeMapCard();
-        
+
         const mapContainer = document.getElementById(this.containerId);
         if (!mapContainer) {
             console.error('Map container not found:', this.containerId);
             return;
         }
-        
+
         const cardHtml = this.createMapCardHTML(location);
-        const closeButtonHtml = this.createCloseButtonHTML();
-        
+        const closeButtonHtml = this.createCloseButtonHTML(location);
+
         mapContainer.insertAdjacentHTML('afterend', cardHtml);
         mapContainer.insertAdjacentHTML('afterend', closeButtonHtml);
-        
+
         this.currentMapCard = document.getElementById('map-card-container');
-        this.currentCloseButton = document.getElementById('map-card-close-button');
-        
+        this.currentCloseButton = document.getElementById('map-card-buttons');
+
         if (this.currentMapCard) {
-            this.positionMapCard(location);
+            // Use requestAnimationFrame to ensure DOM is fully updated before positioning
+            requestAnimationFrame(() => {
+                this.positionMapCard(location);
+            });
         } else {
             console.error('Map card container not found after insertion');
         }
-        
+
         if (typeof Alpine !== 'undefined' && this.currentMapCard) {
             Alpine.initTree(this.currentMapCard);
         }
     }
-    
-        positionMapCard(location) {
+
+    positionMapCard(location) {
         if (!this.currentMapCard) {
             console.error('No map card to position');
             return;
         }
-        
+
         try {
             const locationKey = String(location.id);
             const marker = this.markers.get(locationKey);
-            
+
             if (marker) {
                 const markerLatLng = marker.getLatLng();
                 const markerPixel = this.map.latLngToContainerPoint(markerLatLng);
-                
+
                 const mapRect = this.map.getContainer().getBoundingClientRect();
                 const cardWidth = 400;
                 const cardHeight = 300;
-                
+
                 let left = markerPixel.x;
                 let top = markerPixel.y - cardHeight - 20;
-                
+
                 if (left + cardWidth > mapRect.width) {
                     left = mapRect.width - cardWidth - 20;
                 }
@@ -230,16 +232,31 @@ class MapComponent {
                 if (top + cardHeight > mapRect.height) {
                     top = mapRect.height - cardHeight - 20;
                 }
-                
+
                 this.currentMapCard.style.left = `${left}px`;
                 this.currentMapCard.style.top = `${top}px`;
                 this.currentMapCard.style.transform = 'none';
                 this.currentMapCard.style.display = 'block';
-                
+
                 if (this.currentCloseButton) {
-                    this.currentCloseButton.style.left = `${left + cardWidth - 10}px`;
-                    this.currentCloseButton.style.top = `${top - 10}px`;
-                    this.currentCloseButton.style.display = 'block';
+                    const mapContainerRect = this.map.getContainer().getBoundingClientRect();
+                    const buttonLeft = mapContainerRect.left + left + cardWidth + 5;
+                    const buttonTop = mapContainerRect.top + top;
+
+                    console.log('Positioning buttons:', {
+                        buttonLeft,
+                        buttonTop,
+                        mapRect: mapContainerRect,
+                        cardLeft: left,
+                        cardTop: top,
+                        cardWidth
+                    });
+
+                    this.currentCloseButton.style.position = 'fixed';
+                    this.currentCloseButton.style.left = `${buttonLeft}px`;
+                    this.currentCloseButton.style.top = `${buttonTop}px`;
+                    this.currentCloseButton.style.display = 'flex';
+                    this.currentCloseButton.style.zIndex = '1003';
                 }
             } else {
                 this.fallbackCenterPosition();
@@ -249,45 +266,60 @@ class MapComponent {
             this.fallbackCenterPosition();
         }
     }
-    
+
     fallbackCenterPosition() {
         const mapRect = this.map.getContainer().getBoundingClientRect();
         const cardLeft = mapRect.width / 2 - 200;
         const cardTop = mapRect.height / 2 - 150;
-        
+
         this.currentMapCard.style.left = `${cardLeft}px`;
         this.currentMapCard.style.top = `${cardTop}px`;
         this.currentMapCard.style.display = 'block';
-        
+
         if (this.currentCloseButton) {
-            this.currentCloseButton.style.left = `${cardLeft + 390}px`;
-            this.currentCloseButton.style.top = `${cardTop - 10}px`;
-            this.currentCloseButton.style.display = 'block';
+            const mapContainerRect = this.map.getContainer().getBoundingClientRect();
+            const buttonLeft = mapContainerRect.left + cardLeft + 405;
+            const buttonTop = mapContainerRect.top + cardTop;
+
+            console.log('Fallback positioning buttons:', {
+                buttonLeft,
+                buttonTop,
+                mapRect: mapContainerRect,
+                cardLeft,
+                cardTop
+            });
+
+            this.currentCloseButton.style.position = 'fixed';
+            this.currentCloseButton.style.left = `${buttonLeft}px`;
+            this.currentCloseButton.style.top = `${buttonTop}px`;
+            this.currentCloseButton.style.display = 'flex';
+            this.currentCloseButton.style.zIndex = '1003';
         }
     }
-    
+
     createMapCardHTML(location) {
         const accessibilityText = {
             'acessivel': 'Acessível',
             'parcial_acessivel': 'Parcialmente Acessível',
             'nao_acessivel': 'Não Acessível'
         };
-        
+
         const accessibilityClass = {
             'acessivel': 'bg-green-500',
             'parcial_acessivel': 'bg-yellow-500',
             'nao_acessivel': 'bg-rose-500'
         };
-        
+
         const images = location.images || [];
         const hasImages = images.length > 0;
-        
+        const description = location.description || [];
+
         let imagesHtml = '';
         if (hasImages) {
             const maxImages = Math.min(images.length, 5);
-                         imagesHtml = `
-                 <div class="mb-4 relative" x-data="{ currentSlide: 0, totalSlides: ${maxImages} }">
-                     <div class="relative h-48 bg-black/25 rounded-lg overflow-hidden group">
+            imagesHtml = `
+                <div class="mb-4 relative" x-data="{ currentSlide: 0, totalSlides: ${maxImages} }">
+                    <div class="relative h-48 bg-black/25 rounded-lg overflow-hidden group">
                         ${images.slice(0, maxImages).map((image, index) => `
                             <div 
                                 class="absolute inset-0 transition-opacity duration-300"
@@ -323,7 +355,7 @@ class MapComponent {
                                 </svg>
                             </button>
                             <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
-                                ${Array.from({length: maxImages}, (_, i) => `
+                                ${Array.from({ length: maxImages }, (_, i) => `
                                     <button 
                                         type="button"
                                         @click="currentSlide = ${i}"
@@ -336,17 +368,17 @@ class MapComponent {
                     </div>
                 </div>
             `;
-                 } else {
-             imagesHtml = `
-                 <div class="mb-4 h-48 bg-black/25 rounded-lg flex items-center justify-center">
-                    <svg class="w-8 h-8 text-white/50 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        } else {
+            imagesHtml = `
+                <div class="mb-4 h-48 bg-black/25 rounded-lg flex items-center justify-center">
+                    <svg class="w-8 h-8 text-primary/50 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
-                    <span class="text-sm text-white/50">Sem imagens disponíveis</span>
+                    <span class="text-sm text-primary/50">Sem imagens disponíveis</span>
                 </div>
             `;
         }
-        
+
         return `
             <div id="map-card-container">
                                 <div 
@@ -359,7 +391,7 @@ class MapComponent {
                     <div class="p-2">
                     ${imagesHtml}
 
-                    <div class="space-y-3">
+                    <div class="space-y-2">
                         <div class="flex items-start justify-between space-x-3">
                             <div class="flex-1">
                                 <h3 id="map-card-title" class="text-lg font-semibold text-primary leading-tight">
@@ -378,7 +410,7 @@ class MapComponent {
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 </svg>
                             </div>
-                            <p id="map-card-description" class="text-sm text-white/80 leading-relaxed">
+                            <p id="map-card-description" class="text-sm text-primary/80 leading-relaxed">
                                 ${location.address}
                             </p>
                         </div>
@@ -390,92 +422,166 @@ class MapComponent {
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
                                 </div>
-                                <span class="text-xs text-white/60 font-mono">
+                                <span class="text-xs text-primary/60 font-mono">
                                     ${parseFloat(location.latitude).toFixed(6)}, ${parseFloat(location.longitude).toFixed(6)}
                                 </span>
                             </div>
                         ` : ''}
 
-                        <div class="flex space-x-2 pt-2 border-t border-white/10">
-                            <button 
-                                type="button"
-                                onclick="centerMapOnLocation(${location.latitude}, ${location.longitude})"
-                                class="flex-1 bg-primary/20 hover:bg-primary/30 text-primary font-medium py-2 px-3 rounded-md transition-colors duration-200 text-sm flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer"
-                            >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
-                                </svg>
-                                <span>Centralizar</span>
-                            </button>
-                            <button 
-                                type="button"
-                                onclick="highlightLocationInSidebar('${location.id}')"
-                                class="flex-1 bg-primary/20 hover:bg-primary/30 text-primary font-medium py-2 px-3 rounded-md transition-colors duration-200 text-sm flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer"
-                            >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-                                </svg>
-                                <span>Ver Lista</span>
-                            </button>
-                                                 </div>
+                        ${description.length > 0 ? `
+                            <div class="border-t border-white/10 pt-3">
+                                <h4 class="text-sm font-semibold text-primary mb-2">Sobre este local</h4>
+                                <div class="max-h-80 overflow-y-auto soft-scrollbar space-y-3">
+                                    ${description.map(paragraph => `
+                                        <p class="text-sm text-primary/90 leading-relaxed">${paragraph}</p>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
                      </div>
                  </div>
              </div>
          </div>
          `;
     }
-    
-    createCloseButtonHTML() {
+
+    createCloseButtonHTML(location) {
         return `
-            <button 
-                id="map-card-close-button"
-                type="button" 
-                onclick="closeMapCard()"
-                style="
-                    position: absolute;
-                    z-index: 1003;
-                    width: 44px;
-                    height: 44px;
-                    border-radius: 50%;
-                    background-color: #CED842;
-                    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-                    cursor: pointer;
-                    transition: all 300ms ease-in-out;
-                    border: none;
-                    padding: 0;
-                    margin: 0;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    text-align: center;
-                "
-                onmouseover="this.style.boxShadow='0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'; this.style.transform='translateY(-2px)';"
-                onmouseout="this.style.boxShadow='0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)'; this.style.transform='translateY(0)';"
-                aria-label="Fechar detalhes do local"
-            >
-                <svg 
-                    width="20" 
-                    height="20" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="#653089" 
+            <div id="map-card-buttons" style="position: absolute; z-index: 1003; display: flex; flex-direction: column; gap: 8px;">
+                <button 
+                    id="map-card-close-button"
+                    type="button" 
+                    onclick="closeMapCard()"
                     style="
-                        stroke-width: 2;
-                        stroke-linecap: round;
-                        stroke-linejoin: round;
-                        position: absolute;
-                        top: 50%;
-                        left: 50%;
-                        transform: translate(-50%, -50%);
+                        width: 44px;
+                        height: 44px;
+                        border-radius: 50%;
+                        background-color: #CED842;
+                        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+                        cursor: pointer;
+                        transition: all 300ms ease-in-out;
+                        border: none;
+                        padding: 0;
+                        margin: 0;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
                     "
+                    onmouseover="this.style.boxShadow='0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'; this.style.transform='translateY(-2px)';"
+                    onmouseout="this.style.boxShadow='0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)'; this.style.transform='translateY(0)';"
+                    aria-label="Fechar detalhes do local"
                 >
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
+                    <svg 
+                        width="20" 
+                        height="20" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="#653089" 
+                        style="
+                            stroke-width: 2;
+                            stroke-linecap: round;
+                            stroke-linejoin: round;
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                        "
+                    >
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+
+                <button 
+                    type="button" 
+                    onclick="centerMapOnLocation(${location.latitude}, ${location.longitude})"
+                    style="
+                        width: 44px;
+                        height: 44px;
+                        border-radius: 50%;
+                        background-color: #CED842;
+                        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+                        cursor: pointer;
+                        transition: all 300ms ease-in-out;
+                        border: none;
+                        padding: 0;
+                        margin: 0;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    "
+                    onmouseover="this.style.boxShadow='0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'; this.style.transform='translateY(-2px)';"
+                    onmouseout="this.style.boxShadow='0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)'; this.style.transform='translateY(0)';"
+                    aria-label="Centralizar no mapa"
+                >
+                    <svg 
+                        width="20" 
+                        height="20" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="#653089" 
+                        style="
+                            stroke-width: 2;
+                            stroke-linecap: round;
+                            stroke-linejoin: round;
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                        "
+                    >
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                </button>
+
+                <button 
+                    type="button" 
+                    onclick="highlightLocationInSidebar('${location.id}')"
+                    style="
+                        width: 44px;
+                        height: 44px;
+                        border-radius: 50%;
+                        background-color: #CED842;
+                        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+                        cursor: pointer;
+                        transition: all 300ms ease-in-out;
+                        border: none;
+                        padding: 0;
+                        margin: 0;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    "
+                    onmouseover="this.style.boxShadow='0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'; this.style.transform='translateY(-2px)';"
+                    onmouseout="this.style.boxShadow='0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)'; this.style.transform='translateY(0)';"
+                    aria-label="Ver na lista"
+                >
+                    <svg 
+                        width="20" 
+                        height="20" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="#653089" 
+                        style="
+                            stroke-width: 2;
+                            stroke-linecap: round;
+                            stroke-linejoin: round;
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                        "
+                    >
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
         `;
     }
-    
+
     closeMapCard() {
         if (this.currentMapCard) {
             this.currentMapCard.remove();
@@ -488,7 +594,7 @@ class MapComponent {
         this.selectedLocationId = null;
         this.updateMarkerStyles();
     }
-    
+
     updateMarkerStyles() {
         this.markers.forEach((marker, locationId) => {
             const location = this.getLocationById(locationId);
@@ -498,27 +604,27 @@ class MapComponent {
             }
         });
     }
-    
+
     getLocationById(locationId) {
         const marker = this.markers.get(locationId);
         return marker ? marker.locationData : null;
     }
-    
+
     focusLocation(locationId) {
         this.closeMapCard();
-        
+
         const locationKey = String(locationId);
         const marker = this.markers.get(locationKey);
-        
+
         if (marker && marker.locationData) {
             const location = marker.locationData;
-            
+
             this.selectedLocationId = locationKey;
             this.updateMarkerStyles();
-            
+
             const targetZoom = this.markers.size === 1 ? 18 : Math.max(this.map.getZoom(), 16);
             this.map.setView(marker.getLatLng(), targetZoom);
-            
+
             setTimeout(() => {
                 this.showMapCard(location);
             }, 100);
@@ -526,15 +632,15 @@ class MapComponent {
             console.warn('Marker not found for location ID:', locationId, 'Available markers:', Array.from(this.markers.keys()));
         }
     }
-    
+
     setView(lat, lng, zoom = null) {
         this.map.setView([lat, lng], zoom || this.map.getZoom());
     }
-    
+
     getMap() {
         return this.map;
     }
-    
+
     destroy() {
         this.closeMapCard();
         if (this.map) {
@@ -543,21 +649,21 @@ class MapComponent {
     }
 }
 
-window.closeMapCard = function() {
+window.closeMapCard = function () {
     const mapComponent = window.mapComponentInstance;
     if (mapComponent) {
         mapComponent.closeMapCard();
     }
 };
 
-window.centerMapOnLocation = function(lat, lng) {
+window.centerMapOnLocation = function (lat, lng) {
     const mapComponent = window.mapComponentInstance;
     if (mapComponent) {
         mapComponent.setView(lat, lng, 18);
     }
 };
 
-window.highlightLocationInSidebar = function(locationId) {
+window.highlightLocationInSidebar = function (locationId) {
     document.dispatchEvent(new CustomEvent('highlight-sidebar-location', {
         detail: { locationId }
     }));
@@ -565,10 +671,10 @@ window.highlightLocationInSidebar = function(locationId) {
 
 window.MapComponent = MapComponent;
 
-window.initializeMap = function(containerId, options = {}) {
+window.initializeMap = function (containerId, options = {}) {
     const instance = new MapComponent(containerId, options);
-    
+
     window.mapComponentInstance = instance;
-    
+
     return instance;
 }; 

@@ -3,7 +3,7 @@
     aria-label="Painel de pesquisa e filtros" style="background-image: url('{{ asset('assets/images/search-bg.jpg') }}');" role="complementary" aria-hidden="{{ $collapsed ? 'true' : 'false' }}">
     <div class="flex flex-col h-full">
         <header class="p-2">
-            <img src="{{ asset('assets/images/logo.svg') }}" alt="Logo" class="w-32 m-2 mb-4">
+            <img src="{{ asset('assets/images/logo.svg') }}" alt="Logo" class="w-24 m-2 mb-4">
             <div class="relative">
                 <label for="search-input" class="sr-only">Pesquisar locais</label>
                 <input type="search" id="search-input" wire:model.live.debounce.300ms="search"
