@@ -1,31 +1,26 @@
-<aside 
-    class="absolute top-2 left-2 bottom-2 w-96 bg-white z-[100] shadow-xl transform transition-transform duration-300 ease-in-out rounded-lg overflow-hidden {{ $collapsed ? '-translate-x-full' : 'translate-x-0' }}" 
-    aria-label="Painel de pesquisa e filtros"
-    role="complementary"
-    aria-hidden="{{ $collapsed ? 'true' : 'false' }}"
->
+<aside
+    class="absolute top-2 left-2 bottom-2 w-96 bg-white z-[100] shadow-xl transform transition-transform duration-300 ease-in-out rounded-lg overflow-hidden {{ $collapsed ? '-translate-x-full' : 'translate-x-0' }}"
+    aria-label="Painel de pesquisa e filtros" role="complementary" aria-hidden="{{ $collapsed ? 'true' : 'false' }}">
     <div class="flex flex-col h-full">
         <header class="p-4 border-b border-gray-200 bg-white">
-            <div class="space-y-4">
-                <img src="{{ asset('assets/images/logo.svg') }}" alt="Logo" class="w-32 m-2 mb-4">
-                <div class="relative">
-                    <label for="search-input" class="sr-only">Pesquisar locais</label>
-                    <input type="search" id="search-input" wire:model.live.debounce.300ms="search"
-                        placeholder="Pesquisar locais..."
-                        class="w-full px-4 py-3 pr-10 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        aria-describedby="search-help">
-                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        @svg('heroicon-o-magnifying-glass', 'w-5 h-5 text-gray-400')
-                    </div>
+            <img src="{{ asset('assets/images/logo.svg') }}" alt="Logo" class="w-32 m-2 mb-4">
+            <div class="relative">
+                <label for="search-input" class="sr-only">Pesquisar locais</label>
+                <input type="search" id="search-input" wire:model.live.debounce.300ms="search"
+                    placeholder="Pesquisar locais..."
+                    class="w-full px-4 py-3 pr-10 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-gray-200 focus:border-gray-400 transition-all duration-200"
+                    aria-describedby="search-help">
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    @svg('heroicon-o-magnifying-glass', 'w-5 h-5 text-gray-400')
                 </div>
-                <div id="search-help" class="sr-only">
-                    Digite para pesquisar por nome ou endereço de locais
-                </div>
+            </div>
+            <div id="search-help" class="sr-only">
+                Digite para pesquisar por nome ou endereço de locais
             </div>
         </header>
 
         <section class="p-4 bg-gray-50 border-b border-gray-200">
-            <fieldset class="space-y-3">
+            <fieldset class="space-y-2">
                 <legend class="text-sm font-semibold text-gray-900">Filtros de Acessibilidade</legend>
 
                 <div class="space-y-2">
@@ -38,7 +33,7 @@
                         </div>
                     </label>
 
-                    <label class="flex items-center space-x-3 cursor-pointer">
+                    <label class="flex items-center space-x-2 cursor-pointer">
                         <input type="checkbox" wire:model.live="accessibilityFilters.parcial_acessivel"
                             class="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500">
                         <div class="flex items-center space-x-2">
@@ -47,7 +42,7 @@
                         </div>
                     </label>
 
-                    <label class="flex items-center space-x-3 cursor-pointer">
+                    <label class="flex items-center space-x-2 cursor-pointer">
                         <input type="checkbox" wire:model.live="accessibilityFilters.nao_acessivel"
                             class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
                         <div class="flex items-center space-x-2">
@@ -59,7 +54,7 @@
 
                 @if (array_sum($accessibilityFilters) > 0 || !empty($search))
                     <button wire:click="clearFilters"
-                        class="text-sm text-purple-600 hover:text-purple-800 focus:outline-none focus:underline"
+                        class="text-sm text-blue-600 hover:text-blue-500 hover:underline cursor-pointer focus:outline-none focus:underline"
                         aria-label="Limpar todos os filtros">
                         Limpar filtros
                     </button>
@@ -74,37 +69,34 @@
             </div>
         </section>
 
-        <main class="flex-1 overflow-y-auto soft-scrollbar p-4">
+        <main class="flex-1 overflow-y-auto soft-scrollbar p-2">
             <div class="space-y-3">
                 @forelse($results as $result)
-                    <article 
-                        class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-purple-300 cursor-pointer transition-all duration-200 focus-within:ring-2 focus-within:ring-purple-500 focus-within:ring-offset-1"
-                        data-location-id="{{ $result['id'] }}"
-                        role="button"
-                        tabindex="0"
+                    <article
+                        class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-gray-300 cursor-pointer transition-all duration-200 focus-within:ring-2 focus-within:ring-gray-200 focus-within:ring-offset-1 group"
+                        data-location-id="{{ $result['id'] }}" role="button" tabindex="0"
                         aria-label="Ver {{ $result['name'] }} no mapa - {{ $result['accessibility_level'] === 'acessivel' ? 'Acessível' : '' }}{{ $result['accessibility_level'] === 'parcial_acessivel' ? 'Parcialmente Acessível' : '' }}{{ $result['accessibility_level'] === 'nao_acessivel' ? 'Não Acessível' : '' }}"
                         wire:click="focusLocation('{{ $result['id'] }}')"
                         wire:keydown.enter="focusLocation('{{ $result['id'] }}')"
-                        wire:keydown.space="focusLocation('{{ $result['id'] }}')"
-                    >
-                        <div class="flex items-start justify-between space-x-3">
+                        wire:keydown.space="focusLocation('{{ $result['id'] }}')">
+                        <div class="flex items-start justify-between space-x-2">
                             <div class="flex-1 space-y-3">
                                 <div class="flex items-start space-x-2">
-                                    <div
-                                        class="w-3 h-3 rounded-full mt-1 flex-shrink-0
+                                    <div class="w-3 h-3 rounded-full mt-1 flex-shrink-0
                                         {{ $result['accessibility_level'] === 'acessivel' ? 'bg-green-500' : '' }}
                                         {{ $result['accessibility_level'] === 'parcial_acessivel' ? 'bg-yellow-500' : '' }}
                                         {{ $result['accessibility_level'] === 'nao_acessivel' ? 'bg-red-500' : '' }}"
                                         aria-hidden="true">
                                     </div>
                                     <div class="flex-1">
-                                        <h3 class="font-semibold text-gray-900 text-sm leading-tight">{{ $result['name'] }}</h3>
-                                        <p class="text-sm text-gray-600 mt-1">{{ $result['address'] }}</p>
+                                        <h3 class="font-semibold text-gray-900 text-sm leading-tight mb-1">
+                                            {{ $result['name'] }}</h3>
+                                        <p class="text-xs text-gray-600">{{ $result['address'] }}</p>
                                     </div>
                                 </div>
 
                                 {{-- Image Gallery --}}
-                                @if(isset($result['images']) && count($result['images']) > 0)
+                                @if (isset($result['images']) && count($result['images']) > 0)
                                     <div class="flex space-x-1" aria-label="Imagens do local">
                                         @php
                                             $images = $result['images'];
@@ -112,19 +104,21 @@
                                             $displayImages = array_slice($images, 0, 3);
                                             $remainingCount = max(0, $totalImages - 3);
                                         @endphp
-                                        
-                                        @foreach($displayImages as $index => $image)
-                                            <div class="relative w-12 h-12 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
-                                                <img src="{{ $image }}" 
-                                                     alt="Imagem {{ $index + 1 }} de {{ $result['name'] }}" 
-                                                     class="w-full h-full object-cover"
-                                                     loading="lazy">
+
+                                        @foreach ($displayImages as $index => $image)
+                                            <div
+                                                class="relative w-12 h-12 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
+                                                <img src="{{ $image }}"
+                                                    alt="Imagem {{ $index + 1 }} de {{ $result['name'] }}"
+                                                    class="w-full h-full object-cover" loading="lazy">
                                             </div>
                                         @endforeach
-                                        
-                                        @if($remainingCount > 0)
-                                            <div class="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center flex-shrink-0">
-                                                <span class="text-xs font-medium text-gray-500" aria-label="{{ $remainingCount }} imagens adicionais">
+
+                                        @if ($remainingCount > 0)
+                                            <div
+                                                class="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                                <span class="text-xs font-medium text-gray-500"
+                                                    aria-label="{{ $remainingCount }} imagens adicionais">
                                                     +{{ $remainingCount }}
                                                 </span>
                                             </div>
@@ -133,16 +127,18 @@
                                 @else
                                     {{-- Placeholder when no images --}}
                                     <div class="flex space-x-1">
-                                        @for($i = 0; $i < 3; $i++)
-                                            <div class="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                        @for ($i = 0; $i < 3; $i++)
+                                            <div
+                                                class="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center flex-shrink-0">
                                                 @svg('heroicon-o-photo', 'w-5 h-5 text-gray-400')
                                             </div>
                                         @endfor
                                     </div>
                                 @endif
-                                
+
                                 <div class="flex items-center justify-between">
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                    <span
+                                        class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
                                         {{ $result['accessibility_level'] === 'acessivel' ? 'bg-green-100 text-green-800' : '' }}
                                         {{ $result['accessibility_level'] === 'parcial_acessivel' ? 'bg-yellow-100 text-yellow-800' : '' }}
                                         {{ $result['accessibility_level'] === 'nao_acessivel' ? 'bg-red-100 text-red-800' : '' }}">
@@ -150,17 +146,20 @@
                                         {{ $result['accessibility_level'] === 'parcial_acessivel' ? 'Parcialmente Acessível' : '' }}
                                         {{ $result['accessibility_level'] === 'nao_acessivel' ? 'Não Acessível' : '' }}
                                     </span>
-                                    
-                                    @if(isset($result['latitude']) && isset($result['longitude']))
-                                        <span class="text-xs text-gray-500 font-mono" aria-label="Coordenadas: Latitude {{ number_format($result['latitude'], 4) }}, Longitude {{ number_format($result['longitude'], 4) }}">
-                                            {{ number_format($result['latitude'], 4) }}, {{ number_format($result['longitude'], 4) }}
+
+                                    @if (isset($result['latitude']) && isset($result['longitude']))
+                                        <span class="text-[10px] text-gray-500 font-mono text-right"
+                                            aria-label="Coordenadas: Latitude {{ number_format($result['latitude'], 4) }}, Longitude {{ number_format($result['longitude'], 4) }}">
+                                            {{ number_format($result['latitude'], 4) }},
+                                            {{ number_format($result['longitude'], 4) }}
                                         </span>
                                     @endif
                                 </div>
                             </div>
-                            
-                            <div class="flex-shrink-0 self-center ml-2">
-                                @svg('heroicon-o-arrow-right', 'w-5 h-5 text-gray-400 group-hover:text-purple-600 transition-colors', ['aria-hidden' => 'true'])
+
+                            <div
+                                class="flex-shrink-0 self-start ml-auto group-hover:translate-x-1 transition-transform duration-200">
+                                @svg('heroicon-o-arrow-right', 'w-5 h-5 text-gray-400', ['aria-hidden' => 'true'])
                             </div>
                         </div>
                     </article>
