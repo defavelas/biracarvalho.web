@@ -65,11 +65,21 @@ class SearchSidebar extends Component
 
     public function focusLocation($locationId): void
     {
-        // Set selected location for highlighting
-        $this->selectedLocationId = $locationId;
+        // Convert to string to ensure consistency
+        $this->selectedLocationId = (string) $locationId;
         
         // Dispatch event to focus on the location on the map
-        $this->dispatch('focus-location', locationId: $locationId);
+        $this->dispatch('focus-location', locationId: (string) $locationId);
+        
+        // Also dispatch a browser event for direct JavaScript handling with card closing
+        $this->js("
+            if (window.mapComponentInstance) {
+                // Close all existing cards first
+                window.mapComponentInstance.closeMapCard();
+                // Then focus on the new location
+                window.mapComponentInstance.focusLocation('$locationId');
+            }
+        ");
     }
 
     private function loadResults(): void

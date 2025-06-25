@@ -72,12 +72,13 @@
             <div class="space-y-3">
                 @forelse($results as $result)
                     <article
-                        class="bg-black/25 border-2 {{ $selectedLocationId == $result['id'] ? 'border-primary shadow-md' : 'border-black/30' }} rounded-lg p-4 hover:shadow-md hover:border-primary cursor-pointer transition-all duration-200 group"
+                        class="bg-black/25 border-2 {{ $selectedLocationId == $result['id'] ? 'border-primary shadow-md bg-black/35' : 'border-black/30' }} rounded-lg p-4 hover:shadow-md hover:border-primary cursor-pointer transition-all duration-200 group"
                         data-location-id="{{ $result['id'] }}" role="button" tabindex="0"
                         aria-label="Ver {{ $result['name'] }} no mapa - {{ $result['accessibility_level'] === 'acessivel' ? 'Acessível' : '' }}{{ $result['accessibility_level'] === 'parcial_acessivel' ? 'Parcialmente Acessível' : '' }}{{ $result['accessibility_level'] === 'nao_acessivel' ? 'Não Acessível' : '' }}"
                         wire:click="focusLocation('{{ $result['id'] }}')"
                         wire:keydown.enter="focusLocation('{{ $result['id'] }}')"
-                        wire:keydown.space="focusLocation('{{ $result['id'] }}')">
+                        wire:keydown.space="focusLocation('{{ $result['id'] }}')"
+                        wire:loading.class="opacity-75 pointer-events-none">
                         <div class="flex items-start justify-between space-x-2">
                             <div class="flex-1 space-y-3">
                                 <div class="flex items-start space-x-2">
@@ -95,7 +96,7 @@
                                 </div>
 
                                 @if (isset($result['images']) && count($result['images']) > 0)
-                                    <div class="flex space-x-1" aria-label="Imagens do local">
+                                    <div class="flex space-x-2" aria-label="Imagens do local">
                                         @php
                                             $images = $result['images'];
                                             $totalImages = count($images);
@@ -123,8 +124,7 @@
                                         @endif
                                     </div>
                                 @else
-                                    {{-- Placeholder when no images --}}
-                                    <div class="flex space-x-1">
+                                    <div class="flex space-x-2">
                                         @for ($i = 0; $i < 3; $i++)
                                             <div
                                                 class="w-12 h-12 rounded-md bg-black/25 flex items-center justify-center flex-shrink-0">

@@ -13,9 +13,8 @@ class MapComponent {
         this.currentCloseButton = null;
         this.selectedLocationId = null;
         
-        // Default options for Maré location
         this.options = {
-            center: [-22.8666, -43.2338], // Maré coordinates
+            center: [-22.8666, -43.2338],
             zoom: 14,
             maxZoom: 18,
             minZoom: 10,
@@ -32,38 +31,30 @@ class MapComponent {
             return;
         }
         
-        // Initialize map
         this.map = L.map(this.containerId, {
             center: this.options.center,
             zoom: this.options.zoom,
             maxZoom: this.options.maxZoom,
             minZoom: this.options.minZoom,
-            zoomControl: false, // Disable default zoom control
+            zoomControl: false,
             attributionControl: true
         });
         
-        // Add zoom control to bottom right
         L.control.zoom({
             position: 'bottomright'
         }).addTo(this.map);
         
-        // Add OpenStreetMap base tiles
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             maxZoom: 18
         }).addTo(this.map);
         
-        // Create marker layer group
         this.markerLayer = L.layerGroup().addTo(this.map);
         
-        // Setup event listeners
         this.setupEventListeners();
-        
-        console.log('Map initialized successfully');
     }
     
     setupEventListeners() {
-        // Listen for Livewire events
         document.addEventListener('livewire:init', () => {
             Livewire.on('results-updated', (event) => {
                 this.updateMarkers(event.results);
@@ -74,16 +65,12 @@ class MapComponent {
             });
         });
         
-        // Map events
         this.map.on('zoomend', () => {
-            console.log('Zoom level:', this.map.getZoom());
         });
         
         this.map.on('moveend', () => {
-            console.log('Map center:', this.map.getCenter());
         });
 
-        // Close map card when clicking on map
         this.map.on('click', (e) => {
             if (!e.originalEvent.defaultPrevented) {
                 this.closeMapCard();
@@ -92,7 +79,6 @@ class MapComponent {
     }
     
     updateMarkers(results) {
-        // Clear existing markers
         this.markerLayer.clearLayers();
         this.markers.clear();
         
@@ -101,12 +87,10 @@ class MapComponent {
             return;
         }
         
-        // Add new markers
         results.forEach(result => {
             this.addMarker(result);
         });
         
-        // Fit map to show all markers if there are any
         if (results.length > 0) {
             const group = new L.featureGroup(Array.from(this.markers.values()));
             this.map.fitBounds(group.getBounds().pad(0.1));
@@ -116,20 +100,17 @@ class MapComponent {
     addMarker(location) {
         const { id, name, address, accessibility_level, latitude, longitude } = location;
         
-        // Create custom icon based on accessibility level
-        const icon = this.createAccessibilityIcon(accessibility_level, id === this.selectedLocationId);
+        const locationId = String(id);
         
-        // Create marker without popup
+        const icon = this.createAccessibilityIcon(accessibility_level, locationId === this.selectedLocationId);
+        
         const marker = L.marker([latitude, longitude], { icon })
             .addTo(this.markerLayer);
         
-        // Store location data in marker for easy access
         marker.locationData = location;
         
-        // Store marker reference
-        this.markers.set(id, marker);
+        this.markers.set(locationId, marker);
         
-        // Add click event
         marker.on('click', (e) => {
             e.originalEvent.preventDefault();
             this.onMarkerClick(location);
@@ -139,17 +120,17 @@ class MapComponent {
     }
     
     createAccessibilityIcon(accessibilityLevel, isSelected = false) {
-        let color = '#666666'; // default color
+        let color = '#666666';
         
         switch (accessibilityLevel) {
             case 'acessivel':
-                color = '#10B981'; // green
+                color = '#10B981';
                 break;
             case 'parcial_acessivel':
-                color = '#F59E0B'; // yellow
+                color = '#F59E0B';
                 break;
             case 'nao_acessivel':
-                color = '#EF4444'; // red
+                color = '#EF4444';
                 break;
         }
         
@@ -174,65 +155,69 @@ class MapComponent {
     }
     
     onMarkerClick(location) {
-        console.log('Marker clicked:', location);
-        this.selectedLocationId = location.id;
-        this.showMapCard(location);
+        this.closeMapCard();
+        
+        this.selectedLocationId = String(location.id);
         this.updateMarkerStyles();
         
-        // Dispatch custom event that can be listened to by other components
-        document.dispatchEvent(new CustomEvent('marker-clicked', {
-            detail: location
-        }));
+        const targetZoom = this.markers.size === 1 ? 18 : Math.max(this.map.getZoom(), 16);
+        this.map.setView([location.latitude, location.longitude], targetZoom);
+        
+        setTimeout(() => {
+            this.showMapCard(location);
+        }, 100);
     }
     
     showMapCard(location) {
-        // Remove existing card if any
         this.closeMapCard();
         
-        // Create new map card
         const mapContainer = document.getElementById(this.containerId);
+        if (!mapContainer) {
+            console.error('Map container not found:', this.containerId);
+            return;
+        }
+        
         const cardHtml = this.createMapCardHTML(location);
         const closeButtonHtml = this.createCloseButtonHTML();
         
-        // Insert the card and close button
         mapContainer.insertAdjacentHTML('afterend', cardHtml);
         mapContainer.insertAdjacentHTML('afterend', closeButtonHtml);
         
         this.currentMapCard = document.getElementById('map-card-container');
         this.currentCloseButton = document.getElementById('map-card-close-button');
         
-        // Position card near marker or center screen
         if (this.currentMapCard) {
             this.positionMapCard(location);
         } else {
             console.error('Map card container not found after insertion');
         }
         
-        // Add Alpine.js reactivity if not already present
         if (typeof Alpine !== 'undefined' && this.currentMapCard) {
             Alpine.initTree(this.currentMapCard);
         }
     }
     
         positionMapCard(location) {
-        if (!this.currentMapCard) return;
+        if (!this.currentMapCard) {
+            console.error('No map card to position');
+            return;
+        }
         
         try {
-            // Get marker position on screen
-            const marker = this.markers.get(location.id);
+            const locationKey = String(location.id);
+            const marker = this.markers.get(locationKey);
+            
             if (marker) {
                 const markerLatLng = marker.getLatLng();
                 const markerPixel = this.map.latLngToContainerPoint(markerLatLng);
                 
-                // Get map container dimensions
                 const mapRect = this.map.getContainer().getBoundingClientRect();
-                const cardWidth = 400; // Larger card width
-                const cardHeight = 300; // Estimated card height
+                const cardWidth = 400;
+                const cardHeight = 300;
                 
                 let left = markerPixel.x;
-                let top = markerPixel.y - cardHeight - 20; // Position above marker
+                let top = markerPixel.y - cardHeight - 20;
                 
-                // Adjust if card would go off screen
                 if (left + cardWidth > mapRect.width) {
                     left = mapRect.width - cardWidth - 20;
                 }
@@ -240,38 +225,44 @@ class MapComponent {
                     left = 20;
                 }
                 if (top < 20) {
-                    top = markerPixel.y + 40; // Position below marker if no space above
+                    top = markerPixel.y + 40;
                 }
                 if (top + cardHeight > mapRect.height) {
                     top = mapRect.height - cardHeight - 20;
                 }
                 
-                // Apply positioning to card
                 this.currentMapCard.style.left = `${left}px`;
                 this.currentMapCard.style.top = `${top}px`;
                 this.currentMapCard.style.transform = 'none';
+                this.currentMapCard.style.display = 'block';
                 
-                // Position close button relative to card (top-right corner)
                 if (this.currentCloseButton) {
-                    this.currentCloseButton.style.left = `${left + cardWidth - 10}px`; // 10px offset from right edge
-                    this.currentCloseButton.style.top = `${top - 10}px`; // 10px above card
+                    this.currentCloseButton.style.left = `${left + cardWidth - 10}px`;
+                    this.currentCloseButton.style.top = `${top - 10}px`;
+                    this.currentCloseButton.style.display = 'block';
                 }
+            } else {
+                this.fallbackCenterPosition();
             }
         } catch (error) {
-            // Fallback to center positioning
-            console.warn('Could not position card near marker, using center positioning:', error);
-            const mapRect = this.map.getContainer().getBoundingClientRect();
-            const cardLeft = mapRect.width / 2 - 200; // 200 is half of card width
-            const cardTop = mapRect.height / 2 - 150; // 150 is estimated half of card height
-            
-            this.currentMapCard.style.left = `${cardLeft}px`;
-            this.currentMapCard.style.top = `${cardTop}px`;
-            
-            // Position close button for center positioning
-            if (this.currentCloseButton) {
-                this.currentCloseButton.style.left = `${cardLeft + 390}px`; // Near right edge of card
-                this.currentCloseButton.style.top = `${cardTop - 10}px`; // Above card
-            }
+            console.error('Error positioning card:', error);
+            this.fallbackCenterPosition();
+        }
+    }
+    
+    fallbackCenterPosition() {
+        const mapRect = this.map.getContainer().getBoundingClientRect();
+        const cardLeft = mapRect.width / 2 - 200;
+        const cardTop = mapRect.height / 2 - 150;
+        
+        this.currentMapCard.style.left = `${cardLeft}px`;
+        this.currentMapCard.style.top = `${cardTop}px`;
+        this.currentMapCard.style.display = 'block';
+        
+        if (this.currentCloseButton) {
+            this.currentCloseButton.style.left = `${cardLeft + 390}px`;
+            this.currentCloseButton.style.top = `${cardTop - 10}px`;
+            this.currentCloseButton.style.display = 'block';
         }
     }
     
@@ -294,9 +285,9 @@ class MapComponent {
         let imagesHtml = '';
         if (hasImages) {
             const maxImages = Math.min(images.length, 5);
-            imagesHtml = `
-                <div class="mb-4 relative" x-data="{ currentSlide: 0, totalSlides: ${maxImages} }">
-                    <div class="relative h-32 bg-black/25 rounded-lg overflow-hidden group">
+                         imagesHtml = `
+                 <div class="mb-4 relative" x-data="{ currentSlide: 0, totalSlides: ${maxImages} }">
+                     <div class="relative h-48 bg-black/25 rounded-lg overflow-hidden group">
                         ${images.slice(0, maxImages).map((image, index) => `
                             <div 
                                 class="absolute inset-0 transition-opacity duration-300"
@@ -345,9 +336,9 @@ class MapComponent {
                     </div>
                 </div>
             `;
-        } else {
-            imagesHtml = `
-                <div class="mb-4 h-32 bg-black/25 rounded-lg flex items-center justify-center">
+                 } else {
+             imagesHtml = `
+                 <div class="mb-4 h-48 bg-black/25 rounded-lg flex items-center justify-center">
                     <svg class="w-8 h-8 text-white/50 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
@@ -358,7 +349,6 @@ class MapComponent {
         
         return `
             <div id="map-card-container">
-                <!-- Card Content -->
                                 <div 
                     id="map-card" 
                     class="w-96 max-w-[calc(100vw-2rem)] sm:max-w-96 bg-secondary border-4 border-black/15 rounded-lg shadow-xl"
@@ -366,7 +356,7 @@ class MapComponent {
                     aria-labelledby="map-card-title"
                     aria-describedby="map-card-description"
                 >
-                    <div class="p-4">
+                    <div class="p-2">
                     ${imagesHtml}
 
                     <div class="space-y-3">
@@ -410,7 +400,7 @@ class MapComponent {
                             <button 
                                 type="button"
                                 onclick="centerMapOnLocation(${location.latitude}, ${location.longitude})"
-                                class="flex-1 bg-primary/20 hover:bg-primary/30 text-primary font-medium py-2 px-3 rounded-md transition-colors duration-200 text-sm flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                class="flex-1 bg-primary/20 hover:bg-primary/30 text-primary font-medium py-2 px-3 rounded-md transition-colors duration-200 text-sm flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
@@ -420,7 +410,7 @@ class MapComponent {
                             <button 
                                 type="button"
                                 onclick="highlightLocationInSidebar('${location.id}')"
-                                class="flex-1 bg-primary/20 hover:bg-primary/30 text-primary font-medium py-2 px-3 rounded-md transition-colors duration-200 text-sm flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                class="flex-1 bg-primary/20 hover:bg-primary/30 text-primary font-medium py-2 px-3 rounded-md transition-colors duration-200 text-sm flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
@@ -441,11 +431,46 @@ class MapComponent {
                 id="map-card-close-button"
                 type="button" 
                 onclick="closeMapCard()"
-                class="absolute z-[1003] w-11 h-11 rounded-full bg-secondary shadow-lg border-0 cursor-pointer flex items-center justify-center transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5"
+                style="
+                    position: absolute;
+                    z-index: 1003;
+                    width: 44px;
+                    height: 44px;
+                    border-radius: 50%;
+                    background-color: #653089;
+                    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+                    cursor: pointer;
+                    transition: all 300ms ease-in-out;
+                    border: none;
+                    padding: 0;
+                    margin: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center;
+                "
+                onmouseover="this.style.boxShadow='0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'; this.style.transform='translateY(-2px)';"
+                onmouseout="this.style.boxShadow='0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)'; this.style.transform='translateY(0)';"
                 aria-label="Fechar detalhes do local"
             >
-                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                <svg 
+                    width="20" 
+                    height="20" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="#CED842" 
+                    style="
+                        stroke-width: 2;
+                        stroke-linecap: round;
+                        stroke-linejoin: round;
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                    "
+                >
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
             </button>
         `;
@@ -465,7 +490,6 @@ class MapComponent {
     }
     
     updateMarkerStyles() {
-        // Update all marker styles to reflect selection state
         this.markers.forEach((marker, locationId) => {
             const location = this.getLocationById(locationId);
             if (location) {
@@ -481,17 +505,28 @@ class MapComponent {
     }
     
     focusLocation(locationId) {
-        const marker = this.markers.get(locationId);
-        if (marker) {
+        this.closeMapCard();
+        
+        const locationKey = String(locationId);
+        const marker = this.markers.get(locationKey);
+        
+        if (marker && marker.locationData) {
             const location = marker.locationData;
-            this.selectedLocationId = locationId;
-            this.showMapCard(location);
+            
+            this.selectedLocationId = locationKey;
             this.updateMarkerStyles();
-            this.map.setView(marker.getLatLng(), Math.max(this.map.getZoom(), 16));
+            
+            const targetZoom = this.markers.size === 1 ? 18 : Math.max(this.map.getZoom(), 16);
+            this.map.setView(marker.getLatLng(), targetZoom);
+            
+            setTimeout(() => {
+                this.showMapCard(location);
+            }, 100);
+        } else {
+            console.warn('Marker not found for location ID:', locationId, 'Available markers:', Array.from(this.markers.keys()));
         }
     }
     
-    // Public methods
     setView(lat, lng, zoom = null) {
         this.map.setView([lat, lng], zoom || this.map.getZoom());
     }
@@ -508,7 +543,6 @@ class MapComponent {
     }
 }
 
-// Global functions for card interactions
 window.closeMapCard = function() {
     const mapComponent = window.mapComponentInstance;
     if (mapComponent) {
@@ -524,18 +558,17 @@ window.centerMapOnLocation = function(lat, lng) {
 };
 
 window.highlightLocationInSidebar = function(locationId) {
-    // Dispatch event to highlight the location in sidebar
     document.dispatchEvent(new CustomEvent('highlight-sidebar-location', {
         detail: { locationId }
     }));
 };
 
-// Export for use in other modules
 window.MapComponent = MapComponent;
 
-// Global initialization function
 window.initializeMap = function(containerId, options = {}) {
     const instance = new MapComponent(containerId, options);
-    window.mapComponentInstance = instance; // Store global reference
+    
+    window.mapComponentInstance = instance;
+    
     return instance;
 }; 
