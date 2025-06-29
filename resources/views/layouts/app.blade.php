@@ -32,7 +32,7 @@
             integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
             crossorigin=""/>
 
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @vite(['resources/css/app.css', 'resources/css/mobile.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans bg-gray-50">
         {{ $slot }}

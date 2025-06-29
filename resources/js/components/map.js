@@ -318,8 +318,8 @@ class MapComponent {
         if (hasImages) {
             const maxImages = Math.min(images.length, 5);
             imagesHtml = `
-                <div class="mb-4 relative" x-data="{ currentSlide: 0, totalSlides: ${maxImages} }">
-                    <div class="relative h-48 bg-black/25 rounded-lg overflow-hidden group">
+                <div class="mb-3 md:mb-4 relative" x-data="{ currentSlide: 0, totalSlides: ${maxImages} }">
+                    <div class="relative h-40 md:h-48 bg-black/25 rounded-lg overflow-hidden group">
                         ${images.slice(0, maxImages).map((image, index) => `
                             <div 
                                 class="absolute inset-0 transition-opacity duration-300"
@@ -339,18 +339,20 @@ class MapComponent {
                             <button 
                                 type="button"
                                 @click="currentSlide = currentSlide === 0 ? totalSlides - 1 : currentSlide - 1"
-                                class="absolute left-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                class="absolute left-2 top-1/2 transform -translate-y-1/2 w-10 h-10 md:w-8 md:h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 md:opacity-100 transition-opacity duration-200 mobile-slideshow-nav"
+                                aria-label="Imagem anterior"
                             >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                                 </svg>
                             </button>
                             <button 
                                 type="button"
                                 @click="currentSlide = currentSlide === totalSlides - 1 ? 0 : currentSlide + 1"
-                                class="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                class="absolute right-2 top-1/2 transform -translate-y-1/2 w-10 h-10 md:w-8 md:h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 md:opacity-100 transition-opacity duration-200 mobile-slideshow-nav"
+                                aria-label="Próxima imagem"
                             >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                 </svg>
                             </button>
@@ -359,8 +361,9 @@ class MapComponent {
                                     <button 
                                         type="button"
                                         @click="currentSlide = ${i}"
-                                        class="w-2 h-2 rounded-full transition-all duration-200"
+                                        class="w-3 h-3 md:w-2 md:h-2 rounded-full transition-all duration-200"
                                         :class="currentSlide === ${i} ? 'bg-primary' : 'bg-white/50 hover:bg-white/75'"
+                                        aria-label="Ir para imagem ${i + 1}"
                                     ></button>
                                 `).join('')}
                             </div>
@@ -370,7 +373,7 @@ class MapComponent {
             `;
         } else {
             imagesHtml = `
-                <div class="mb-4 h-48 bg-black/25 rounded-lg flex items-center justify-center">
+                <div class="mb-3 md:mb-4 h-40 md:h-48 bg-black/25 rounded-lg flex items-center justify-center">
                     <svg class="w-8 h-8 text-primary/50 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
@@ -383,46 +386,46 @@ class MapComponent {
             <div id="map-card-container">
                                 <div 
                     id="map-card" 
-                    class="w-96 max-w-[calc(100vw-2rem)] sm:max-w-96 bg-secondary border-4 border-black/15 rounded-lg shadow-xl"
+                    class="w-full max-w-[calc(100vw-2rem)] md:w-96 md:max-w-96 bg-secondary border-2 md:border-4 border-black/15 rounded-lg shadow-xl"
                     role="dialog"
                     aria-labelledby="map-card-title"
                     aria-describedby="map-card-description"
                 >
-                    <div class="p-2">
+                    <div class="p-3 md:p-2 mobile-compact-spacing">
                     ${imagesHtml}
 
-                    <div class="space-y-2">
+                    <div class="space-y-3 md:space-y-2">
                         <div class="flex items-start justify-between space-x-3">
                             <div class="flex-1">
-                                <h3 id="map-card-title" class="text-lg font-semibold text-primary leading-tight">
+                                <h3 id="map-card-title" class="text-xl md:text-lg font-semibold text-primary leading-tight">
                                     ${location.name}
                                 </h3>
                             </div>
-                            <span class="inline-flex items-center px-2.5 py-1 font-semibold rounded-full text-xs text-black/75 flex-shrink-0 ${accessibilityClass[location.accessibility_level]}">
+                            <span class="inline-flex items-center px-3 py-1.5 md:px-2.5 md:py-1 font-semibold rounded-full text-sm md:text-xs text-black/75 flex-shrink-0 ${accessibilityClass[location.accessibility_level]}">
                                 ${accessibilityText[location.accessibility_level]}
                             </span>
                         </div>
 
                         <div class="flex items-start space-x-2">
-                            <div class="w-5 h-5 text-primary flex-shrink-0 mt-0.5">
+                            <div class="w-6 h-6 md:w-5 md:h-5 text-primary flex-shrink-0 mt-0.5">
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 </svg>
                             </div>
-                            <p id="map-card-description" class="text-sm text-primary/80 leading-relaxed">
+                            <p id="map-card-description" class="text-base md:text-sm text-primary/80 leading-relaxed">
                                 ${location.address}
                             </p>
                         </div>
 
                         ${location.latitude && location.longitude ? `
                             <div class="flex items-center space-x-2">
-                                <div class="w-5 h-5 text-primary flex-shrink-0">
+                                <div class="w-6 h-6 md:w-5 md:h-5 text-primary flex-shrink-0">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
                                 </div>
-                                <span class="text-xs text-primary/60 font-mono">
+                                <span class="text-sm md:text-xs text-primary/60 font-mono">
                                     ${parseFloat(location.latitude).toFixed(6)}, ${parseFloat(location.longitude).toFixed(6)}
                                 </span>
                             </div>
@@ -430,10 +433,10 @@ class MapComponent {
 
                         ${description.length > 0 ? `
                             <div class="border-t border-white/10 pt-3">
-                                <h4 class="text-sm font-semibold text-primary mb-2">Sobre este local</h4>
+                                <h4 class="text-base md:text-sm font-semibold text-primary mb-2">Sobre este local</h4>
                                 <div class="max-h-80 overflow-y-auto soft-scrollbar space-y-3">
                                     ${description.map(paragraph => `
-                                        <p class="text-sm text-primary/90 leading-relaxed">${paragraph}</p>
+                                        <p class="text-base md:text-sm text-primary/90 leading-relaxed">${paragraph}</p>
                                     `).join('')}
                                 </div>
                             </div>
@@ -447,14 +450,14 @@ class MapComponent {
 
     createCloseButtonHTML(location) {
         return `
-            <div id="map-card-buttons" style="position: absolute; z-index: 1003; display: flex; flex-direction: column; gap: 8px;">
+            <div id="map-card-buttons" style="position: absolute; z-index: 1003; display: flex; flex-direction: column; gap: 12px;">
                 <button 
                     id="map-card-close-button"
                     type="button" 
                     onclick="closeMapCard()"
                     style="
-                        width: 44px;
-                        height: 44px;
+                        width: 48px;
+                        height: 48px;
                         border-radius: 50%;
                         background-color: #CED842;
                         box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
@@ -472,8 +475,8 @@ class MapComponent {
                     aria-label="Fechar detalhes do local"
                 >
                     <svg 
-                        width="20" 
-                        height="20" 
+                        width="22" 
+                        height="22" 
                         viewBox="0 0 24 24" 
                         fill="none" 
                         stroke="#653089" 
@@ -492,8 +495,8 @@ class MapComponent {
                     type="button" 
                     onclick="centerMapOnLocation(${location.latitude}, ${location.longitude})"
                     style="
-                        width: 44px;
-                        height: 44px;
+                        width: 48px;
+                        height: 48px;
                         border-radius: 50%;
                         background-color: #CED842;
                         box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
@@ -511,8 +514,8 @@ class MapComponent {
                     aria-label="Centralizar no mapa"
                 >
                     <svg 
-                        width="20" 
-                        height="20" 
+                        width="22" 
+                        height="22" 
                         viewBox="0 0 24 24" 
                         fill="none" 
                         stroke="#653089" 
@@ -531,8 +534,8 @@ class MapComponent {
                     type="button" 
                     onclick="highlightLocationInSidebar('${location.id}')"
                     style="
-                        width: 44px;
-                        height: 44px;
+                        width: 48px;
+                        height: 48px;
                         border-radius: 50%;
                         background-color: #CED842;
                         box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
@@ -550,8 +553,8 @@ class MapComponent {
                     aria-label="Ver na lista"
                 >
                     <svg 
-                        width="20" 
-                        height="20" 
+                        width="22" 
+                        height="22" 
                         viewBox="0 0 24 24" 
                         fill="none" 
                         stroke="#653089" 
