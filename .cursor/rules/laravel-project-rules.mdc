@@ -1,0 +1,99 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Rules for the "Bira Carvalho Program - Territory, Accessibility, and Technology in Maré" web application, focused on collaboratively mapping urban accessibility conditions for people with disabilities.
+globs:
+  - "**/*.php"
+  - "**/*.blade.php"
+  - "**/*.js"
+  - "config/*.php"
+alwaysApply: true
+---
+
+# Project Overview
+The "Bira Carvalho Program" is a responsive Single Page Application (SPA) designed to engage residents of Favela da Maré with mobility impairments in a collaborative digital process of mapping accessibility and urban mobility conditions. It aims to use web technologies to create visibility and support the development of more inclusive public policies for people with disabilities in favelas and urban peripheries.
+
+The core of the project is a user-friendly, map-based web interface for data visualization, supported by a robust backend for secure, efficient, and asynchronous data processing, including a flexible CSV import system. A foundational principle is ensuring the highest standards of web accessibility, adhering to WCAG and WAI-ARIA guidelines for a fully inclusive user experience.
+
+# Tech Overview
+**Project:** `mare.web` (Web Application for Collaborative Accessibility Mapping)
+**Framework:** Laravel 12.x (Latest, Full-Stack SPA)
+**Language:** PHP 8.4+
+**Frontend Framework:** Livewire 3.6+ & Alpine.js
+**Mapping:** OpenStreetMap + Leaflet.js
+**Styling:** Tailwind CSS v4.x
+**Database:** MySQL 8.0+ (via Eloquent ORM)
+**Development Environment:** Docker via Laravel Sail
+**Primary Language:** pt-BR (Default locale: `pt-BR`)
+**Architecture:** SPA built with Livewire components. Focus on Laravel's best practices: Service classes for business logic, Factories, and Form Requests. Features a flexible CSV data import architecture with column mapping, using asynchronous Jobs for processing.
+
+# Completion Rules
+Suggestions provided by Cursor during code completion:
+- Prioritize **Eloquent ORM** for all database interactions (e.g., `Location::create($data)`, `ImportJob::find($id)`). Avoid raw SQL queries.
+- Suggest **Laravel helpers** relevant to web applications (e.g., `route()`, `config()`, `session()`, `__('messages.welcome')`).
+- Autocomplete **Livewire component methods and properties** (e.g., `$this->mount()`, `$this->render()`, `$this->dispatch()`, `#[Rule(...)]`).
+- Suggest and enforce strict validation using dedicated **FormRequest classes** (e.g., `public function import(ImportCsvRequest $request)`). Suggest relevant validation rules (`required`, `file`, `mimes:csv,txt`, `uuid`, `exists`, `decimal:2,8`).
+- Autocomplete Laravel **Blade directives** and Livewire Blade directives (e.g., `@if`, `@foreach`, `@livewire`, `@csrf`, `wire:model`, `wire:key`).
+- Suggest **job queues** for asynchronous tasks (e.g., processing CSV uploads: `dispatch(new ProcessCsvImport($importJob));`).
+- Autocomplete **database migrations** for MySQL 8+, prioritizing **UUIDs for primary/foreign keys** and **indexes on all searchable columns**. For example, for a locations table:
+  `$table->uuid('id')->primary();`
+  `$table->foreignUuid('category_id')->constrained('categories');`
+  `$table->string('name')->index();`
+  `$table->string('accessibility_level')->default('unknown')->index();`
+  `$table->decimal('latitude', 10, 8);`
+  `$table->decimal('longitude', 11, 8);`
+  `$table->spatialIndex(['latitude', 'longitude']);`
+- Autocomplete **Leaflet.js and OpenStreetMap** integration patterns, (e.g., `L.map('map')`, `L.tileLayer(...)`, `L.marker(...)`, `L.geoJSON(...)`).
+- When generating HTML, prioritize **semantic HTML5 elements** (`<main>`, `<section>`, `<form>`, `<button>`, `<input>`, `<label>`).
+- Autocomplete **WAI-ARIA attributes** for interactive elements, especially on the map and in menus (e.g., `role`, `aria-label`, `aria-describedby`, `aria-controls`).
+- Always suggest associating `<label>` tags with their `<input>` fields using `for` and `id` attributes.
+
+# Agent Rules
+Actions Cursor's AI Agent can perform or suggest:
+- When editing **Eloquent models**, suggest adding relevant relationships (`hasMany`, `belongsTo`, `Point`, `Polygon`).
+- Generate **migration files** using correct Laravel 12 syntax, ensuring all foreign keys are UUIDs and that searchable text/relation columns have indexes (`->index()`). Suggest spatial indexes for coordinate pairs.
+- Suggest **caching strategies** (`Cache::remember`) for frequently accessed data, like location categories or GeoJSON layers.
+- Automatically **import required classes** and Facades (`Log`, `Cache`, `Http`, `Schema`, `Storage`, project Models, Services, Jobs, and Form Requests).
+- Scaffold **Livewire components** (`.php` and `.blade.php` files) for key UI sections like the map view, search sidebar, or upload modal, ensuring templates use semantic HTML5 and are accessible.
+- Suggest refactoring complex logic into dedicated **Service classes** (`app/Services/`). Specifically, structure the CSV import logic within a `CsvImportService`. This service should be responsible for validating the file, mapping flexible CSV headers to database columns, and dispatching a Job for each row or batch.
+- Suggest creating **custom validation rules** for complex scenarios, like validating specific columns in a CSV file or checking geocoordinate validity.
+- Suggest adding **PestPHP tests** for Livewire components (`Livewire::test(...)`), feature tests for file uploads and API endpoints, and unit tests for Service classes like `CsvImportService`.
+
+# Chat Rules
+Guidelines for how Cursor Chat should respond and provide advice:
+- Provide **Laravel & Livewire-specific advice**: "To handle CSV imports with flexible columns, create a configuration file (e.g., `config/import.php`) where you define the mapping between possible CSV headers like 'nome_do_lugar' or 'place_name' and your database column 'name'. Your `CsvImportService` can then use this configuration to process any valid file."
+- Suggest **performance optimizations**: "When importing large CSVs, dispatch a batch of Jobs to process rows in parallel and use `upsert()` for mass inserts/updates to reduce database queries."
+- Explain **core concepts**: "A Service class in Laravel helps you decouple business logic—like the rules for mapping and validating a CSV import—from your controllers or Livewire components, making your code cleaner and easier to test."
+- Reference **official documentation**: "For details on Laravel's powerful collections for processing the CSV data, see: https://laravel.com/docs/12.x/collections" or "Check the Leaflet.js documentation for performance tips on handling many markers: https://leafletjs.com/reference.html#marker"
+- Emphasize **best practices** for maintainability, security, and especially **web accessibility**.
+- Provide advice on **WAI-ARIA implementation** for custom map controls: "Ensure your filter buttons are actual `<button>` elements with `aria-pressed` state to indicate if they are active."
+- Offer solutions for **keyboard navigability** on the map, such as allowing users to pan and cycle through markers using arrow keys.
+
+# Accessibility & Semantic HTML Rules
+All HTML generated must adhere to the highest standards of web accessibility, following:
+- **WCAG (Web Content Accessibility Guidelines):** Minimum of AA compliance, aiming for AAA. This covers perceivable, operable, understandable, and robust content.
+- **WAI-ARIA (Web Accessibility Initiative):** Utilize ARIA roles, states, and properties to enhance semantic meaning, especially for the dynamic map interface, search filters, and modal dialogs.
+- **Semantic HTML5:** Prioritize appropriate HTML5 elements (`<nav>`, `<main>`, `<section>`, `<button>`) over generic `<div>`s to convey structure.
+
+**Key principles for HTML/Blade generation:**
+- **Meaningful Structure:** Use `<header>`, `<nav>`, `<main>`, `<footer>` correctly. Headings (`<h1>`-`<h6>`) must be in logical order.
+- **Form Accessibility:** Every `input` must have a linked `<label>`. Group related controls with `<fieldset>` and `<legend>`. Provide clear, programmatically associated error messages using `aria-describedby`.
+- **Interactive Elements:** Use `<button>` for actions and `<a>` for navigation. All interactive elements, including custom map controls, must be keyboard accessible and have a visible focus state. Manage focus logically after dynamic updates.
+- **ARIA & Live Regions:** Use ARIA `role`s for non-semantic elements (`role="dialog"`). Use `aria-live="polite"` for regions with dynamic content that should be announced by screen readers, such as search result summaries or import status updates.
+- **Images and Media:** All `<img>` tags must have a meaningful `alt` attribute. Decorative images get `alt=""`.
+- **Language:** The `<html>` tag must have `lang="pt-BR"`.
+- **Skip Links:** Provide a "skip to main content" link for keyboard users.
+
+# Best Practices (Web Application Focus)
+- [cite_start]**UUIDs for Keys:** **Always** use UUIDs for primary and foreign keys in all database tables. [cite: 64]
+- [cite_start]**Database Efficiency:** Utilize **Eloquent ORM** efficiently with eager loading (`with(...)`) and database indexes (`$table->index(...)`) on all searchable or foreign key columns. [cite: 65] Use **spatial indexes** for geospatial columns to optimize map queries.
+- [cite_start]**Validation:** **Always** utilize **FormRequest classes** for validation and authorization for all user submissions. [cite: 66]
+- [cite_start]**Security:** Protect routes with middleware (`web`, `auth`). [cite: 67] [cite_start]Implement CSRF protection and rate limiting on form submissions and data imports. [cite: 68, 70] [cite_start]Sanitize all incoming data. [cite: 69]
+- [cite_start]**Error Handling:** Implement consistent and accessible error messaging, especially for async job failures. [cite: 71]
+- **Code Structure:** Adhere to the defined architecture. [cite_start]Keep Livewire components focused on UI logic and delegate complex business logic (like CSV parsing and mapping) to Service classes. [cite: 72, 73]
+- [cite_start]**Testing:** Implement comprehensive **PestPHP Feature tests** for file imports and API interactions, and **Unit tests** for Services. [cite: 77]
+- [cite_start]**Localization:** Ensure all user-facing strings use Laravel's localization features (`__('file.key')`) for `pt-BR`. [cite: 79]
+- **Configuration Management:** Centralize settings in `config/*.php` files. For instance, use `config/import.php` to define the mapping between possible CSV column names ('nome_do_lugar', 'endereço', etc.) and their corresponding database columns ('name', 'address').
