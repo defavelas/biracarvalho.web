@@ -34,18 +34,18 @@
                     @endif
                 </div>
 
-                <div class="space-y-2 mb-2">
+                <div class="space-y-2 mb-2" wire:key="filter-toggles">
                     <x-toggle-button wire:model.live="accessibilityFilters.acessivel" :value="$accessibilityFilters['acessivel']"
                         label="Acessível" trackClass="bg-primary border-secondary" thumbClass="bg-green-500"
-                        labelClass="text-secondary" />
+                        labelClass="text-secondary" wire:key="filter-acessivel" />
 
                     <x-toggle-button wire:model.live="accessibilityFilters.parcial_acessivel" :value="$accessibilityFilters['parcial_acessivel']"
                         label="Parcialmente Acessível" trackClass="bg-primary border-secondary"
-                        thumbClass="bg-yellow-500" labelClass="text-secondary" />
+                        thumbClass="bg-yellow-500" labelClass="text-secondary" wire:key="filter-parcial" />
 
                     <x-toggle-button wire:model.live="accessibilityFilters.nao_acessivel" :value="$accessibilityFilters['nao_acessivel']"
                         label="Não Acessível" trackClass="bg-primary border-secondary" thumbClass="bg-accent-orange"
-                        labelClass="text-secondary" />
+                        labelClass="text-secondary" wire:key="filter-nao-acessivel" />
                 </div>
             </fieldset>
 
@@ -57,7 +57,7 @@
         </section>
 
         <main class="flex-1 overflow-y-auto soft-scrollbar p-2">
-            <div class="space-y-2">
+            <div class="space-y-2" wire:key="results-{{ md5(json_encode($accessibilityFilters) . $search) }}">
                 @forelse($results as $result)
                     <article
                         class="bg-black/25 border-2 {{ $selectedLocationId == $result['id'] ? 'border-secondary shadow-md bg-black/35' : 'border-black/30' }} rounded-lg p-2.5 hover:shadow-md hover:border-secondary cursor-pointer transition-all duration-200 group"
