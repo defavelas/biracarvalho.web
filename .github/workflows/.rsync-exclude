@@ -1,0 +1,29 @@
+# Version control
+.git/
+.github/
+.gitignore
+.gitattributes
+
+# Local Environment and config
+.env*
+.env.example
+.editorconfig
+*.md
+
+# Node.js - we only need the build artifacts, not the source modules
+node_modules/
+package.json
+package-lock.json
+vite.config.js
+
+# Testing & Dev tooling
+tests/
+phpunit.xml
+docker-compose.yml
+
+# Cursor
+.cursor/
+.cursorignore
+
+# VSCode
+.vscode/

@@ -1,0 +1,77 @@
+name: Hostinger
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: "Build and Deploy"
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          coverage: none
+
+      - name: Setup environment for build
+        run: cp .env.example .env
+
+      - name: Restore Composer cache
+        id: composer-cache
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer Dependencies
+        run: composer install --prefer-dist --no-progress --no-dev --optimize-autoloader
+
+      - name: Install Node JS
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+
+      - name: Restore NPM cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Build Frontend Assets
+        run: npm install && npm run build
+
+      - name: Publish to Hostinger
+        uses: burnett01/rsync-deployments@7.0.2
+        with:
+          switches: -avzr --delete --exclude-from='.github/workflows/.rsync-exclude'
+          path: ./
+          remote_path: ${{ secrets.SSH_PATH }}
+          remote_host: ${{ secrets.SSH_HOST }}
+          remote_port: ${{ secrets.SSH_PORT }}
+          remote_user: ${{ secrets.SSH_USER }}
+          remote_key: ${{ secrets.SSH_PKEY }}
+
+      - name: Run Final Artisan Commands
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          port: ${{ secrets.SSH_PORT }}
+          key: ${{ secrets.SSH_PKEY }}
+          script: |
+            cd ${{ secrets.SSH_PATH }}
+            php artisan migrate --force --no-interaction
+            php artisan optimize:clear
+            php artisan optimize

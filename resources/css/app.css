@@ -1,7 +1,64 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-[x-cloak] {
-  display: none !important;
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Libre Franklin', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+    
+    --color-primary: #653089;
+    --color-secondary: #CED842;
+    --color-accent-orange: #D55229;
+    --color-accent-pink: #E499AC;
+    --color-accent-dark: #2B433C;
+}
+
+@utility result-highlighted {
+    background-color: #f3f4f6;
+    border-left: 4px solid #CED842;
+}
+
+.soft-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.soft-scrollbar::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+}
+
+.soft-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 3px;
+}
+
+.soft-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.leaflet-layer {
+    filter: grayscale(100%) sepia(100%) hue-rotate(235deg) saturate(1.25) brightness(0.5) contrast(1.25) !important;
+}
+
+.leaflet-container {
+    background-color: #653089 !important;
+}
+
+.leaflet-control-zoom a {
+    background-color: #CED842 !important;
+    color: #653089 !important;
+    border-color: #653089 !important;
+}
+
+.leaflet-control-zoom a:hover {
+    background-color: #653089 !important;
+    color: #CED842 !important;
+}
+
+#map-card-container {
+    position: absolute;
+    z-index: 200;
 }
