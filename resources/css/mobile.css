@@ -1,0 +1,91 @@
+/* Mobile-specific styles for map and touch interactions */
+@media (max-width: 768px) {
+    /* Map card mobile optimizations */
+    #map-card-container {
+        position: fixed !important;
+        bottom: 1rem !important;
+        left: 1rem !important;
+        right: 1rem !important;
+        top: auto !important;
+        transform: none !important;
+        z-index: 1002;
+    }
+
+    #map-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+    }
+
+    /* Map card buttons mobile positioning */
+    #map-card-buttons {
+        position: fixed !important;
+        top: 1rem !important;
+        right: 1rem !important;
+        left: auto !important;
+        z-index: 1003 !important;
+    }
+
+    /* Touch-friendly marker sizes */
+    .custom-marker {
+        transform: scale(1.2) !important;
+    }
+
+    /* Ensure proper touch targets */
+    .leaflet-control-zoom a {
+        min-width: 44px !important;
+        min-height: 44px !important;
+        line-height: 42px !important;
+    }
+
+    /* Mobile-friendly slideshow controls */
+    .mobile-slideshow-nav {
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 18px !important;
+    }
+
+    /* Mobile sidebar adjustments */
+    .mobile-sidebar-fullscreen {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        bottom: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        border: none !important;
+        border-radius: 0 !important;
+        transform: translateX(-100%) !important;
+        transition: transform 0.3s ease-in-out !important;
+    }
+
+    .mobile-sidebar-fullscreen.show {
+        transform: translateX(0) !important;
+    }
+}
+
+/* Landscape mobile devices */
+@media (max-width: 768px) and (orientation: landscape) {
+    #map-card-container {
+        bottom: 0.5rem !important;
+        left: 0.5rem !important;
+        right: 0.5rem !important;
+    }
+
+    #map-card-buttons {
+        top: 0.5rem !important;
+        right: 0.5rem !important;
+    }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+    .mobile-compact-spacing {
+        padding: 0.75rem !important;
+    }
+
+    .mobile-compact-spacing .space-y-2 > * + * {
+        margin-top: 0.5rem !important;
+    }
+} 
