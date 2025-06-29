@@ -56,6 +56,7 @@ class SearchSidebar extends Component
     public function updatedAccessibilityFilters(): void
     {
         $this->loadResults();
+        $this->dispatch('results-updated', results: $this->results);
     }
 
     /**
