@@ -27,3 +27,7 @@ docker-compose.yml
 
 # VSCode
 .vscode/
+
+# Ignore storage folder
+storage/app/private/
+storage/app/public/
