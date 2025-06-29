@@ -307,7 +307,7 @@ class MapComponent {
         const accessibilityClass = {
             'acessivel': 'bg-green-500',
             'parcial_acessivel': 'bg-yellow-500',
-            'nao_acessivel': 'bg-rose-500'
+            'nao_acessivel': 'bg-accent-orange'
         };
 
         const images = location.images || [];

@@ -44,7 +44,7 @@
                         thumbClass="bg-yellow-500" labelClass="text-secondary" />
 
                     <x-toggle-button wire:model.live="accessibilityFilters.nao_acessivel" :value="$accessibilityFilters['nao_acessivel']"
-                        label="Não Acessível" trackClass="bg-primary border-secondary" thumbClass="bg-rose-500"
+                        label="Não Acessível" trackClass="bg-primary border-secondary" thumbClass="bg-accent-orange"
                         labelClass="text-secondary" />
                 </div>
             </fieldset>
@@ -73,7 +73,7 @@
                                     <div class="w-3 h-3 rounded-full mt-1 flex-shrink-0
                                         {{ $result['accessibility_level'] === 'acessivel' ? 'bg-green-500' : '' }}
                                         {{ $result['accessibility_level'] === 'parcial_acessivel' ? 'bg-yellow-500' : '' }}
-                                        {{ $result['accessibility_level'] === 'nao_acessivel' ? 'bg-rose-500' : '' }}"
+                                        {{ $result['accessibility_level'] === 'nao_acessivel' ? 'bg-accent-orange' : '' }}"
                                         aria-hidden="true">
                                     </div>
                                     <div class="flex-1">
@@ -130,7 +130,7 @@
                                         class="inline-flex items-center px-2 leading-5 font-semibold rounded-full text-xs text-black/75
                                         {{ $result['accessibility_level'] === 'acessivel' ? 'bg-green-500' : '' }}
                                         {{ $result['accessibility_level'] === 'parcial_acessivel' ? 'bg-yellow-500' : '' }}
-                                        {{ $result['accessibility_level'] === 'nao_acessivel' ? 'bg-rose-500' : '' }}">
+                                        {{ $result['accessibility_level'] === 'nao_acessivel' ? 'bg-accent-orange' : '' }}">
                                         {{ $result['accessibility_level'] === 'acessivel' ? 'Acessível' : '' }}
                                         {{ $result['accessibility_level'] === 'parcial_acessivel' ? 'Parcialmente Acessível' : '' }}
                                         {{ $result['accessibility_level'] === 'nao_acessivel' ? 'Não Acessível' : '' }}

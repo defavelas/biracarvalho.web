@@ -47,7 +47,7 @@
                 <span class="inline-flex items-center px-2.5 py-1 font-semibold rounded-full text-xs text-black/75 flex-shrink-0
                     {{ $location['accessibility_level'] === 'acessivel' ? 'bg-green-500' : '' }}
                     {{ $location['accessibility_level'] === 'parcial_acessivel' ? 'bg-yellow-500' : '' }}
-                    {{ $location['accessibility_level'] === 'nao_acessivel' ? 'bg-rose-500' : '' }}">
+                                            {{ $location['accessibility_level'] === 'nao_acessivel' ? 'bg-accent-orange' : '' }}">
                     {{ $location['accessibility_level'] === 'acessivel' ? 'Acessível' : '' }}
                     {{ $location['accessibility_level'] === 'parcial_acessivel' ? 'Parcialmente Acessível' : '' }}
                     {{ $location['accessibility_level'] === 'nao_acessivel' ? 'Não Acessível' : '' }}
