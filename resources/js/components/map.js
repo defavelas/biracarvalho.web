@@ -119,37 +119,26 @@ class MapComponent {
     }
 
     createAccessibilityIcon(accessibilityLevel, isSelected = false) {
-        let color = '#666666';
+        let iconUrl = '/assets/images/green-pin.png'; // default
 
         switch (accessibilityLevel) {
             case 'acessivel':
-                color = '#10B981';
+                iconUrl = '/assets/images/green-pin.png';
                 break;
             case 'parcial_acessivel':
-                color = '#F59E0B';
+                iconUrl = '/assets/images/yellow-pin.png';
                 break;
             case 'nao_acessivel':
-                color = '#EF4444';
+                iconUrl = '/assets/images/orange-pin.png';
                 break;
         }
 
-        const size = isSelected ? 28 : 20;
-        const borderWidth = isSelected ? 3 : 2;
-
-        return L.divIcon({
-            className: 'custom-marker',
-            html: `<div style="
-                width: ${size}px;
-                height: ${size}px;
-                border-radius: 50%;
-                background-color: ${color};
-                                    border: ${borderWidth}px solid ${isSelected ? '#653089' : 'white'};
-                box-shadow: 0 2px 8px rgba(0,0,0,${isSelected ? '0.5' : '0.3'});
-                transform: ${isSelected ? 'scale(1.1)' : 'scale(1)'};
-                transition: all 0.2s ease;
-            "></div>`,
-            iconSize: [size, size],
-            iconAnchor: [size / 2, size / 2]
+        return L.icon({
+            iconUrl: iconUrl,
+            iconSize: [34, 46],
+            iconAnchor: [17, 46],
+            popupAnchor: [0, -46],
+            className: isSelected ? 'selected-marker' : 'accessibility-marker'
         });
     }
 
