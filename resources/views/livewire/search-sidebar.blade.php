@@ -1,17 +1,105 @@
-<aside
-    class="absolute 
-           /* Mobile: Full screen overlay */
-           top-0 left-0 bottom-0 right-0 w-full h-full
-           /* Tablet and up: Positioned sidebar */
-           md:top-2 md:left-2 md:bottom-2 md:right-auto md:w-96 md:h-auto
-           bg-primary bg-no-repeat bg-top border-0 md:border-4 border-black/15 z-[100] shadow-xl 
-           transform transition-transform duration-300 ease-in-out 
-           rounded-none md:rounded-xl overflow-hidden 
-           {{ $collapsed ? '-translate-x-full' : 'translate-x-0' }}"
-    aria-label="Painel de pesquisa e filtros" 
-    style="background-image: url('{{ asset('assets/images/search-bg.jpg') }}');" 
-    role="complementary" 
-    aria-hidden="{{ $collapsed ? 'true' : 'false' }}">
+<div>
+    <!-- Mobile: Floating search bar -->
+    <div class="md:hidden">
+        <!-- Mobile floating search container -->
+        <div class="fixed top-4 left-4 right-4 z-[1001] transform transition-all duration-300 ease-in-out translate-y-0 opacity-100"
+             aria-label="Barra de pesquisa móvel" 
+             aria-hidden="false">
+            
+            <!-- Compact search bar -->
+            <div class="bg-primary rounded-lg shadow-xl border-2 border-black/15 overflow-hidden">
+                <div class="p-3 bg-no-repeat bg-top" style="background-image: url('{{ asset('assets/images/search-bg.jpg') }}');">
+                    <!-- Logo and search in one row -->
+                    <div class="flex items-center gap-3 mb-3">
+                        <img src="{{ asset('assets/images/logo.svg') }}" alt="Logo" class="w-12 h-12 flex-shrink-0">
+                        <div class="flex-1 relative">
+                            <label for="mobile-search-input" class="sr-only">Pesquisar locais</label>
+                            <input type="search" id="mobile-search-input" wire:model.live.debounce.300ms="search"
+                                placeholder="Pesquisar locais..."
+                                class="bg-white w-full px-3 py-2 pr-8 text-sm border-2 border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-black/25 transition-all duration-200"
+                                aria-describedby="mobile-search-help">
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                @svg('heroicon-o-magnifying-glass', 'w-4 h-4 text-primary')
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filters and results row -->
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <div class="flex gap-1">
+                                <button type="button" 
+                                        wire:click="$toggle('accessibilityFilters.acessivel')"
+                                        class="w-7 h-7 rounded-full border-2 border-white/50 flex items-center justify-center transition-all duration-200 {{ $accessibilityFilters['acessivel'] ? 'bg-green-500 border-green-500' : 'bg-transparent' }}"
+                                        aria-label="{{ $accessibilityFilters['acessivel'] ? 'Desativar filtro Acessível' : 'Ativar filtro Acessível' }}">
+                                    @if($accessibilityFilters['acessivel'])
+                                        @svg('heroicon-s-check', 'w-3 h-3 text-white')
+                                    @endif
+                                </button>
+                                <button type="button" 
+                                        wire:click="$toggle('accessibilityFilters.parcial_acessivel')"
+                                        class="w-7 h-7 rounded-full border-2 border-white/50 flex items-center justify-center transition-all duration-200 {{ $accessibilityFilters['parcial_acessivel'] ? 'bg-yellow-500 border-yellow-500' : 'bg-transparent' }}"
+                                        aria-label="{{ $accessibilityFilters['parcial_acessivel'] ? 'Desativar filtro Parcialmente Acessível' : 'Ativar filtro Parcialmente Acessível' }}">
+                                    @if($accessibilityFilters['parcial_acessivel'])
+                                        @svg('heroicon-s-check', 'w-3 h-3 text-white')
+                                    @endif
+                                </button>
+                                <button type="button" 
+                                        wire:click="$toggle('accessibilityFilters.nao_acessivel')"
+                                        class="w-7 h-7 rounded-full border-2 border-white/50 flex items-center justify-center transition-all duration-200 {{ $accessibilityFilters['nao_acessivel'] ? 'bg-accent-orange border-accent-orange' : 'bg-transparent' }}"
+                                        aria-label="{{ $accessibilityFilters['nao_acessivel'] ? 'Desativar filtro Não Acessível' : 'Ativar filtro Não Acessível' }}">
+                                    @if($accessibilityFilters['nao_acessivel'])
+                                        @svg('heroicon-s-check', 'w-3 h-3 text-white')
+                                    @endif
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            @if (array_sum($accessibilityFilters) > 0 || !empty($search))
+                                <button wire:click="clearFilters"
+                                    class="flex items-center justify-center w-6 h-6 text-white/70 hover:text-white transition-colors duration-200"
+                                    aria-label="Limpar todos os filtros">
+                                    @svg('heroicon-o-trash', 'w-4 h-4')
+                                </button>
+                            @endif
+                            
+                            <span class="text-xs font-mono text-white/80 bg-black/20 px-2 py-1 rounded">{{ $totalResults }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Filter legends -->
+                    <div class="flex items-center justify-center gap-4 text-xs text-white/70">
+                        <div class="flex items-center gap-1">
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <span>Acessível</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                            <span>Parcial</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <div class="w-3 h-3 bg-accent-orange rounded-full"></div>
+                            <span>Não Acessível</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desktop: Full sidebar -->
+    <aside
+        class="hidden md:block absolute 
+               md:top-2 md:left-2 md:bottom-2 md:right-auto md:w-96 md:h-auto
+               bg-primary bg-no-repeat bg-top border-0 md:border-4 border-black/15 z-[100] shadow-xl 
+               transform transition-transform duration-300 ease-in-out 
+               md:rounded-xl overflow-hidden 
+               {{ $collapsed ? '-translate-x-full' : 'translate-x-0' }}"
+        aria-label="Painel de pesquisa e filtros" 
+        style="background-image: url('{{ asset('assets/images/search-bg.jpg') }}');" 
+        role="complementary" 
+        aria-hidden="{{ $collapsed ? 'true' : 'false' }}">
     
     <div class="flex flex-col h-full">
         <!-- Mobile-optimized header -->
@@ -179,3 +267,4 @@
         </main>
     </div>
 </aside>
+</div>
