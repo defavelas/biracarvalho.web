@@ -29,23 +29,23 @@
                         <div class="flex flex-wrap gap-1">
                             <button type="button" 
                                     wire:click="$toggle('accessibilityFilters.acessivel')"
-                                    class="flex items-center gap-1 px-2 py-1 rounded-full border border-white/30 text-xs font-medium transition-all duration-200 {{ $accessibilityFilters['acessivel'] ? 'bg-green-500 border-green-500 text-white' : 'bg-black/20 text-white/80' }}"
+                                    class="flex items-center gap-1 px-2 py-1 rounded-full border border-white/30 text-xs transition-all duration-200 {{ $accessibilityFilters['acessivel'] ? 'bg-green-500 border-green-500 text-black font-medium' : 'bg-black/20 text-white/80 font-medium' }}"
                                     aria-label="{{ $accessibilityFilters['acessivel'] ? 'Desativar filtro Acessível' : 'Ativar filtro Acessível' }}">
-                                <div class="w-2 h-2 rounded-full bg-green-500 {{ $accessibilityFilters['acessivel'] ? 'bg-white' : '' }}"></div>
+                                <div class="w-2 h-2 rounded-full {{ $accessibilityFilters['acessivel'] ? 'bg-white' : 'bg-green-500' }}"></div>
                                 <span>Acessível</span>
                             </button>
                             <button type="button" 
                                     wire:click="$toggle('accessibilityFilters.parcial_acessivel')"
-                                    class="flex items-center gap-1 px-2 py-1 rounded-full border border-white/30 text-xs font-medium transition-all duration-200 {{ $accessibilityFilters['parcial_acessivel'] ? 'bg-yellow-500 border-yellow-500 text-black' : 'bg-black/20 text-white/80' }}"
+                                    class="flex items-center gap-1 px-2 py-1 rounded-full border border-white/30 text-xs transition-all duration-200 {{ $accessibilityFilters['parcial_acessivel'] ? 'bg-yellow-500 border-yellow-500 text-black font-medium' : 'bg-black/20 text-white/80 font-medium' }}"
                                     aria-label="{{ $accessibilityFilters['parcial_acessivel'] ? 'Desativar filtro Parcialmente Acessível' : 'Ativar filtro Parcialmente Acessível' }}">
-                                <div class="w-2 h-2 rounded-full bg-yellow-500 {{ $accessibilityFilters['parcial_acessivel'] ? 'bg-white' : '' }}"></div>
+                                <div class="w-2 h-2 rounded-full {{ $accessibilityFilters['parcial_acessivel'] ? 'bg-white' : 'bg-yellow-500' }}"></div>
                                 <span>Parcial</span>
                             </button>
                             <button type="button" 
                                     wire:click="$toggle('accessibilityFilters.nao_acessivel')"
-                                    class="flex items-center gap-1 px-2 py-1 rounded-full border border-white/30 text-xs font-medium transition-all duration-200 {{ $accessibilityFilters['nao_acessivel'] ? 'bg-accent-orange border-accent-orange text-white' : 'bg-black/20 text-white/80' }}"
+                                    class="flex items-center gap-1 px-2 py-1 rounded-full border border-white/30 text-xs transition-all duration-200 {{ $accessibilityFilters['nao_acessivel'] ? 'bg-accent-orange border-accent-orange text-black font-medium' : 'bg-black/20 text-white/80 font-medium' }}"
                                     aria-label="{{ $accessibilityFilters['nao_acessivel'] ? 'Desativar filtro Não Acessível' : 'Ativar filtro Não Acessível' }}">
-                                <div class="w-2 h-2 rounded-full bg-accent-orange {{ $accessibilityFilters['nao_acessivel'] ? 'bg-white' : '' }}"></div>
+                                <div class="w-2 h-2 rounded-full {{ $accessibilityFilters['nao_acessivel'] ? 'bg-white' : 'bg-accent-orange' }}"></div>
                                 <span>Não Acessível</span>
                             </button>
                         </div>
@@ -182,12 +182,12 @@
 
         <!-- Results indicator when closed -->
         @if((!empty($search) || array_sum($accessibilityFilters) > 0) && !$resultsOpen && $totalResults > 0)
-        <div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[998]">
+        <div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[998]" id="mobile-results-indicator">
             <button wire:click="openResults"
-                class="flex items-center gap-2 bg-secondary text-primary px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 text-sm font-medium"
+                class="flex items-center gap-2 bg-secondary text-primary px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 text-sm font-bold"
                 aria-label="Mostrar {{ $totalResults }} {{ $totalResults === 1 ? 'resultado' : 'resultados' }}">
                 @svg('heroicon-o-chevron-up', 'w-4 h-4')
-                <span>{{ $totalResults }} {{ $totalResults === 1 ? 'resultado' : 'resultados' }}</span>
+                <span class="font-bold">{{ $totalResults }} {{ $totalResults === 1 ? 'resultado' : 'resultados' }}</span>
             </button>
         </div>
         @endif
@@ -239,7 +239,7 @@
                         <button wire:click="clearFilters"
                             class="flex items-center justify-center w-8 h-8 md:w-auto md:h-auto text-sm text-primary font-semibold hover:underline cursor-pointer focus:outline-none focus:underline"
                             aria-label="Limpar todos os filtros">
-                            @svg('heroicon-o-trash', 'w-5 h-5 text-primary')
+                            @svg('heroicon-o-trash', 'w-5 h-5 text-white/80')
                         </button>
                     @endif
                 </div>

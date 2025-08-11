@@ -3,18 +3,31 @@
     /* Map card mobile optimizations */
     #map-card-container {
         position: fixed !important;
-        bottom: 1rem !important;
+        bottom: 4rem !important; /* 64px spacing from footer */
         left: 1rem !important;
         right: 1rem !important;
         top: auto !important;
         transform: none !important;
-        z-index: 1002;
+        z-index: 997 !important; /* Lower than results count button (998) */
     }
 
     #map-card {
         width: 100% !important;
         max-width: 100% !important;
         margin: 0 !important;
+        position: relative !important;
+        left: auto !important;
+        transform: none !important;
+    }
+
+    /* Hide absolute buttons on mobile */
+    #map-card .absolute {
+        display: none !important;
+    }
+
+    /* Hide action buttons at bottom of card on mobile */
+    #map-card .flex.space-x-2.pt-2 {
+        display: none !important;
     }
 
     /* Map card buttons mobile positioning */
@@ -24,6 +37,41 @@
         right: 1rem !important;
         left: auto !important;
         z-index: 1003 !important;
+    }
+
+    /* Hide results area when card is opened */
+    body:has(#map-card) .fixed.bottom-0.h-\\[50vh\\] {
+        display: none !important;
+    }
+    
+    /* Hide results count indicator when card is opened */
+    body:has(#map-card) .fixed.bottom-4.left-1\\/2 {
+        display: none !important;
+    }
+
+    /* Ensure map card has proper mobile presentation */
+    #map-card {
+        max-height: 70vh !important;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    /* Hide scrollbar in card content on mobile */
+    #map-card .overflow-y-auto {
+        scrollbar-width: thin !important;
+        -ms-overflow-style: none !important;
+    }
+    
+    #map-card .overflow-y-auto::-webkit-scrollbar {
+        width: 4px !important;
+    }
+    
+    #map-card .overflow-y-auto::-webkit-scrollbar-track {
+        background: transparent !important;
+    }
+    
+    #map-card .overflow-y-auto::-webkit-scrollbar-thumb {
+        background: rgba(101, 48, 137, 0.3) !important;
+        border-radius: 2px !important;
     }
 
     /* Touch-friendly marker sizes */

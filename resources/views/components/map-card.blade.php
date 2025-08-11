@@ -6,7 +6,7 @@
 @if($location && $show)
 <div 
     id="map-card" 
-    class="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-80 bg-secondary border-4 border-black/15 rounded-lg shadow-xl z-[200] transition-all duration-300 ease-in-out"
+    class="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-80 bg-secondary border-4 border-black/15 rounded-lg shadow-xl z-[200] transition-all duration-300 ease-in-out flex flex-col max-h-[70vh]"
     role="dialog"
     aria-labelledby="map-card-title"
     aria-describedby="map-card-description"
@@ -21,7 +21,51 @@
         @svg('heroicon-o-x-mark', 'w-4 h-4')
     </button>
 
-    <div class="p-4">
+    <!-- Fixed Header -->
+    <div class="p-4 border-b border-primary/20 flex-shrink-0">
+        <!-- Title and Accessibility Badge -->
+        <div class="flex items-start justify-between space-x-3 mb-3">
+            <div class="flex-1">
+                <h3 id="map-card-title" class="text-lg font-semibold text-primary leading-tight">
+                    {{ $location['name'] }}
+                </h3>
+            </div>
+            <span class="inline-flex items-center px-2.5 py-1 font-semibold rounded-full text-xs text-black/75 flex-shrink-0
+                {{ $location['accessibility_level'] === 'acessivel' ? 'bg-green-500' : '' }}
+                {{ $location['accessibility_level'] === 'parcial_acessivel' ? 'bg-yellow-500' : '' }}
+                {{ $location['accessibility_level'] === 'nao_acessivel' ? 'bg-accent-orange' : '' }}">
+                {{ $location['accessibility_level'] === 'acessivel' ? 'Acessível' : '' }}
+                {{ $location['accessibility_level'] === 'parcial_acessivel' ? 'Parcialmente Acessível' : '' }}
+                {{ $location['accessibility_level'] === 'nao_acessivel' ? 'Não Acessível' : '' }}
+            </span>
+        </div>
+
+        <!-- Address -->
+        <div class="flex items-start space-x-2 mb-3">
+            <div class="w-5 h-5 text-primary flex-shrink-0 mt-0.5">
+                @svg('heroicon-o-map-pin', 'w-5 h-5')
+            </div>
+            <p id="map-card-description" class="text-sm text-white/80 leading-relaxed">
+                {{ $location['address'] }}
+            </p>
+        </div>
+
+        <!-- Coordinates -->
+        @if(isset($location['latitude']) && isset($location['longitude']))
+            <div class="flex items-center space-x-2">
+                <div class="w-5 h-5 text-primary flex-shrink-0">
+                    @svg('heroicon-o-globe-alt', 'w-5 h-5')
+                </div>
+                <span class="text-xs text-white/60 font-mono"
+                    aria-label="Coordenadas: Latitude {{ number_format($location['latitude'], 6) }}, Longitude {{ number_format($location['longitude'], 6) }}">
+                    {{ number_format($location['latitude'], 6) }}, {{ number_format($location['longitude'], 6) }}
+                </span>
+            </div>
+        @endif
+    </div>
+
+    <!-- Scrollable Content -->
+    <div class="flex-1 overflow-y-auto p-4">
         <!-- Image Slideshow Section -->
         @if(isset($location['images']) && count($location['images']) > 0)
             <div class="mb-4 relative">
@@ -35,50 +79,17 @@
             </div>
         @endif
 
-        <!-- Location Info -->
+        <!-- Additional Content Area -->
         <div class="space-y-3">
-            <!-- Title and Accessibility Badge -->
-            <div class="flex items-start justify-between space-x-3">
-                <div class="flex-1">
-                    <h3 id="map-card-title" class="text-lg font-semibold text-primary leading-tight">
-                        {{ $location['name'] }}
-                    </h3>
-                </div>
-                <span class="inline-flex items-center px-2.5 py-1 font-semibold rounded-full text-xs text-black/75 flex-shrink-0
-                    {{ $location['accessibility_level'] === 'acessivel' ? 'bg-green-500' : '' }}
-                    {{ $location['accessibility_level'] === 'parcial_acessivel' ? 'bg-yellow-500' : '' }}
-                                            {{ $location['accessibility_level'] === 'nao_acessivel' ? 'bg-accent-orange' : '' }}">
-                    {{ $location['accessibility_level'] === 'acessivel' ? 'Acessível' : '' }}
-                    {{ $location['accessibility_level'] === 'parcial_acessivel' ? 'Parcialmente Acessível' : '' }}
-                    {{ $location['accessibility_level'] === 'nao_acessivel' ? 'Não Acessível' : '' }}
-                </span>
-            </div>
-
-            <!-- Address -->
-            <div class="flex items-start space-x-2">
-                <div class="w-5 h-5 text-primary flex-shrink-0 mt-0.5">
-                    @svg('heroicon-o-map-pin', 'w-5 h-5')
-                </div>
-                <p id="map-card-description" class="text-sm text-white/80 leading-relaxed">
-                    {{ $location['address'] }}
-                </p>
-            </div>
-
-            <!-- Coordinates -->
-            @if(isset($location['latitude']) && isset($location['longitude']))
-                <div class="flex items-center space-x-2">
-                    <div class="w-5 h-5 text-primary flex-shrink-0">
-                        @svg('heroicon-o-globe-alt', 'w-5 h-5')
-                    </div>
-                    <span class="text-xs text-white/60 font-mono"
-                        aria-label="Coordenadas: Latitude {{ number_format($location['latitude'], 6) }}, Longitude {{ number_format($location['longitude'], 6) }}">
-                        {{ number_format($location['latitude'], 6) }}, {{ number_format($location['longitude'], 6) }}
-                    </span>
+            <!-- Description or other content can go here -->
+            @if(isset($location['description']))
+                <div class="text-sm text-white/70 leading-relaxed">
+                    {{ $location['description'] }}
                 </div>
             @endif
 
             <!-- Action Buttons -->
-            <div class="flex space-x-2 pt-2 border-t border-white/10">
+            <div class="flex space-x-2 pt-4 border-t border-white/10">
                 <button 
                     type="button"
                     onclick="centerMapOnLocation({{ $location['latitude'] }}, {{ $location['longitude'] }})"
