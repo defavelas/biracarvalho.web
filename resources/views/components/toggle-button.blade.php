@@ -3,9 +3,9 @@
     'name' => null,
     'value' => false,
     'label' => '',
-    'trackClass' => 'bg-primary border-secondary',
-    'thumbClass' => 'bg-secondary',
-    'labelClass' => 'text-secondary',
+    'trackClass' => 'bg-black/20 border-white',
+    'thumbClass' => 'bg-white',
+    'labelClass' => 'text-white',
     'disabled' => false,
 ])
 
@@ -22,11 +22,11 @@
             {{ $attributes->whereStartsWith('wire:') }} class="sr-only" role="switch"
             aria-checked="{{ $isChecked ? 'true' : 'false' }}">
         <div
-            class="w-8 h-5 md:w-[29px] md:h-4 rounded-full border-2 transition-colors duration-200 ease-in-out {{ $trackClass }} {{ $isChecked ? 'bg-opacity-100' : 'bg-opacity-50' }} relative flex items-center">
+            class="w-8 h-5 md:w-[29px] md:h-4 rounded-full border-1 transition-colors duration-200 ease-in-out {{ $trackClass }} {{ $isChecked ? 'bg-opacity-100' : 'bg-opacity-50' }} relative flex items-center">
             <div
                 class="absolute left-0.5 w-3.5 h-3.5 md:w-2.5 md:h-2.5 border-1 border-transparent rounded-full transition-transform duration-200 ease-in-out {{ $thumbClass }} {{ $isChecked ? 'transform translate-x-3 md:translate-x-3' : 'transform translate-x-0' }} shadow-sm">
             </div>
         </div>
     </div>
-    <span class="text-base md:text-sm font-medium {{ $labelClass }}">{{ $label }}</span>
+    <span class="{{ $labelClass }}">{{ $label }}</span>
 </label>
