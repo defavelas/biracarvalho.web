@@ -19,6 +19,7 @@ class SearchSidebar extends Component
     ];
     
     public bool $collapsed = false;
+    public bool $resultsOpen = true;
     
     public array $results = [];
     public int $totalResults = 0;
@@ -48,6 +49,9 @@ class SearchSidebar extends Component
     public function updatedSearch(): void
     {
         $this->loadResults();
+        if (!empty($this->search)) {
+            $this->resultsOpen = true;
+        }
     }
 
     /**
@@ -57,6 +61,9 @@ class SearchSidebar extends Component
     {
         $this->loadResults();
         $this->dispatch('results-updated', results: $this->results);
+        if (array_sum($this->accessibilityFilters) > 0) {
+            $this->resultsOpen = true;
+        }
     }
 
     /**
@@ -80,6 +87,7 @@ class SearchSidebar extends Component
 
         $this->search = '';
         $this->selectedLocationId = null;
+        $this->resultsOpen = false;
         
         $this->loadResults();
         
@@ -95,11 +103,30 @@ class SearchSidebar extends Component
     }
 
     /**
+     * Close the results panel for better map navigation.
+     */
+    public function closeResults(): void
+    {
+        $this->resultsOpen = false;
+    }
+
+    /**
+     * Open the results panel.
+     */
+    public function openResults(): void
+    {
+        $this->resultsOpen = true;
+    }
+
+    /**
      * Focus on a specific location and update the map.
      */
     public function focusLocation($locationId): void
     {
         $this->selectedLocationId = (string) $locationId;
+        
+        // Close results on mobile when focusing on a location
+        $this->resultsOpen = false;
         
         $this->dispatch('focus-location', locationId: (string) $locationId);
         

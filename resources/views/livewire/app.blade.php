@@ -12,31 +12,19 @@
 
     <livewire:search-sidebar :collapsed="$sidebarCollapsed" />
 
-    <!-- Responsive sidebar toggle button -->
+    <!-- Desktop: Sidebar toggle button -->
     <button 
         type="button"
-        class="absolute z-[1002] w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-secondary shadow-lg border-0 cursor-pointer flex items-center justify-center transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5 
-               top-3 left-3 md:top-5 
-               {{ $sidebarCollapsed ? 'md:left-5' : 'md:left-[25.5rem]' }}"
+        class="hidden md:flex absolute z-[1002] w-12 h-12 rounded-full bg-secondary shadow-lg border-0 cursor-pointer items-center justify-center transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5 
+               top-5 {{ $sidebarCollapsed ? 'left-5' : 'left-[25.5rem]' }}"
         wire:click="toggleSidebar"
         aria-label="{{ $sidebarCollapsed ? 'Abrir painel de pesquisa' : 'Fechar painel de pesquisa' }}"
     >
         @if($sidebarCollapsed)
-            @svg('heroicon-o-bars-3', 'w-5 h-5 sm:w-6 sm:h-6 text-primary transition-transform duration-200')
+            @svg('heroicon-o-bars-3', 'w-6 h-6 text-primary transition-transform duration-200')
         @else
-            @svg('heroicon-o-x-mark', 'w-5 h-5 sm:w-6 sm:h-6 text-primary transition-transform duration-200')
+            @svg('heroicon-o-x-mark', 'w-6 h-6 text-primary transition-transform duration-200')
         @endif
-    </button>
-
-    <!-- Mobile-optimized settings button -->
-    <button 
-        type="button"
-        class="absolute z-[1002] w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-secondary shadow-lg border-0 cursor-pointer flex items-center justify-center transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5 
-               top-3 right-3 sm:top-5 sm:right-5"
-        wire:click="openSettings"
-        aria-label="Abrir configurações e login"
-    >
-        @svg('heroicon-o-cog-6-tooth', 'w-5 h-5 sm:w-6 sm:h-6 text-primary')
     </button>
 
     <livewire:auth-modal />

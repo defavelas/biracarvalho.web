@@ -19,11 +19,6 @@ class App extends Component
         $this->dispatch('sidebar-toggled', collapsed: $this->sidebarCollapsed);
     }
 
-    public function openSettings(): void
-    {
-        $this->dispatch('show-auth-modal');
-    }
-
     public function render()
     {
         return view('livewire.app')
