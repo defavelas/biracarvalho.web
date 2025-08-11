@@ -12,21 +12,6 @@
 
     <livewire:search-sidebar :collapsed="$sidebarCollapsed" />
 
-    <!-- Desktop: Sidebar toggle button -->
-    <button 
-        type="button"
-        class="hidden md:flex absolute z-[1002] w-12 h-12 rounded-full bg-secondary shadow-lg border-0 cursor-pointer items-center justify-center transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5 
-               top-5 {{ $sidebarCollapsed ? 'left-5' : 'left-[25.5rem]' }}"
-        wire:click="toggleSidebar"
-        aria-label="{{ $sidebarCollapsed ? 'Abrir painel de pesquisa' : 'Fechar painel de pesquisa' }}"
-    >
-        @if($sidebarCollapsed)
-            @svg('heroicon-o-bars-3', 'w-6 h-6 text-primary transition-transform duration-200')
-        @else
-            @svg('heroicon-o-x-mark', 'w-6 h-6 text-primary transition-transform duration-200')
-        @endif
-    </button>
-
     <livewire:auth-modal />
 
     <div aria-live="polite" aria-atomic="true" class="sr-only" id="status-updates">

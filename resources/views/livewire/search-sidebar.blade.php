@@ -24,35 +24,30 @@
                         </div>
                     </div>
 
-                    <!-- Filters and results row -->
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center gap-2">
-                            <div class="flex gap-1">
-                                <button type="button" 
-                                        wire:click="$toggle('accessibilityFilters.acessivel')"
-                                        class="w-7 h-7 rounded-full border-2 border-white/50 flex items-center justify-center transition-all duration-200 {{ $accessibilityFilters['acessivel'] ? 'bg-green-500 border-green-500' : 'bg-transparent' }}"
-                                        aria-label="{{ $accessibilityFilters['acessivel'] ? 'Desativar filtro Acessível' : 'Ativar filtro Acessível' }}">
-                                    @if($accessibilityFilters['acessivel'])
-                                        @svg('heroicon-s-check', 'w-3 h-3 text-white')
-                                    @endif
-                                </button>
-                                <button type="button" 
-                                        wire:click="$toggle('accessibilityFilters.parcial_acessivel')"
-                                        class="w-7 h-7 rounded-full border-2 border-white/50 flex items-center justify-center transition-all duration-200 {{ $accessibilityFilters['parcial_acessivel'] ? 'bg-yellow-500 border-yellow-500' : 'bg-transparent' }}"
-                                        aria-label="{{ $accessibilityFilters['parcial_acessivel'] ? 'Desativar filtro Parcialmente Acessível' : 'Ativar filtro Parcialmente Acessível' }}">
-                                    @if($accessibilityFilters['parcial_acessivel'])
-                                        @svg('heroicon-s-check', 'w-3 h-3 text-white')
-                                    @endif
-                                </button>
-                                <button type="button" 
-                                        wire:click="$toggle('accessibilityFilters.nao_acessivel')"
-                                        class="w-7 h-7 rounded-full border-2 border-white/50 flex items-center justify-center transition-all duration-200 {{ $accessibilityFilters['nao_acessivel'] ? 'bg-accent-orange border-accent-orange' : 'bg-transparent' }}"
-                                        aria-label="{{ $accessibilityFilters['nao_acessivel'] ? 'Desativar filtro Não Acessível' : 'Ativar filtro Não Acessível' }}">
-                                    @if($accessibilityFilters['nao_acessivel'])
-                                        @svg('heroicon-s-check', 'w-3 h-3 text-white')
-                                    @endif
-                                </button>
-                            </div>
+                    <!-- Filter buttons with labels -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                        <div class="flex flex-wrap gap-1">
+                            <button type="button" 
+                                    wire:click="$toggle('accessibilityFilters.acessivel')"
+                                    class="flex items-center gap-1 px-2 py-1 rounded-full border border-white/30 text-xs font-medium transition-all duration-200 {{ $accessibilityFilters['acessivel'] ? 'bg-green-500 border-green-500 text-white' : 'bg-black/20 text-white/80' }}"
+                                    aria-label="{{ $accessibilityFilters['acessivel'] ? 'Desativar filtro Acessível' : 'Ativar filtro Acessível' }}">
+                                <div class="w-2 h-2 rounded-full bg-green-500 {{ $accessibilityFilters['acessivel'] ? 'bg-white' : '' }}"></div>
+                                <span>Acessível</span>
+                            </button>
+                            <button type="button" 
+                                    wire:click="$toggle('accessibilityFilters.parcial_acessivel')"
+                                    class="flex items-center gap-1 px-2 py-1 rounded-full border border-white/30 text-xs font-medium transition-all duration-200 {{ $accessibilityFilters['parcial_acessivel'] ? 'bg-yellow-500 border-yellow-500 text-black' : 'bg-black/20 text-white/80' }}"
+                                    aria-label="{{ $accessibilityFilters['parcial_acessivel'] ? 'Desativar filtro Parcialmente Acessível' : 'Ativar filtro Parcialmente Acessível' }}">
+                                <div class="w-2 h-2 rounded-full bg-yellow-500 {{ $accessibilityFilters['parcial_acessivel'] ? 'bg-white' : '' }}"></div>
+                                <span>Parcial</span>
+                            </button>
+                            <button type="button" 
+                                    wire:click="$toggle('accessibilityFilters.nao_acessivel')"
+                                    class="flex items-center gap-1 px-2 py-1 rounded-full border border-white/30 text-xs font-medium transition-all duration-200 {{ $accessibilityFilters['nao_acessivel'] ? 'bg-accent-orange border-accent-orange text-white' : 'bg-black/20 text-white/80' }}"
+                                    aria-label="{{ $accessibilityFilters['nao_acessivel'] ? 'Desativar filtro Não Acessível' : 'Ativar filtro Não Acessível' }}">
+                                <div class="w-2 h-2 rounded-full bg-accent-orange {{ $accessibilityFilters['nao_acessivel'] ? 'bg-white' : '' }}"></div>
+                                <span>Não Acessível</span>
+                            </button>
                         </div>
                         
                         <div class="flex items-center gap-2">
@@ -67,25 +62,135 @@
                             <span class="text-xs font-mono text-white/80 bg-black/20 px-2 py-1 rounded">{{ $totalResults }}</span>
                         </div>
                     </div>
-
-                    <!-- Filter legends -->
-                    <div class="flex items-center justify-center gap-4 text-xs text-white/70">
-                        <div class="flex items-center gap-1">
-                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                            <span>Acessível</span>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                            <span>Parcial</span>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <div class="w-3 h-3 bg-accent-orange rounded-full"></div>
-                            <span>Não Acessível</span>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Mobile search results cards (50% screen height) -->
+        @if((!empty($search) || array_sum($accessibilityFilters) > 0) && $resultsOpen)
+        <div class="fixed bottom-0 left-0 right-0 h-[50vh] bg-primary/95 backdrop-blur-sm border-t-4 border-secondary z-[999] transform transition-all duration-300 ease-in-out translate-y-0"
+             style="background-image: linear-gradient(to bottom, rgba(101, 48, 137, 0.95), rgba(101, 48, 137, 0.98));">
+            
+            <!-- Results header -->
+            <div class="p-4 border-b border-white/20 bg-black/20">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-semibold text-white">
+                        Resultados da Pesquisa
+                    </h3>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-mono text-white/80 bg-black/30 px-2 py-1 rounded">
+                            {{ $totalResults }} {{ $totalResults === 1 ? 'local' : 'locais' }}
+                        </span>
+                        <button wire:click="closeResults"
+                            class="flex items-center justify-center w-7 h-7 bg-black/30 hover:bg-black/50 rounded-full text-white/70 hover:text-white transition-all duration-200"
+                            aria-label="Fechar resultados para melhor navegação no mapa">
+                            @svg('heroicon-o-chevron-down', 'w-4 h-4')
+                        </button>
+                        @if (array_sum($accessibilityFilters) > 0 || !empty($search))
+                            <button wire:click="clearFilters"
+                                class="flex items-center justify-center w-7 h-7 bg-black/30 hover:bg-black/50 rounded-full text-white/70 hover:text-white transition-all duration-200"
+                                aria-label="Limpar todos os filtros">
+                                @svg('heroicon-o-x-mark', 'w-4 h-4')
+                            </button>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scrollable results container -->
+            <div class="flex-1 overflow-y-auto soft-scrollbar" style="height: calc(50vh - 70px);">
+                <div class="p-4 space-y-3">
+                    @forelse($results as $result)
+                        <article
+                            class="bg-black/25 border border-white/20 rounded-lg p-3 hover:bg-black/35 hover:border-secondary cursor-pointer transition-all duration-200 group"
+                            data-location-id="{{ $result['id'] }}" 
+                            role="button" 
+                            tabindex="0"
+                            aria-label="Ver {{ $result['name'] }} no mapa - {{ $result['accessibility_level'] === 'acessivel' ? 'Acessível' : '' }}{{ $result['accessibility_level'] === 'parcial_acessivel' ? 'Parcialmente Acessível' : '' }}{{ $result['accessibility_level'] === 'nao_acessivel' ? 'Não Acessível' : '' }}"
+                            wire:click="focusLocation('{{ $result['id'] }}')"
+                            wire:keydown.enter="focusLocation('{{ $result['id'] }}')"
+                            wire:keydown.space="focusLocation('{{ $result['id'] }}')"
+                            wire:loading.class="opacity-75 pointer-events-none">
+                            
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1 space-y-2">
+                                    <div class="flex items-start gap-2">
+                                        <div class="w-3 h-3 rounded-full mt-1 flex-shrink-0
+                                            {{ $result['accessibility_level'] === 'acessivel' ? 'bg-green-500' : '' }}
+                                            {{ $result['accessibility_level'] === 'parcial_acessivel' ? 'bg-yellow-500' : '' }}
+                                            {{ $result['accessibility_level'] === 'nao_acessivel' ? 'bg-accent-orange' : '' }}"
+                                            aria-hidden="true">
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <h4 class="font-semibold text-secondary text-sm leading-tight mb-1 truncate">
+                                                {{ $result['name'] }}
+                                            </h4>
+                                            <p class="text-xs text-white/70 leading-relaxed line-clamp-2">
+                                                {{ $result['address'] }}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center justify-between">
+                                        <span
+                                            class="inline-flex items-center px-2 py-0.5 leading-4 font-medium rounded-full text-xs text-black/75
+                                            {{ $result['accessibility_level'] === 'acessivel' ? 'bg-green-500' : '' }}
+                                            {{ $result['accessibility_level'] === 'parcial_acessivel' ? 'bg-yellow-500' : '' }}
+                                            {{ $result['accessibility_level'] === 'nao_acessivel' ? 'bg-accent-orange' : '' }}">
+                                            {{ $result['accessibility_level'] === 'acessivel' ? 'Acessível' : '' }}
+                                            {{ $result['accessibility_level'] === 'parcial_acessivel' ? 'Parcial' : '' }}
+                                            {{ $result['accessibility_level'] === 'nao_acessivel' ? 'Não Acessível' : '' }}
+                                        </span>
+
+                                        @if (isset($result['images']) && count($result['images']) > 0)
+                                            <div class="flex -space-x-1">
+                                                @foreach (array_slice($result['images'], 0, 2) as $index => $image)
+                                                    <div class="w-6 h-6 rounded-full overflow-hidden bg-black/25 border border-white/30">
+                                                        <img src="{{ $image }}"
+                                                            alt="Imagem {{ $index + 1 }} de {{ $result['name'] }}"
+                                                            class="w-full h-full object-cover" loading="lazy">
+                                                    </div>
+                                                @endforeach
+                                                @if (count($result['images']) > 2)
+                                                    <div class="w-6 h-6 rounded-full bg-black/40 border border-white/30 flex items-center justify-center">
+                                                        <span class="text-xs text-white/70 font-medium">+{{ count($result['images']) - 2 }}</span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <div class="flex-shrink-0 self-center ml-3 group-hover:translate-x-1 transition-transform duration-200">
+                                    @svg('heroicon-o-arrow-right', 'w-4 h-4 text-white/50 group-hover:text-secondary', ['aria-hidden' => 'true'])
+                                </div>
+                            </div>
+                        </article>
+                    @empty
+                        <div class="py-12 text-center">
+                            <div class="mx-auto w-12 h-12 bg-black/25 rounded-full flex items-center justify-center mb-3">
+                                @svg('heroicon-o-magnifying-glass', 'w-6 h-6 text-secondary')
+                            </div>
+                            <h4 class="text-sm font-semibold text-secondary mb-1">Nenhum resultado encontrado</h4>
+                            <p class="text-xs text-white/50">Tente ajustar seus filtros ou termo de pesquisa</p>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+        @endif
+
+        <!-- Results indicator when closed -->
+        @if((!empty($search) || array_sum($accessibilityFilters) > 0) && !$resultsOpen && $totalResults > 0)
+        <div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[998]">
+            <button wire:click="openResults"
+                class="flex items-center gap-2 bg-secondary text-primary px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 text-sm font-medium"
+                aria-label="Mostrar {{ $totalResults }} {{ $totalResults === 1 ? 'resultado' : 'resultados' }}">
+                @svg('heroicon-o-chevron-up', 'w-4 h-4')
+                <span>{{ $totalResults }} {{ $totalResults === 1 ? 'resultado' : 'resultados' }}</span>
+            </button>
+        </div>
+        @endif
     </div>
 
     <!-- Desktop: Full sidebar -->
