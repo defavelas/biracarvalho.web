@@ -24,9 +24,8 @@
                         </div>
                     </div>
 
-                    <!-- Filter buttons with labels -->
-                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-                        <div class="flex flex-wrap gap-1">
+                    <!-- Filter buttons with labels (row 1) -->
+                    <div class="flex flex-wrap items-center gap-1 mb-2">
                             <button type="button" 
                                     wire:click="$toggle('accessibilityFilters.acessivel')"
                                     class="flex items-center gap-1 px-2 py-1 rounded-full border border-white/30 text-xs transition-all duration-200 {{ $accessibilityFilters['acessivel'] ? 'bg-green-500 border-green-500 text-black font-medium' : 'bg-black/20 text-white/80 font-medium' }}"
@@ -48,19 +47,20 @@
                                 <div class="w-2 h-2 rounded-full {{ $accessibilityFilters['nao_acessivel'] ? 'bg-white' : 'bg-accent-orange' }}"></div>
                                 <span>Não Acessível</span>
                             </button>
-                        </div>
-                        
-                        <div class="flex items-center gap-2">
-                            @if (array_sum($accessibilityFilters) > 0 || !empty($search))
-                                <button wire:click="clearFilters"
-                                    class="flex items-center justify-center w-6 h-6 text-white/70 hover:text-white transition-colors duration-200"
-                                    aria-label="Limpar todos os filtros">
-                                    @svg('heroicon-o-trash', 'w-4 h-4')
-                                </button>
-                            @endif
-                            
-                            <span class="text-xs font-mono text-white/80 bg-black/20 px-2 py-1 rounded">{{ $totalResults }}</span>
-                        </div>
+                    </div>
+
+                    <!-- Results count + reset (row 2) -->
+                    <div class="flex items-center justify-between">
+                        <p class="text-xs font-mono text-white/90">
+                            {{ $totalResults }} {{ $totalResults === 1 ? 'local' : 'locais' }}
+                        </p>
+                        @if (array_sum($accessibilityFilters) > 0 || !empty($search))
+                            <button wire:click="clearFilters"
+                                class="flex items-center justify-center w-7 h-7 bg-black/20 hover:bg-black/30 rounded-full text-white/80 hover:text-white transition-colors duration-200"
+                                aria-label="Limpar todos os filtros">
+                                @svg('heroicon-o-trash', 'w-4 h-4')
+                            </button>
+                        @endif
                     </div>
                 </div>
             </div>

@@ -26,11 +26,11 @@
         <!-- Title and Accessibility Badge -->
         <div class="flex items-start justify-between space-x-3 mb-3">
             <div class="flex-1">
-                <h3 id="map-card-title" class="text-sm md:text-lg font-medium md:font-semibold text-primary leading-tight">
+                <h3 id="map-card-title" class="text-[13px] md:text-lg font-medium md:font-semibold text-primary leading-tight">
                     {{ $location['name'] }}
                 </h3>
             </div>
-            <span class="inline-flex items-center px-1.5 py-0.5 md:px-2.5 md:py-1 font-normal md:font-semibold rounded-full text-[10px] md:text-xs text-black/75 flex-shrink-0
+            <span class="inline-flex items-center px-1.5 py-0.5 md:px-2.5 md:py-1 font-normal md:font-semibold rounded-full text-[9px] md:text-xs text-black/75 flex-shrink-0
                 {{ $location['accessibility_level'] === 'acessivel' ? 'bg-green-500' : '' }}
                 {{ $location['accessibility_level'] === 'parcial_acessivel' ? 'bg-yellow-500' : '' }}
                 {{ $location['accessibility_level'] === 'nao_acessivel' ? 'bg-accent-orange' : '' }}">
@@ -42,10 +42,10 @@
 
         <!-- Address -->
         <div class="flex items-start space-x-2 mb-3">
-            <div class="w-4 h-4 md:w-5 md:h-5 text-primary flex-shrink-0 mt-0.5">
-                @svg('heroicon-o-map-pin', 'w-4 h-4 md:w-5 md:h-5')
+            <div class="w-3.5 h-3.5 md:w-5 md:h-5 text-primary flex-shrink-0 mt-0.5">
+                @svg('heroicon-o-map-pin', 'w-3.5 h-3.5 md:w-5 md:h-5')
             </div>
-            <p id="map-card-description" class="text-[11px] md:text-sm text-white/80 leading-relaxed">
+            <p id="map-card-description" class="text-[11px] md:text-sm text-white/80 leading-snug md:leading-relaxed">
                 {{ $location['address'] }}
             </p>
         </div>
@@ -53,10 +53,10 @@
         <!-- Coordinates -->
         @if(isset($location['latitude']) && isset($location['longitude']))
             <div class="flex items-center space-x-2">
-                <div class="w-4 h-4 md:w-5 md:h-5 text-primary flex-shrink-0">
-                    @svg('heroicon-o-globe-alt', 'w-4 h-4 md:w-5 md:h-5')
+                <div class="w-3.5 h-3.5 md:w-5 md:h-5 text-primary flex-shrink-0">
+                    @svg('heroicon-o-globe-alt', 'w-3.5 h-3.5 md:w-5 md:h-5')
                 </div>
-                <span class="text-[10px] md:text-xs text-white/60 font-mono"
+                <span class="text-[9.5px] md:text-xs text-white/60 font-mono"
                     aria-label="Coordenadas: Latitude {{ number_format($location['latitude'], 6) }}, Longitude {{ number_format($location['longitude'], 6) }}">
                     {{ number_format($location['latitude'], 6) }}, {{ number_format($location['longitude'], 6) }}
                 </span>
