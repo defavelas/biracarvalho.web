@@ -125,6 +125,9 @@ class SearchSidebar extends Component
     {
         $this->selectedLocationId = (string) $locationId;
         
+        // Close results on mobile when focusing on a location
+        $this->resultsOpen = false;
+        
         $this->dispatch('focus-location', locationId: (string) $locationId);
         
         $this->js("
