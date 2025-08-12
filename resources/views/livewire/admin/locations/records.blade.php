@@ -2,14 +2,14 @@
     <div class="mb-4">
         <div class="sm:flex sm:items-center sm:justify-between">
             <header class="sm:flex-auto">
-                <h1 class="text-2xl font-bold text-white mb-2 flex items-center">
-                    <svg class="w-6 h-6 mr-3 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <h1 class="text-2xl font-bold text-white flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                     Locais de Acessibilidade
                 </h1>
-                <p class="text-white/80 text-sm">
+                <p class="text-white/80 text-base">
                     Gerencie os locais de acessibilidade e mobilidade urbana do programa.
                 </p>
             </header>
@@ -25,38 +25,26 @@
     </div>
 
     <!-- Filters Section -->
-    <div class="bg-white/5 backdrop-blur-sm rounded-xl p-4 mb-6 border border-white/10">
+    <div class="bg-black/15 p-4 mb-4 rounded-md">
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div>
-                <label for="search" class="block text-sm font-medium text-white/90 mb-2">
-                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    Buscar
-                </label>
-                <input wire:model.live.debounce.300ms="search" 
-                       type="text" 
-                       id="search"
-                       placeholder="Nome, endereço ou descrição..."
-                       class="block w-full rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 px-4 py-2.5 focus:outline-none focus:ring-4 focus:ring-secondary/25 focus:border-secondary/50 transition-all duration-200">
-            </div>
+            <x-input 
+                wire:model.live.debounce.300ms="search"
+                label="Buscar"
+                placeholder="Nome, endereço ou descrição..."
+                icon='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>'
+                id="search"
+                for="search"
+            />
             
-            <div>
-                <label for="type-filter" class="block text-sm font-medium text-white/90 mb-2">
-                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-                    </svg>
-                    Tipo
-                </label>
-                <select wire:model.live="typeFilter" 
-                        id="type-filter"
-                        class="block w-full rounded-lg bg-white/10 border border-white/20 text-white px-4 py-2.5 focus:outline-none focus:ring-4 focus:ring-secondary/25 focus:border-secondary/50 transition-all duration-200">
-                    <option value="">Todos os tipos</option>
-                    @foreach($locationTypes as $value => $label)
-                        <option value="{{ $value }}" class="bg-primary text-white">{{ $label }}</option>
-                    @endforeach
-                </select>
-            </div>
+            <x-select 
+                wire:model.live="typeFilter"
+                label="Tipo"
+                placeholder="Todos os tipos"
+                icon='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>'
+                :options="collect($locationTypes)->map(fn($label, $value) => ['value' => $value, 'label' => $label])->prepend(['value' => '', 'label' => 'Todos os tipos'])->values()->toArray()"
+                id="type-filter"
+                for="type-filter"
+            />
             
             <div class="flex items-end">
                 <div class="flex-1">

@@ -12,7 +12,7 @@
 
 <div class="space-y-2">
     @if($label)
-        <label {{ $attributes->only(['for', 'id']) }} class="block text-sm font-medium text-accent-dark mb-2">
+        <label {{ $attributes->only(['for', 'id']) }} class="block text-sm font-medium text-secondary mb-2">
             @if($icon)
                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     {!! $icon !!}
@@ -41,7 +41,7 @@
             @click="open = !open"
             @click.away="open = false"
             {{ $attributes->except(['wire:model', 'for', 'id'])->class([
-                'w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-4 transition-colors duration-200 text-left',
+                'w-full min-w-48 bg-white px-4 py-2 border rounded-md focus:outline-none focus:ring-4 placeholder:text-accent-dark transition-colors duration-200 text-left',
                 'border-red-500 focus:ring-red-500/25 focus:border-red-500' => $error,
                 'border-gray-300 focus:ring-primary/25 focus:border-primary' => !$error,
             ]) }}

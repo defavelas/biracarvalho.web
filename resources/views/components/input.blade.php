@@ -9,7 +9,7 @@
 
 <div class="space-y-2">
     @if($label)
-        <label {{ $attributes->only(['for', 'id']) }} class="block text-sm font-medium text-accent-dark mb-2">
+        <label {{ $attributes->only(['for', 'id']) }} class="block text-sm font-medium text-secondary mb-2">
             @if($icon)
                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     {!! $icon !!}
@@ -25,7 +25,7 @@
     @if($type === 'textarea')
         <textarea
             {{ $attributes->except(['label', 'error', 'required', 'type', 'icon', 'help', 'for', 'id'])->class([
-                'w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-4 transition-colors duration-200 resize-none',
+                'w-full bg-white px-4 py-2 border rounded-md focus:outline-none focus:ring-4 placeholder:text-accent-dark transition-colors duration-200 resize-none text-accent-dark',
                 'border-red-500 focus:ring-red-500/25 focus:border-red-500' => $error,
                 'border-gray-300 focus:ring-primary/25 focus:border-primary' => !$error,
             ]) }}
@@ -34,7 +34,7 @@
         <input
             type="{{ $type }}"
             {{ $attributes->except(['label', 'error', 'required', 'type', 'icon', 'help', 'for', 'id'])->class([
-                'w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-4 transition-colors duration-200',
+                'w-full bg-white px-4 py-2 border rounded-md focus:outline-none focus:ring-4 placeholder:text-accent-dark transition-colors duration-200 text-accent-dark',
                 'border-red-500 focus:ring-red-500/25 focus:border-red-500' => $error,
                 'border-gray-300 focus:ring-primary/25 focus:border-primary' => !$error,
             ]) }}
