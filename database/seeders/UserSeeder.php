@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-class AdminUserSeeder extends Seeder
+class UserSeeder extends Seeder
 {
     /**
      * Run the database seeder.
@@ -16,11 +16,11 @@ class AdminUserSeeder extends Seeder
     public function run(): void
     {
         User::firstOrCreate(
-            ['email' => 'admin@biracarvalho.com'],
+            ['email' => 'admin@biracarvalho.com.br'],
             [
                 'name' => 'Administrador',
-                'email' => 'admin@biracarvalho.com',
-                'password' => Hash::make('admin123'),
+                'email' => 'admin@biracarvalho.com.br',
+                'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ]
         );

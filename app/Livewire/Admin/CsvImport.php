@@ -89,6 +89,11 @@ final class CsvImport extends Component
         $this->reset(['csvFile', 'importResult', 'showResult']);
     }
 
+    public function hasPendingImports(): bool
+    {
+        return ImportJob::where('status', ImportStatus::Pending)->exists();
+    }
+
     public function render()
     {
         $processor = new CsvProcessor();
@@ -106,6 +111,7 @@ final class CsvImport extends Component
             'expectedHeaders' => $processor->getExpectedHeaders(),
             'imports' => $imports,
             'statusOptions' => collect(ImportStatus::cases())->mapWithKeys(fn($c) => [$c->value => $c->label()])->toArray(),
+            'hasPendingImports' => $this->hasPendingImports(),
         ]);
     }
 }

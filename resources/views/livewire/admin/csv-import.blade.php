@@ -1,4 +1,4 @@
-<div>
+<div @if($hasPendingImports) wire:poll.3s @endif>
     <!-- Header Section -->
     <div class="mb-4">
         <div class="flex items-center justify-between">
