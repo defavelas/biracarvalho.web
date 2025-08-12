@@ -18,7 +18,7 @@ final class CsvProcessor
     private int $processedCount = 0;
     private int $skippedCount = 0;
 
-    public function process(UploadedFile $file): array
+    public function process(UploadedFile|string $file): array
     {
         $this->resetCounters();
 
@@ -65,28 +65,34 @@ final class CsvProcessor
         return $csv;
     }
 
-    private function isValidCsvFile(UploadedFile $file): bool
+    private function isValidCsvFile(UploadedFile|string $file): bool
     {
-        if ( ! $file->isValid()) {
-            return false;
+        if ($file instanceof UploadedFile) {
+            if ( ! $file->isValid()) {
+                return false;
+            }
+
+            $allowedExtensions = ['csv'];
+            $allowedMimeTypes = [
+                'text/csv',
+                'text/plain',
+                'application/csv',
+                'application/vnd.ms-excel',
+            ];
+
+            return in_array(mb_strtolower((string) $file->getClientOriginalExtension()), $allowedExtensions, true)
+                && in_array((string) $file->getMimeType(), $allowedMimeTypes, true);
         }
 
-        $allowedExtensions = ['csv'];
-        $allowedMimeTypes = [
-            'text/csv',
-            'text/plain',
-            'application/csv',
-            'application/vnd.ms-excel',
-        ];
-
-        return in_array(mb_strtolower((string) $file->getClientOriginalExtension()), $allowedExtensions, true)
-            && in_array((string) $file->getMimeType(), $allowedMimeTypes, true);
+        // File path validation
+        return file_exists($file) && is_readable($file) && str_ends_with(strtolower($file), '.csv');
     }
 
-    private function parseCsvFile(UploadedFile $file): array
+    private function parseCsvFile(UploadedFile|string $file): array
     {
         $csvData = [];
-        $handle = fopen($file->getPathname(), 'r');
+        $filePath = $file instanceof UploadedFile ? $file->getPathname() : $file;
+        $handle = fopen($filePath, 'r');
 
         if (false === $handle) {
             return [];

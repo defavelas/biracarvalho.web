@@ -44,11 +44,7 @@ final class ProcessCsvImport implements ShouldQueue
 
         try {
             $processor = new CsvProcessor();
-            $result = $processor->process(new \Illuminate\Http\UploadedFile(
-                path: storage_path('app/' . $this->filePath),
-                originalName: $this->originalName,
-                test: true,
-            ));
+            $result = $processor->process(\Illuminate\Support\Facades\Storage::path($this->filePath));
 
             $importJob->update([
                 'status' => $result['success'] ? ImportStatus::Completed : ImportStatus::Failed,
