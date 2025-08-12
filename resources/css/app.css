@@ -16,6 +16,36 @@
     --color-accent-dark: #2B433C;
 }
 
+@utility primary {
+  --tw-text-opacity: 1;
+  color: rgb(101 48 137 / var(--tw-text-opacity));
+}
+
+@utility bg-primary {
+  --tw-bg-opacity: 1;
+  background-color: rgb(101 48 137 / var(--tw-bg-opacity));
+}
+
+@utility border-primary {
+  --tw-border-opacity: 1;
+  border-color: rgb(101 48 137 / var(--tw-border-opacity));
+}
+
+@utility secondary {
+  --tw-text-opacity: 1;
+  color: rgb(206 216 66 / var(--tw-text-opacity));
+}
+
+@utility bg-secondary {
+  --tw-bg-opacity: 1;
+  background-color: rgb(206 216 66 / var(--tw-bg-opacity));
+}
+
+@utility accent-dark {
+  --tw-text-opacity: 1;
+  color: rgb(43 67 60 / var(--tw-text-opacity));
+}
+
 @utility result-highlighted {
     background-color: #f3f4f6;
     border-left: 4px solid #CED842;

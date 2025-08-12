@@ -27,7 +27,7 @@
         @endif
     </button>
 
-    <livewire:auth-modal />
+    
 
     <div aria-live="polite" aria-atomic="true" class="sr-only" id="status-updates">
         @if($sidebarCollapsed)
