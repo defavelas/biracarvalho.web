@@ -183,9 +183,10 @@ final class AccessibleLocationsProcess
                         'published_at' => null,
                     ]);
 
-                    Log::debug('Created image for location', [
+                    Log::debug('Created public image for location', [
                         'location_id' => $location->id,
                         'image_path' => $imagePath,
+                        'public_url' => Storage::url($imagePath),
                     ]);
                 }
 

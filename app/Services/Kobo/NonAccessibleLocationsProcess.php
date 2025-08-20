@@ -184,9 +184,10 @@ final class NonAccessibleLocationsProcess
                         'published_at' => null,
                     ]);
 
-                    Log::debug('Created image for non-accessible location', [
+                    Log::debug('Created public image for non-accessible location', [
                         'location_id' => $location->id,
                         'image_path' => $imagePath,
+                        'public_url' => Storage::url($imagePath),
                     ]);
                 }
 
