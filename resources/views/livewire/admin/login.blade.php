@@ -44,7 +44,9 @@
                 </div>
             </section>
             <footer class="mt-8 text-white text-xs font-mono">
-                &copy;Bira Carvalho, 2025. Tecnologia <span class="text-secondary">BSON Labs</span>.
+                &copy;Bira Carvalho, 2025. &hearts;
+                <a href="https://bsonlabs.com?utm_source=bira-carvalho" target="_blank" rel="noopener noreferrer"
+                    class="text-secondary hover:underline">BSON Labs</a>
             </footer>
         </div>
     </div>

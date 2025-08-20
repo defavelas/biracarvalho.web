@@ -11,8 +11,14 @@ use Livewire\Component;
 
 final class Login extends Component
 {
+    /**
+     * The login form.
+     */
     public LoginForm $form;
 
+    /**
+     * Mount the component.
+     */
     public function mount(): void
     {
         if (Auth::check()) {
@@ -20,13 +26,17 @@ final class Login extends Component
         }
     }
 
+    /**
+     * Login the user.
+     */
     public function login(): void
     {
-        $key = 'login_attempts:' . request()->ip();
+        $key = 'login_attempts:' . md5($this->form->username);
 
         if (RateLimiter::tooManyAttempts($key, 3)) {
             $seconds = RateLimiter::availableIn($key);
             $this->addError('form.username', 'Muitas tentativas de login. Tente novamente em ' . $seconds . ' segundos.');
+            
             return;
         }
 
@@ -39,18 +49,24 @@ final class Login extends Component
 
         if (Auth::attempt($credentials)) {
             RateLimiter::clear($key);
+            
             session()->regenerate();
+
             $this->redirect(route('admin.locations.records'));
         } else {
             RateLimiter::hit($key, 1800); // 30 minutes
+            
             $this->addError('form.username', 'Credenciais inválidas.');
         }
     }
 
+    /**
+     * Render the component.
+     */
     public function render()
     {
         return view('livewire.admin.login')
-            ->title('Programa Bira Carvalho: Login')
+            ->title('Programa Bira Carvalho: Acesso Restrito')
             ->layout('layouts.guest');
     }
 }
