@@ -28,6 +28,8 @@ return new class () extends Migration {
             
             $table->timestamp('published_at')->nullable();
 
+            $table->string('external_id')->nullable();
+
             $table->softDeletes();
             $table->timestamps();
 
