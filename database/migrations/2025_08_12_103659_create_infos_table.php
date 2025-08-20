@@ -14,17 +14,19 @@ return new class () extends Migration {
     {
         Schema::create('infos', function (Blueprint $table): void {
             $table->uuid('id')->primary();
-            
+
             $table->uuid('location_id');
 
             $table->string('title');
             $table->text('value');
 
+            $table->timestamps();
+
             $table->foreign('location_id')
                 ->references('id')
                 ->on('locations')
                 ->onDelete('cascade');
-                
+
             $table->index(['location_id']);
         });
     }

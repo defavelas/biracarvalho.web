@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-class UserSeeder extends Seeder
+final class UserSeeder extends Seeder
 {
     /**
      * Run the database seeder.
@@ -22,8 +22,7 @@ class UserSeeder extends Seeder
                 'email' => 'admin@biracarvalho.com.br',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
-            ]
+            ],
         );
     }
 }
-

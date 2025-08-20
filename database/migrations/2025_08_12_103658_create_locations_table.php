@@ -15,7 +15,7 @@ return new class () extends Migration {
     {
         Schema::create('locations', function (Blueprint $table): void {
             $table->uuid('id')->primary();
-            
+
             $table->string('name');
             $table->text('type');
 
@@ -23,9 +23,9 @@ return new class () extends Migration {
 
             $table->decimal('latitude', 10, 8);
             $table->decimal('longitude', 11, 8);
-            
+
             $table->string('authors')->nullable();
-            
+
             $table->timestamp('published_at')->nullable();
 
             $table->string('external_id')->nullable();

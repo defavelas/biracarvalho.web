@@ -37,7 +37,7 @@ final class Info extends Model
     /**
      * Get the location that the info belongs to.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function location(): BelongsTo
     {

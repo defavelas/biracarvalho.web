@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\LocationType;
+use App\Enum\Location\Category;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -29,6 +29,7 @@ final class Location extends Model
         'latitude',
         'longitude',
         'authors',
+        'external_id',
         'published_at',
     ];
 
@@ -38,7 +39,7 @@ final class Location extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'category' => Location\Category::class,
+        'category' => Category::class,
         'latitude' => 'decimal:8',
         'longitude' => 'decimal:8',
         'published_at' => 'datetime',
@@ -47,7 +48,7 @@ final class Location extends Model
     /**
      * Get the images for the location.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function images(): HasMany
     {
@@ -57,7 +58,7 @@ final class Location extends Model
     /**
      * Get the infos for the location.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function infos(): HasMany
     {

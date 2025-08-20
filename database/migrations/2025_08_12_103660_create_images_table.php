@@ -24,7 +24,7 @@ return new class () extends Migration {
                 ->references('id')
                 ->on('locations')
                 ->onDelete('cascade');
-                
+
             $table->index(['location_id']);
             $table->index(['published_at']);
         });

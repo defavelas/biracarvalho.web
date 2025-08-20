@@ -36,7 +36,7 @@ final class Login extends Component
         if (RateLimiter::tooManyAttempts($key, 3)) {
             $seconds = RateLimiter::availableIn($key);
             $this->addError('form.username', 'Muitas tentativas de login. Tente novamente em ' . $seconds . ' segundos.');
-            
+
             return;
         }
 
@@ -49,13 +49,13 @@ final class Login extends Component
 
         if (Auth::attempt($credentials)) {
             RateLimiter::clear($key);
-            
+
             session()->regenerate();
 
             $this->redirect(route('admin.locations.records'));
         } else {
             RateLimiter::hit($key, 1800); // 30 minutes
-            
+
             $this->addError('form.username', 'Credenciais inválidas.');
         }
     }

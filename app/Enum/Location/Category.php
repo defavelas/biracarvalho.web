@@ -23,6 +23,16 @@ enum Category: string
     }
 
     /**
+     * Get the values for the type.
+     *
+     * @return array<string>
+     */
+    public static function values(): array
+    {
+        return array_column(self::cases(), 'value');
+    }
+
+    /**
      * Get the label for the type.
      *
      * @return string
@@ -48,15 +58,5 @@ enum Category: string
             self::PARTIALLY_ACCESSIBLE => 'yellow',
             self::NOT_ACCESSIBLE => 'red',
         };
-    }
-
-    /**
-     * Get the values for the type.
-     *
-     * @return array<string>
-     */
-    public static function values(): array
-    {
-        return array_column(self::cases(), 'value');
     }
 }
