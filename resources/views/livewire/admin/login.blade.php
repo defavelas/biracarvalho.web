@@ -34,7 +34,7 @@
                         </p>
                     </div>
 
-                    <div class="flex items-start space-x-3">
+                    <div class="flex items-start space-x-2">
                         <div class="w-2 h-2 bg-secondary rounded-full mt-2.5 flex-shrink-0"></div>
                         <p class="text-sm xl:text-base">
                             <strong class="text-secondary">Impacto Social:</strong>
@@ -43,6 +43,9 @@
                     </div>
                 </div>
             </section>
+            <footer class="mt-8 text-white text-xs font-mono">
+                &copy;Bira Carvalho, 2025. Tecnologia <span class="text-secondary">BSON Labs</span>.
+            </footer>
         </div>
     </div>
 
