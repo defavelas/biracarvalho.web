@@ -239,12 +239,12 @@ final class NonAccessibleLocationsProcess
                 throw new Exception("HTTP {$response->status()}: {$response->body()}");
             }
 
-            // Generate file path
+            // Generate file path for public access
             $extension = $this->getExtensionFromMimeType($mimeType);
             $filename = Str::uuid() . '.' . $extension;
-            $path = 'images/locations/' . $filename;
+            $path = 'public/images/locations/' . $filename;
 
-            // Store the file
+            // Store the file in public disk
             Storage::put($path, $response->body());
 
             return $path;
