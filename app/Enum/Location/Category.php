@@ -8,7 +8,7 @@ enum Category: string
 {
     case ACCESSIBLE = 'accessible';
     case PARTIALLY_ACCESSIBLE = 'partially_accessible';
-    case NOT_ACCESSIBLE = 'not_accessible';
+    case NON_ACCESSIBLE = 'non_accessible';
 
     /**
      * Get the options for the type.
@@ -42,7 +42,7 @@ enum Category: string
         return match ($this) {
             self::ACCESSIBLE => __('Acessível'),
             self::PARTIALLY_ACCESSIBLE => __('Parcialmente Acessível'),
-            self::NOT_ACCESSIBLE => __('Não Acessível'),
+            self::NON_ACCESSIBLE => __('Não Acessível'),
         };
     }
 
@@ -56,7 +56,7 @@ enum Category: string
         return match ($this) {
             self::ACCESSIBLE => 'green',
             self::PARTIALLY_ACCESSIBLE => 'yellow',
-            self::NOT_ACCESSIBLE => 'red',
+            self::NON_ACCESSIBLE => 'red',
         };
     }
 }
