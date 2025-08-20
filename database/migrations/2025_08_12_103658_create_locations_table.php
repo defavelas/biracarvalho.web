@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\LocationType;
+use App\Enum\Location;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,21 +15,23 @@ return new class () extends Migration {
     {
         Schema::create('locations', function (Blueprint $table): void {
             $table->uuid('id')->primary();
-            $table->enum('type', [
-                LocationType::ACCESSIBLE->value,
-                LocationType::PARTIALLY_ACCESSIBLE->value,
-                LocationType::NOT_ACCESSIBLE->value,
-            ]);
+            
             $table->string('name');
-            $table->text('address');
-            $table->longText('description')->nullable();
+            $table->text('type');
+
+            $table->enum('category', Location\Category::values());
+
             $table->decimal('latitude', 10, 8);
             $table->decimal('longitude', 11, 8);
+            
+            $table->string('authors')->nullable();
+            
             $table->timestamp('published_at')->nullable();
+
             $table->softDeletes();
             $table->timestamps();
 
-            $table->index(['type']);
+            $table->index(['category']);
             $table->index(['published_at']);
             $table->index(['latitude', 'longitude']);
         });

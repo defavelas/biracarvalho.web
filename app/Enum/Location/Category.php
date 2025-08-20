@@ -2,14 +2,19 @@
 
 declare(strict_types=1);
 
-namespace App\Enums;
+namespace App\Enum\Location;
 
-enum LocationType: string
+enum Category: string
 {
     case ACCESSIBLE = 'accessible';
     case PARTIALLY_ACCESSIBLE = 'partially_accessible';
     case NOT_ACCESSIBLE = 'not_accessible';
 
+    /**
+     * Get the options for the type.
+     *
+     * @return array<string, string>
+     */
     public static function options(): array
     {
         return collect(self::cases())
@@ -17,6 +22,11 @@ enum LocationType: string
             ->toArray();
     }
 
+    /**
+     * Get the label for the type.
+     *
+     * @return string
+     */
     public function label(): string
     {
         return match ($this) {
@@ -26,6 +36,11 @@ enum LocationType: string
         };
     }
 
+    /**
+     * Get the color for the type.
+     *
+     * @return string
+     */
     public function color(): string
     {
         return match ($this) {
@@ -33,5 +48,15 @@ enum LocationType: string
             self::PARTIALLY_ACCESSIBLE => 'yellow',
             self::NOT_ACCESSIBLE => 'red',
         };
+    }
+
+    /**
+     * Get the values for the type.
+     *
+     * @return array<string>
+     */
+    public static function values(): array
+    {
+        return array_column(self::cases(), 'value');
     }
 }

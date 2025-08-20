@@ -16,15 +16,6 @@ Route::prefix('admin')->group(function (): void {
         Route::get('/locations', Livewire\Admin\Locations\Records::class)
             ->name('admin.locations.records');
 
-        Route::get('/locations/create', Livewire\Admin\Locations\Create::class)
-            ->name('admin.locations.create');
-
-        Route::get('/locations/{location}/edit', Livewire\Admin\Locations\Edit::class)
-            ->name('admin.locations.edit');
-
-        Route::get('/csv-import', Livewire\Admin\CsvImport::class)
-            ->name('admin.csv-import');
-
         Route::post('/logout', function () {
             auth()->logout();
             session()->invalidate();

@@ -17,59 +17,61 @@ final class Location extends Model
     use HasUuids;
     use SoftDeletes;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'type',
         'name',
-        'address',
-        'description',
+        'category',
         'latitude',
         'longitude',
+        'authors',
         'published_at',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
-        'type' => LocationType::class,
+        'category' => Location\Category::class,
         'latitude' => 'decimal:8',
         'longitude' => 'decimal:8',
         'published_at' => 'datetime',
     ];
 
+    /**
+     * Get the images for the location.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function images(): HasMany
     {
         return $this->hasMany(Image::class);
     }
 
+    /**
+     * Get the infos for the location.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function infos(): HasMany
+    {
+        return $this->hasMany(Info::class);
+    }
+
+    /**
+     * Scope a query to only include published locations.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopePublished($query)
     {
         return $query->whereNotNull('published_at');
-    }
-
-    public function scopeByType($query, LocationType $type)
-    {
-        return $query->where('type', $type);
-    }
-
-    public function scopeSearch($query, string $search)
-    {
-        return $query->where(function ($q) use ($search): void {
-            $q->where('name', 'like', "%{$search}%")
-                ->orWhere('address', 'like', "%{$search}%")
-                ->orWhere('description', 'like', "%{$search}%");
-        });
-    }
-
-    public function isPublished(): bool
-    {
-        return null !== $this->published_at;
-    }
-
-    public function publish(): void
-    {
-        $this->update(['published_at' => now()]);
-    }
-
-    public function unpublish(): void
-    {
-        $this->update(['published_at' => null]);
     }
 }

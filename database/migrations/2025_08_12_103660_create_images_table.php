@@ -20,7 +20,11 @@ return new class () extends Migration {
             $table->softDeletes();
             $table->timestamps();
 
-            $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
+            $table->foreign('location_id')
+                ->references('id')
+                ->on('locations')
+                ->onDelete('cascade');
+                
             $table->index(['location_id']);
             $table->index(['published_at']);
         });
