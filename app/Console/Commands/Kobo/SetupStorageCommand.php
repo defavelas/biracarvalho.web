@@ -32,36 +32,36 @@ final class SetupStorageCommand extends Command
             // Create public images directory if it doesn't exist
             $publicImagesPath = storage_path('app/public/images/locations');
             
-            if (!File::exists($publicImagesPath)) {
+            if ( ! File::exists($publicImagesPath)) {
                 File::makeDirectory($publicImagesPath, 0755, true);
-                $this->info('✓ Created public images directory: ' . $publicImagesPath);
+                $this->info('Created public images directory: ' . $publicImagesPath);
             } else {
-                $this->info('✓ Public images directory already exists');
+                $this->info('Public images directory already exists');
             }
 
             // Create storage link if it doesn't exist
             $linkPath = public_path('storage');
             
-            if (!File::exists($linkPath)) {
+            if ( ! File::exists($linkPath)) {
                 $this->call('storage:link');
-                $this->info('✓ Storage symlink created');
+                $this->info('Storage symlink created');
             } else {
-                $this->info('✓ Storage symlink already exists');
+                $this->info('Storage symlink already exists');
             }
 
             // Test public access
             $testUrl = asset('storage/images/locations/');
             $this->newLine();
-            $this->info('🎯 Images will be accessible at: ' . $testUrl);
-            $this->comment('Example URL: ' . $testUrl . 'uuid.jpg');
+            $this->info('Images will be accessible at: ' . $testUrl);
+            $this->comment('Example URL: ' . $testUrl . 'example-uuid.jpg');
             
             $this->newLine();
-            $this->info('✅ Kobo storage setup completed successfully!');
+            $this->info('Kobo storage setup completed successfully!');
             
             return self::SUCCESS;
             
         } catch (\Exception $e) {
-            $this->error('❌ Setup failed: ' . $e->getMessage());
+            $this->error('Setup failed: ' . $e->getMessage());
             return self::FAILURE;
         }
     }

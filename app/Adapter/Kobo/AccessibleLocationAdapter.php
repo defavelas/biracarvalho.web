@@ -228,23 +228,11 @@ final class AccessibleLocationAdapter
     {
         // Basic decoding - replace underscores with spaces and clean up
         $title = str_replace('_', ' ', $key);
-        $title = preg_replace('/^\d+\s+/', '', $title); // Remove leading numbers
+        $title = preg_replace('/^\d+\s+/', '', $title);
         $title = Str::title($title);
 
-        // Custom mappings for known question patterns
-        $mappings = [
-            '_1_Na_sua_perspectiva_este_lu' => 'Na sua perspectiva, este lugar é acessível?',
-            '_4_Compartilhe_a_localiza_o' => 'Localização GPS',
-            '_5_Quais_elementos_to_trutura_e_mobilidade' => 'Elementos de infraestrutura e mobilidade',
-            '_5_1_Quais_elementos_porte_e_deslocamento' => 'Elementos de transporte e deslocamento',
-            '_5_2_Quais_elementos_omunica_o_e_intera_o' => 'Elementos de comunicação e interação',
-            '_5_3_Quais_s_o_os_ou_este_local_acess_vel' => 'Outros aspectos que tornam este local acessível',
-            '_6_O_entorno_imediat_se_local_acess_vel' => 'O entorno imediato deste local é acessível?',
-            '_6_1_Se_n_o_for_acess_descreva_o_problema' => 'Descreva o problema de acessibilidade',
-            '_7_Tire_uma_foto_que_mostre_o_local' => 'Foto do local',
-            '_8_Tire_mais_uma_fot_gora_de_outro_ngulo' => 'Segunda foto do local',
-            '_9_Grave_um_udio_ex_esse_lugar_acess_vel' => 'Áudio explicativo',
-        ];
+        // Get question title mappings from config
+        $mappings = config('kobo.accessible', []);
 
         return $mappings[$key] ?? $title;
     }

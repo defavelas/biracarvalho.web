@@ -242,10 +242,10 @@ final class AccessibleLocationsProcess
             // Generate file path for public access
             $extension = $this->getExtensionFromMimeType($mimeType);
             $filename = Str::uuid() . '.' . $extension;
-            $path = 'public/images/locations/' . $filename;
+            $path = 'images/locations/' . $filename;
 
             // Store the file in public disk
-            Storage::put($path, $response->body());
+            Storage::disk('public')->put($path, $response->body());
 
             return $path;
 

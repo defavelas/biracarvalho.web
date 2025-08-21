@@ -60,8 +60,8 @@ final class Image extends Model
     protected static function booted(): void
     {
         static::deleting(function (Image $image): void {
-            if (Storage::exists($image->image_path)) {
-                Storage::delete($image->image_path);
+            if (Storage::disk('public')->exists($image->image_path)) {
+                Storage::disk('public')->delete($image->image_path);
             }
         });
     }

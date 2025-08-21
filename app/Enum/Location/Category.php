@@ -7,7 +7,6 @@ namespace App\Enum\Location;
 enum Category: string
 {
     case ACCESSIBLE = 'accessible';
-    case PARTIALLY_ACCESSIBLE = 'partially_accessible';
     case NON_ACCESSIBLE = 'non_accessible';
 
     /**
@@ -41,7 +40,6 @@ enum Category: string
     {
         return match ($this) {
             self::ACCESSIBLE => __('Acessível'),
-            self::PARTIALLY_ACCESSIBLE => __('Parcialmente Acessível'),
             self::NON_ACCESSIBLE => __('Não Acessível'),
         };
     }
@@ -55,7 +53,6 @@ enum Category: string
     {
         return match ($this) {
             self::ACCESSIBLE => 'green',
-            self::PARTIALLY_ACCESSIBLE => 'yellow',
             self::NON_ACCESSIBLE => 'red',
         };
     }
