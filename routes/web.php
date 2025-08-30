@@ -7,6 +7,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', Livewire\App::class)->name('map');
 
+Route::get('/api/locations/map', function () {
+    $locationService = app(\App\Services\LocationService::class);
+    $locations = $locationService->getPublishedLocationsForMap();
+    return response()->json($locationService->transformCollectionForMap($locations));
+});
+
 Route::get('/admin', fn() => redirect()->route('admin.dashboard'));
 
 Route::prefix('admin')->group(function (): void {

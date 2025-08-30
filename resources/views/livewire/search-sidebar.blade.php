@@ -27,24 +27,19 @@
                     <!-- Filter buttons with labels (row 1) -->
                     <div class="flex flex-wrap justify-start items-center gap-2 my-2">
                             <button type="button" 
-                                    wire:click="$toggle('accessibilityFilters.acessivel')"
-                                    class="flex items-center gap-1 px-2 py-1 rounded-full border border-black/20 text-xs transition-all duration-200 {{ $accessibilityFilters['acessivel'] ? 'bg-green-500 border-green-500 text-black font-medium' : 'bg-black/20 text-white/80 font-medium' }}"
-                                    aria-label="{{ $accessibilityFilters['acessivel'] ? 'Desativar filtro Acessível' : 'Ativar filtro Acessível' }}">
-                                <div class="w-2 h-2 rounded-full {{ $accessibilityFilters['acessivel'] ? 'bg-white' : 'bg-green-500' }}"></div>
+                                    wire:click="$toggle('categoryFilters.accessible')"
+                                    class="flex items-center gap-1 px-2 py-1 rounded-full border border-black/20 text-xs transition-all duration-200 {{ $categoryFilters['accessible'] ? 'bg-green-500 border-green-500 text-black font-medium' : 'bg-black/20 text-white/80 font-medium' }}"
+                                    aria-label="{{ $categoryFilters['accessible'] ? 'Desativar filtro Acessível' : 'Ativar filtro Acessível' }}"
+                                    aria-pressed="{{ $categoryFilters['accessible'] ? 'true' : 'false' }}">
+                                <div class="w-2 h-2 rounded-full {{ $categoryFilters['accessible'] ? 'bg-white' : 'bg-green-500' }}"></div>
                                 <span>Acessível</span>
                             </button>
                             <button type="button" 
-                                    wire:click="$toggle('accessibilityFilters.parcial_acessivel')"
-                                    class="flex items-center gap-1 px-2 py-1 rounded-full border border-black/20 text-xs transition-all duration-200 {{ $accessibilityFilters['parcial_acessivel'] ? 'bg-yellow-500 border-yellow-500 text-black font-medium' : 'bg-black/20 text-white/80 font-medium' }}"
-                                    aria-label="{{ $accessibilityFilters['parcial_acessivel'] ? 'Desativar filtro Parcialmente Acessível' : 'Ativar filtro Parcialmente Acessível' }}">
-                                <div class="w-2 h-2 rounded-full {{ $accessibilityFilters['parcial_acessivel'] ? 'bg-white' : 'bg-yellow-500' }}"></div>
-                                <span>Parcial</span>
-                            </button>
-                            <button type="button" 
-                                    wire:click="$toggle('accessibilityFilters.nao_acessivel')"
-                                    class="flex items-center gap-1 px-2 py-1 rounded-full border border-black/20 text-xs transition-all duration-200 {{ $accessibilityFilters['nao_acessivel'] ? 'bg-accent-orange border-accent-orange text-black font-medium' : 'bg-black/20 text-white/80 font-medium' }}"
-                                    aria-label="{{ $accessibilityFilters['nao_acessivel'] ? 'Desativar filtro Não Acessível' : 'Ativar filtro Não Acessível' }}">
-                                <div class="w-2 h-2 rounded-full {{ $accessibilityFilters['nao_acessivel'] ? 'bg-white' : 'bg-accent-orange' }}"></div>
+                                    wire:click="$toggle('categoryFilters.non_accessible')"
+                                    class="flex items-center gap-1 px-2 py-1 rounded-full border border-black/20 text-xs transition-all duration-200 {{ $categoryFilters['non_accessible'] ? 'bg-red-500 border-red-500 text-white font-medium' : 'bg-black/20 text-white/80 font-medium' }}"
+                                    aria-label="{{ $categoryFilters['non_accessible'] ? 'Desativar filtro Não Acessível' : 'Ativar filtro Não Acessível' }}"
+                                    aria-pressed="{{ $categoryFilters['non_accessible'] ? 'true' : 'false' }}">
+                                <div class="w-2 h-2 rounded-full {{ $categoryFilters['non_accessible'] ? 'bg-white' : 'bg-red-500' }}"></div>
                                 <span>Não Acessível</span>
                             </button>
                     </div>
@@ -54,7 +49,7 @@
                         <p class="text-xs font-mono text-white/90 min-h-8 flex items-center">
                             {{ $totalResults }} {{ $totalResults === 1 ? 'local' : 'locais' }}
                         </p>
-                        @if (array_sum($accessibilityFilters) > 0 || !empty($search))
+                        @if (array_sum($categoryFilters) > 0 || !empty($search))
                             <button wire:click="clearFilters"
                                 class="flex items-center justify-center w-8 h-8 bg-black/20 hover:bg-black/30 rounded-full text-white/80 hover:text-white transition-colors duration-200"
                                 aria-label="Limpar todos os filtros">
@@ -67,7 +62,7 @@
         </div>
 
         <!-- Mobile search results cards (50% screen height) -->
-        @if((!empty($search) || array_sum($accessibilityFilters) > 0) && $resultsOpen)
+        @if((!empty($search) || array_sum($categoryFilters) > 0) && $resultsOpen)
         <div class="fixed bottom-0 left-0 right-0 h-[50vh] bg-primary/95 backdrop-blur-sm z-[999] transform transition-all duration-300 ease-in-out translate-y-0"
              style="background-image: linear-gradient(to bottom, rgba(101, 48, 137, 0.95), rgba(101, 48, 137, 0.98));">
             
@@ -88,7 +83,7 @@
                             aria-label="Fechar resultados para melhor navegação no mapa">
                             @svg('heroicon-o-x-mark', 'w-4 h-4')
                         </button>
-                        @if (array_sum($accessibilityFilters) > 0 || !empty($search))
+                        @if (array_sum($categoryFilters) > 0 || !empty($search))
                             <button wire:click="clearFilters"
                                 class="flex items-center justify-center w-8 h-8 bg-black/30 hover:bg-black/50 rounded-full text-white/70 hover:text-white transition-all duration-200"
                                 aria-label="Limpar todos os filtros">
@@ -108,7 +103,7 @@
                             data-location-id="{{ $result['id'] }}" 
                             role="button" 
                             tabindex="0"
-                            aria-label="Ver {{ $result['name'] }} no mapa - {{ $result['accessibility_level'] === 'acessivel' ? 'Acessível' : '' }}{{ $result['accessibility_level'] === 'parcial_acessivel' ? 'Parcialmente Acessível' : '' }}{{ $result['accessibility_level'] === 'nao_acessivel' ? 'Não Acessível' : '' }}"
+                            aria-label="Ver {{ $result['name'] }} no mapa - {{ $result['categoryLabel'] }}"
                             wire:click="focusLocation('{{ $result['id'] }}')"
                             wire:keydown.enter="focusLocation('{{ $result['id'] }}')"
                             wire:keydown.space="focusLocation('{{ $result['id'] }}')"
@@ -117,10 +112,7 @@
                             <div class="flex items-start justify-between">
                                 <div class="flex-1 space-y-2">
                                     <div class="flex items-start gap-2">
-                                        <div class="w-3 h-3 rounded-full mt-1 flex-shrink-0
-                                            {{ $result['accessibility_level'] === 'acessivel' ? 'bg-green-500' : '' }}
-                                            {{ $result['accessibility_level'] === 'parcial_acessivel' ? 'bg-yellow-500' : '' }}
-                                            {{ $result['accessibility_level'] === 'nao_acessivel' ? 'bg-accent-orange' : '' }}"
+                                        <div class="w-3 h-3 rounded-full mt-1 flex-shrink-0 bg-{{ $result['categoryColor'] }}-500"
                                             aria-hidden="true">
                                         </div>
                                         <div class="flex-1 min-w-0">
@@ -128,27 +120,27 @@
                                                 {{ $result['name'] }}
                                             </h4>
                                             <p class="text-xs text-white/70 leading-relaxed line-clamp-2">
-                                                {{ $result['address'] }}
+                                                {{ $result['type'] ?? 'Local de acessibilidade' }}
                                             </p>
+                                            @if($result['authors'])
+                                                <p class="text-xs text-white/60 leading-relaxed">
+                                                    Por: {{ $result['authors'] }}
+                                                </p>
+                                            @endif
                                         </div>
                                     </div>
 
                                     <div class="flex items-center justify-between">
                                         <span
-                                            class="inline-flex items-center px-2 py-0.5 leading-4 font-medium rounded-full text-xs text-black/75
-                                            {{ $result['accessibility_level'] === 'acessivel' ? 'bg-green-500' : '' }}
-                                            {{ $result['accessibility_level'] === 'parcial_acessivel' ? 'bg-yellow-500' : '' }}
-                                            {{ $result['accessibility_level'] === 'nao_acessivel' ? 'bg-accent-orange' : '' }}">
-                                            {{ $result['accessibility_level'] === 'acessivel' ? 'Acessível' : '' }}
-                                            {{ $result['accessibility_level'] === 'parcial_acessivel' ? 'Parcial' : '' }}
-                                            {{ $result['accessibility_level'] === 'nao_acessivel' ? 'Não Acessível' : '' }}
+                                            class="inline-flex items-center px-2 py-0.5 leading-4 font-medium rounded-full text-xs text-white bg-{{ $result['categoryColor'] }}-500">
+                                            {{ $result['categoryLabel'] }}
                                         </span>
 
                                         @if (isset($result['images']) && count($result['images']) > 0)
                                             <div class="flex -space-x-1">
                                                 @foreach (array_slice($result['images'], 0, 2) as $index => $image)
                                                     <div class="w-6 h-6 rounded-full overflow-hidden bg-black/25 border border-white/30">
-                                                        <img src="{{ $image }}"
+                                                        <img src="{{ $image['url'] }}"
                                                             alt="Imagem {{ $index + 1 }} de {{ $result['name'] }}"
                                                             class="w-full h-full object-cover" loading="lazy">
                                                     </div>
@@ -183,7 +175,7 @@
         @endif
 
         <!-- Results indicator when closed -->
-        @if((!empty($search) || array_sum($accessibilityFilters) > 0) && !$resultsOpen && $totalResults > 0)
+        @if((!empty($search) || array_sum($categoryFilters) > 0) && !$resultsOpen && $totalResults > 0)
         <div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[998]" id="mobile-results-indicator">
             <button wire:click="openResults"
                 class="flex items-center gap-2 bg-secondary text-primary px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 text-sm font-medium"
@@ -235,9 +227,9 @@
             <fieldset class="space-y-3 md:space-y-2 mb-3 md:mb-2">
                 <div class="flex items-center justify-between">
                     <legend class="text-base md:text-lg font-semibold text-white">
-                        Acessibilidade
+                        Categoria de Acessibilidade
                     </legend>
-                    @if (array_sum($accessibilityFilters) > 0 || !empty($search))
+                    @if (array_sum($categoryFilters) > 0 || !empty($search))
                         <button wire:click="clearFilters"
                             class="flex items-center justify-center w-8 h-8 md:w-auto md:h-auto text-sm text-primary font-semibold hover:underline cursor-pointer focus:outline-none focus:underline"
                             aria-label="Limpar todos os filtros">
@@ -247,17 +239,13 @@
                 </div>
 
                 <div class="space-y-3 md:space-y-2 mb-3 md:mb-2" wire:key="filter-toggles">
-                    <x-toggle-button wire:model.live="accessibilityFilters.acessivel" :value="$accessibilityFilters['acessivel']"
+                    <x-toggle-button wire:model.live="categoryFilters.accessible" :value="$categoryFilters['accessible']"
                         label="Acessível" trackClass="bg-black/20 border-white" thumbClass="bg-green-500"
-                        labelClass="text-white text-sm" wire:key="filter-acessivel" />
+                        labelClass="text-white text-sm" wire:key="filter-accessible" />
 
-                    <x-toggle-button wire:model.live="accessibilityFilters.parcial_acessivel" :value="$accessibilityFilters['parcial_acessivel']"
-                        label="Parcialmente Acessível" trackClass="bg-black/20 border-white"
-                        thumbClass="bg-yellow-500" labelClass="text-white text-sm" wire:key="filter-parcial" />
-
-                    <x-toggle-button wire:model.live="accessibilityFilters.nao_acessivel" :value="$accessibilityFilters['nao_acessivel']"
-                        label="Não Acessível" trackClass="bg-black/20 border-white" thumbClass="bg-accent-orange"
-                        labelClass="text-white text-sm" wire:key="filter-nao-acessivel" />
+                    <x-toggle-button wire:model.live="categoryFilters.non_accessible" :value="$categoryFilters['non_accessible']"
+                        label="Não Acessível" trackClass="bg-black/20 border-white" thumbClass="bg-red-500"
+                        labelClass="text-white text-sm" wire:key="filter-non-accessible" />
                 </div>
             </fieldset>
 
@@ -270,12 +258,12 @@
 
         <!-- Mobile-optimized results section -->
         <main class="flex-1 overflow-y-auto soft-scrollbar p-2 md:p-2 safe-area-bottom">
-            <div class="space-y-2" wire:key="results-{{ md5(json_encode($accessibilityFilters) . $search) }}">
+            <div class="space-y-2" wire:key="results-{{ md5(json_encode($categoryFilters) . $search) }}">
                 @forelse($results as $result)
                     <article
                         class="bg-black/20 border-1 {{ $selectedLocationId == $result['id'] ? 'bg-secondary !text-primary shadow-md' : '!text-white border-black/30' }} rounded-lg p-3 md:p-2.5 hover:shadow-md hover:border-secondary cursor-pointer transition-all duration-200 group"
                         data-location-id="{{ $result['id'] }}" role="button" tabindex="0"
-                        aria-label="Ver {{ $result['name'] }} no mapa - {{ $result['accessibility_level'] === 'acessivel' ? 'Acessível' : '' }}{{ $result['accessibility_level'] === 'parcial_acessivel' ? 'Parcialmente Acessível' : '' }}{{ $result['accessibility_level'] === 'nao_acessivel' ? 'Não Acessível' : '' }}"
+                        aria-label="Ver {{ $result['name'] }} no mapa - {{ $result['categoryLabel'] }}"
                         wire:click="focusLocation('{{ $result['id'] }}')"
                         wire:keydown.enter="focusLocation('{{ $result['id'] }}')"
                         wire:keydown.space="focusLocation('{{ $result['id'] }}')"
@@ -283,10 +271,7 @@
                         <div class="flex items-start justify-between space-x-3 md:space-x-2">
                             <div class="flex-1 space-y-2">
                                 <div class="flex items-start space-x-2">
-                                    <div class="w-4 h-4 md:w-3 md:h-3 rounded-full mt-1 flex-shrink-0
-                                        {{ $result['accessibility_level'] === 'acessivel' ? 'bg-green-500' : '' }}
-                                        {{ $result['accessibility_level'] === 'parcial_acessivel' ? 'bg-yellow-500' : '' }}
-                                        {{ $result['accessibility_level'] === 'nao_acessivel' ? 'bg-accent-orange' : '' }}"
+                                    <div class="w-4 h-4 md:w-3 md:h-3 rounded-full mt-1 flex-shrink-0 bg-{{ $result['categoryColor'] }}-500"
                                         aria-hidden="true">
                                     </div>
                                     <div class="flex-1">
@@ -294,8 +279,13 @@
                                             {{ $result['name'] }}
                                         </h3>
                                         <p class="text-sm md:text-xs leading-relaxed">
-                                            {{ $result['address'] }}
+                                            {{ $result['type'] ?? 'Local de acessibilidade' }}
                                         </p>
+                                        @if($result['authors'])
+                                            <p class="text-xs text-{{ $selectedLocationId == $result['id'] ? 'primary' : 'white' }}/60 leading-relaxed">
+                                                Por: {{ $result['authors'] }}
+                                            </p>
+                                        @endif
                                     </div>
                                 </div>
 
@@ -310,7 +300,7 @@
 
                                         @foreach ($displayImages as $index => $image)
                                             <div class="relative w-14 h-14 md:w-12 md:h-12 rounded-md overflow-hidden bg-black/20 flex-shrink-0">
-                                                <img src="{{ $image }}"
+                                                <img src="{{ $image['url'] }}"
                                                     alt="Imagem {{ $index + 1 }} de {{ $result['name'] }}"
                                                     class="w-full h-full object-cover" loading="lazy">
                                             </div>
@@ -337,13 +327,8 @@
 
                                 <div class="flex items-center justify-between">
                                     <span
-                                        class="inline-flex items-center px-2.5 py-1.5 md:px-2 md:py-1 leading-5 font-semibold rounded-full text-sm md:text-xs text-black/75
-                                        {{ $result['accessibility_level'] === 'acessivel' ? 'bg-green-500' : '' }}
-                                        {{ $result['accessibility_level'] === 'parcial_acessivel' ? 'bg-yellow-500' : '' }}
-                                        {{ $result['accessibility_level'] === 'nao_acessivel' ? 'bg-accent-orange' : '' }}">
-                                        {{ $result['accessibility_level'] === 'acessivel' ? 'Acessível' : '' }}
-                                        {{ $result['accessibility_level'] === 'parcial_acessivel' ? 'Parcialmente Acessível' : '' }}
-                                        {{ $result['accessibility_level'] === 'nao_acessivel' ? 'Não Acessível' : '' }}
+                                        class="inline-flex items-center px-2.5 py-1.5 md:px-2 md:py-1 leading-5 font-semibold rounded-full text-sm md:text-xs text-white bg-{{ $result['categoryColor'] }}-500">
+                                        {{ $result['categoryLabel'] }}
                                     </span>
 
                                     @if (isset($result['latitude']) && isset($result['longitude']))

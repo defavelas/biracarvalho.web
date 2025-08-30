@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Enum\Location\Category;
+use App\Services\LocationService;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -11,10 +13,9 @@ final class SearchSidebar extends Component
 {
     public string $search = '';
 
-    public array $accessibilityFilters = [
-        'acessivel' => false,
-        'nao_acessivel' => false,
-        'parcial_acessivel' => false,
+    public array $categoryFilters = [
+        'accessible' => false,
+        'non_accessible' => false,
     ];
 
     public bool $collapsed = false;
@@ -54,13 +55,13 @@ final class SearchSidebar extends Component
     }
 
     /**
-     * Handle accessibility filter updates.
+     * Handle category filter updates.
      */
-    public function updatedAccessibilityFilters(): void
+    public function updatedCategoryFilters(): void
     {
         $this->loadResults();
         $this->dispatch('results-updated', results: $this->results);
-        if (array_sum($this->accessibilityFilters) > 0) {
+        if (array_sum($this->categoryFilters) > 0) {
             $this->resultsOpen = true;
         }
     }
@@ -78,10 +79,9 @@ final class SearchSidebar extends Component
      */
     public function clearFilters(): void
     {
-        $this->accessibilityFilters = [
-            'acessivel' => false,
-            'nao_acessivel' => false,
-            'parcial_acessivel' => false,
+        $this->categoryFilters = [
+            'accessible' => false,
+            'non_accessible' => false,
         ];
 
         $this->search = '';
@@ -150,21 +150,33 @@ final class SearchSidebar extends Component
      */
     private function loadResults(): void
     {
-        $mockResults = config('places.mock_locations', []);
+        try {
+            $locationService = app(LocationService::class);
+            
+            $activeCategories = array_keys(array_filter($this->categoryFilters ?? []));
+            
+            // Ensure we always pass an array
+            if (!is_array($activeCategories)) {
+                $activeCategories = [];
+            }
+            
+            $locations = $locationService->searchLocations($this->search ?? '', $activeCategories);
+            
+            $this->results = $locationService->transformCollectionForMap($locations);
+            $this->totalResults = count($this->results);
 
-        if ( ! empty($this->search)) {
-            $mockResults = array_filter($mockResults, fn($result) => false !== mb_stripos($result['name'], $this->search) ||
-                       false !== mb_stripos($result['address'], $this->search));
+            $this->dispatch('results-updated', results: $this->results);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error loading results in SearchSidebar', [
+                'error' => $e->getMessage(),
+                'search' => $this->search ?? null,
+                'categoryFilters' => $this->categoryFilters ?? null,
+            ]);
+            
+            // Fallback to empty results
+            $this->results = [];
+            $this->totalResults = 0;
+            $this->dispatch('results-updated', results: $this->results);
         }
-
-        $activeFilters = array_keys(array_filter($this->accessibilityFilters));
-        if ( ! empty($activeFilters)) {
-            $mockResults = array_filter($mockResults, fn($result) => in_array($result['accessibility_level'], $activeFilters));
-        }
-
-        $this->results = array_values($mockResults);
-        $this->totalResults = count($this->results);
-
-        $this->dispatch('results-updated', results: $this->results);
     }
 }
