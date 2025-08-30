@@ -52,6 +52,10 @@ final class Records extends Component
     {
         if ($this->selectedLocation) {
             $this->selectedLocation->delete();
+            
+            // Clear location caches when a location is deleted
+            app(\App\Services\LocationService::class)->clearCache();
+            
             $this->showDeleteModal = false;
             $this->selectedLocation = null;
 

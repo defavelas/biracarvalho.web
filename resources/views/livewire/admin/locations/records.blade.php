@@ -29,24 +29,29 @@
                 for="search"
             />
             
-            <div>
-                <label for="category-filter" class="block text-sm font-medium text-white/90 mb-2">Categoria</label>
-                <select wire:model.live="categoryFilter" id="category-filter" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/60 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary/50">
-                    <option value="">Todas as categorias</option>
-                    @foreach($categories as $value => $label)
-                        <option value="{{ $value }}" class="text-gray-900">{{ $label }}</option>
-                    @endforeach
-                </select>
-            </div>
+            <x-select
+                wire:model.live="categoryFilter"
+                label="Categoria"
+                placeholder="Todas as categorias"
+                theme="dark"
+                :options="collect([['value' => '', 'label' => 'Todas as categorias']])->merge(collect($categories)->map(fn($label, $value) => ['value' => $value, 'label' => $label]))"
+                id="category-filter"
+                for="category-filter"
+            />
             
-            <div>
-                <label for="status-filter" class="block text-sm font-medium text-white/90 mb-2">Status</label>
-                <select wire:model.live="statusFilter" id="status-filter" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/60 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary/50">
-                    <option value="">Todos os status</option>
-                    <option value="pending" class="text-gray-900">Pendente</option>
-                    <option value="approved" class="text-gray-900">Aprovado</option>
-                </select>
-            </div>
+            <x-select
+                wire:model.live="statusFilter"
+                label="Status"
+                placeholder="Todos os status"
+                theme="dark"
+                :options="[
+                    ['value' => '', 'label' => 'Todos os status'],
+                    ['value' => 'pending', 'label' => 'Pendente'],
+                    ['value' => 'approved', 'label' => 'Aprovado']
+                ]"
+                id="status-filter"
+                for="status-filter"
+            />
             
             <div class="flex items-end">
                 <div class="flex-1">

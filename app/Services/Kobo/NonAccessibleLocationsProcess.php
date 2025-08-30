@@ -66,6 +66,9 @@ final class NonAccessibleLocationsProcess
             throw $e;
         }
 
+        // Clear location caches after processing completes
+        app(\App\Services\LocationService::class)->clearCache();
+
         Log::info('Completed non-accessible locations processing', $stats);
         return $stats;
     }

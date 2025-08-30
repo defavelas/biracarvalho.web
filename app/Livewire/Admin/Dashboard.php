@@ -24,6 +24,9 @@ final class Dashboard extends Component
     {
         $location->delete();
         
+        // Clear location caches when a location is deleted
+        app(\App\Services\LocationService::class)->clearCache();
+        
         session()->flash('message', __('Local rejeitado e excluído.'));
         $this->resetPage();
     }

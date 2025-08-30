@@ -65,6 +65,9 @@ final class AccessibleLocationsProcess
             throw $e;
         }
 
+        // Clear location caches after processing completes
+        app(\App\Services\LocationService::class)->clearCache();
+        
         Log::info('Completed accessible locations processing', $stats);
         return $stats;
     }
