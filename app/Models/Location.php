@@ -75,4 +75,45 @@ final class Location extends Model
     {
         return $query->whereNotNull('published_at');
     }
+
+    /**
+     * Scope a query to only include pending locations (not published).
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopePending($query)
+    {
+        return $query->whereNull('published_at');
+    }
+
+    /**
+     * Approve the location by setting published_at.
+     *
+     * @return bool
+     */
+    public function approve(): bool
+    {
+        return $this->update(['published_at' => now()]);
+    }
+
+    /**
+     * Check if location is pending approval.
+     *
+     * @return bool
+     */
+    public function isPending(): bool
+    {
+        return is_null($this->published_at);
+    }
+
+    /**
+     * Check if location is approved.
+     *
+     * @return bool
+     */
+    public function isApproved(): bool
+    {
+        return !is_null($this->published_at);
+    }
 }

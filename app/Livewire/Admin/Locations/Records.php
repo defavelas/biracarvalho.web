@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\Locations;
 
-use App\Enums\LocationType;
+use App\Enum\Location\Category;
 use App\Models\Location;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -17,10 +17,12 @@ final class Records extends Component
     #[Url(as: 'q')]
     public string $search = '';
 
-    #[Url(as: 'type')]
-    public string $typeFilter = '';
+    #[Url(as: 'category')]
+    public string $categoryFilter = '';
 
-    public bool $showEditModal = false;
+    #[Url(as: 'status')]
+    public string $statusFilter = '';
+
     public bool $showDeleteModal = false;
     public ?Location $selectedLocation = null;
 
@@ -29,21 +31,16 @@ final class Records extends Component
         $this->resetPage();
     }
 
-    public function updatingTypeFilter(): void
+    public function updatingCategoryFilter(): void
     {
         $this->resetPage();
     }
 
-    public function create(): void
+    public function updatingStatusFilter(): void
     {
-        $this->dispatch('open-create-modal');
+        $this->resetPage();
     }
 
-    public function edit(Location $location): void
-    {
-        $this->selectedLocation = $location;
-        $this->showEditModal = true;
-    }
 
     public function confirmDelete(Location $location): void
     {
@@ -64,26 +61,36 @@ final class Records extends Component
 
     public function closeModals(): void
     {
-        $this->showEditModal = false;
         $this->showDeleteModal = false;
         $this->selectedLocation = null;
+    }
+
+    public function approve(Location $location): void
+    {
+        $location->approve();
+        session()->flash('message', __('Local aprovado com sucesso.'));
     }
 
     public function getLocationsProperty()
     {
         return Location::query()
-            ->when($this->search, fn($query) => $query->search($this->search))
-            ->when($this->typeFilter, fn($query) => $query->where('type', $this->typeFilter))
-            ->with('images')
+            ->when($this->search, fn($query) => $query->where('name', 'like', "%{$this->search}%"))
+            ->when($this->categoryFilter, fn($query) => $query->where('category', $this->categoryFilter))
+            ->when($this->statusFilter, function ($query) {
+                return $this->statusFilter === 'pending' 
+                    ? $query->pending() 
+                    : $query->published();
+            })
+            ->with(['images', 'infos'])
             ->latest()
-            ->paginate(15);
+            ->paginate(25);
     }
 
     public function render()
     {
         return view('livewire.admin.locations.records', [
             'locations' => $this->locations,
-            'locationTypes' => LocationType::options(),
+            'categories' => Category::options(),
         ])
             ->title('Bira Carvalho: Locais de acessibilidade')
             ->layout('layouts.admin');

@@ -42,7 +42,7 @@ final class Image extends Model
         return Storage::url($this->image_path);
     }
 
-    public function isPublished(): bool
+    public function isApproved(): bool
     {
         return null !== $this->published_at;
     }

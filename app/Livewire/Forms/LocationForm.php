@@ -78,7 +78,7 @@ final class LocationForm extends Form
         $this->description = $location->description ?? '';
         $this->latitude = (string) $location->latitude;
         $this->longitude = (string) $location->longitude;
-        $this->published = $location->isPublished();
+        $this->published = $location->isApproved();
     }
 
     public function store(): Location

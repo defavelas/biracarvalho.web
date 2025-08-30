@@ -14,19 +14,12 @@
                 </p>
             </header>
             
-            <div class="mt-4 sm:mt-0 sm:flex-none">
-                <button wire:click="create" 
-                        type="button" 
-                        class="inline-flex items-center justify-center rounded-md bg-secondary hover:bg-secondary/90 px-4 py-2 text-sm font-semibold text-primary shadow-lg transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-secondary/25 transform hover:scale-105 cursor-pointer">
-                    @svg('heroicon-o-plus', 'w-6 h-6')
-                </button>
-            </div>
         </div>
     </div>
 
     <!-- Filters Section -->
     <div class="bg-black/15 p-4 mb-4 rounded-md">
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
             <x-input 
                 wire:model.live.debounce.300ms="search"
                 label="Buscar"
@@ -36,15 +29,24 @@
                 for="search"
             />
             
-            <x-select 
-                wire:model.live="typeFilter"
-                label="Tipo"
-                placeholder="Todos os tipos"
-                icon='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>'
-                :options="collect($locationTypes)->map(fn($label, $value) => ['value' => $value, 'label' => $label])->prepend(['value' => '', 'label' => 'Todos os tipos'])->values()->toArray()"
-                id="type-filter"
-                for="type-filter"
-            />
+            <div>
+                <label for="category-filter" class="block text-sm font-medium text-white/90 mb-2">Categoria</label>
+                <select wire:model.live="categoryFilter" id="category-filter" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/60 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary/50">
+                    <option value="">Todas as categorias</option>
+                    @foreach($categories as $value => $label)
+                        <option value="{{ $value }}" class="text-gray-900">{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <div>
+                <label for="status-filter" class="block text-sm font-medium text-white/90 mb-2">Status</label>
+                <select wire:model.live="statusFilter" id="status-filter" class="w-full bg-white/10 border border-white/20 text-white placeholder-white/60 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary/50">
+                    <option value="">Todos os status</option>
+                    <option value="pending" class="text-gray-900">Pendente</option>
+                    <option value="approved" class="text-gray-900">Aprovado</option>
+                </select>
+            </div>
             
             <div class="flex items-end">
                 <div class="flex-1">
@@ -72,9 +74,9 @@
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white/90 uppercase tracking-wider">
                             <div class="flex items-center">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a1.994 1.994 0 01-1.414.586H7a4 4 0 01-4-4V7a4 4 0 014-4z"/>
                                 </svg>
-                                Tipo
+                                Categoria
                             </div>
                         </th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white/90 uppercase tracking-wider">
@@ -83,7 +85,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                                 </svg>
-                                Endereço
+                                Coordenadas
                             </div>
                         </th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-white/90 uppercase tracking-wider">
@@ -117,21 +119,17 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4">
-                                <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full 
-                                    @if($location->type->value === 'accessible') bg-green-500/20 text-green-300 border border-green-500/30
-                                    @elseif($location->type->value === 'partially_accessible') bg-yellow-500/20 text-yellow-300 border border-yellow-500/30
-                                    @else bg-red-500/20 text-red-300 border border-red-500/30
-                                    @endif" aria-label="Tipo: {{ $location->type->label() }}">
-                                    {{ $location->type->label() }}
+                                <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-{{ $location->category->color() }}-500/20 text-{{ $location->category->color() }}-300 border border-{{ $location->category->color() }}-500/30">
+                                    {{ $location->category->label() }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-sm text-white/80">
-                                <div class="max-w-xs truncate" title="{{ $location->address }}">
-                                    {{ Str::limit($location->address, 40) }}
+                                <div class="text-xs">
+                                    {{ number_format($location->latitude, 6) }}, {{ number_format($location->longitude, 6) }}
                                 </div>
                             </td>
                             <td class="px-6 py-4">
-                                @if($location->isPublished())
+                                @if($location->isApproved())
                                     <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-secondary/20 text-secondary border border-secondary/30">
                                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
@@ -157,14 +155,17 @@
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end space-x-2">
-                                    <button wire:click="edit({{ $location->id }})" 
-                                            class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-secondary hover:text-white bg-secondary/10 hover:bg-secondary/20 rounded-lg border border-secondary/30 transition-all duration-200">
-                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                        Editar
-                                    </button>
-                                    <button wire:click="confirmDelete({{ $location->id }})" 
+                                    @if($location->isPending())
+                                        <button wire:click="approve('{{ $location->id }}')"
+                                                wire:confirm="Tem certeza que deseja aprovar este registro?"
+                                                class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-green-300 hover:text-white bg-green-500/10 hover:bg-green-500/20 rounded-lg border border-green-500/30 transition-all duration-200">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                            Aprovar
+                                        </button>
+                                    @endif
+                                    <button wire:click="confirmDelete('{{ $location->id }}')" 
                                             class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-red-300 hover:text-white bg-red-500/10 hover:bg-red-500/20 rounded-lg border border-red-500/30 transition-all duration-200">
                                         <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -200,27 +201,6 @@
         </div>
     </div>
 
-    <!-- Create Modal -->
-    @livewire('admin.locations.create')
-
-    <!-- Edit Modal -->
-    @if($showEditModal && $selectedLocation)
-        <div class="fixed inset-0 z-50 overflow-y-auto" x-data>
-            <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <div class="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity" 
-                     x-transition:enter="ease-out duration-300"
-                     x-transition:enter-start="opacity-0"
-                     x-transition:enter-end="opacity-100"></div>
-                
-                <div class="inline-block align-bottom bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full"
-                     x-transition:enter="ease-out duration-400"
-                     x-transition:enter-start="opacity-0 translate-y-8 scale-95"
-                     x-transition:enter-end="opacity-100 translate-y-0 scale-100">
-                    @livewire('admin.locations.edit', ['location' => $selectedLocation], key($selectedLocation->id))
-                </div>
-            </div>
-        </div>
-    @endif
 
     <!-- Delete Confirmation Modal -->
     @if($showDeleteModal && $selectedLocation)
