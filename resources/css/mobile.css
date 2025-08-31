@@ -31,7 +31,7 @@
     #map-card button[onclick*="centerMapOnLocation"],
     #map-card button[onclick*="highlightLocationInSidebar"],
     #map-card button[type="button"]:not(.absolute),
-    #map-card .flex-1.bg-primary\\/20,
+    #map-card .flex-1.bg-primary\/20,
     #map-card .space-x-2 button,
     #map-card button:not([aria-label*="Fechar"]) {
         display: none !important;
@@ -44,7 +44,7 @@
     }
 
     /* Also hide the border-t container that holds action buttons */
-    #map-card .border-t.border-white\\/10,
+    #map-card .border-t.border-white\/10,
     #map-card div:has(button[onclick*="centerMapOnLocation"]),
     #map-card .pt-4.border-t {
         display: none !important;
@@ -66,18 +66,21 @@
     body:has(#map-card) .fixed.bottom-0.h-\\[50vh\\] {
         display: none !important;
     }
-    
+
     /* Hide results count indicator when card is opened */
-    body:has(#map-card) .fixed.bottom-4.left-1\\/2 {
+    body:has(#map-card) .fixed.bottom-4.left-1\/2 {
         display: none !important;
     }
 
     /* Ensure map card has proper mobile presentation */
     #map-card {
         max-height: 70vh !important;
+        min-height: 300px !important;
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3) !important;
         /* Reduce padding on mobile */
         padding: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
     }
 
     /* Reduce padding in card header and content on mobile */
@@ -94,20 +97,24 @@
         margin-left: 0.25rem !important; /* 4px instead of 8px */
     }
 
-    /* Hide scrollbar in card content on mobile */
+    /* Optimize scrollable content area */
     #map-card .overflow-y-auto {
+        flex: 1 !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
         scrollbar-width: thin !important;
         -ms-overflow-style: none !important;
     }
-    
+
     #map-card .overflow-y-auto::-webkit-scrollbar {
         width: 4px !important;
     }
-    
+
     #map-card .overflow-y-auto::-webkit-scrollbar-track {
         background: transparent !important;
     }
-    
+
     #map-card .overflow-y-auto::-webkit-scrollbar-thumb {
         background: rgba(101, 48, 137, 0.3) !important;
         border-radius: 2px !important;
@@ -128,7 +135,7 @@
         transform: scale(0.85); /* shrink the control group */
         transform-origin: bottom right;
     }
-    
+
     .leaflet-control-zoom a {
         min-width: 36px !important;
         min-height: 36px !important;
@@ -183,6 +190,38 @@
         top: 0.5rem !important;
         right: 0.5rem !important;
     }
+
+    #map-card {
+        max-height: 85vh !important;
+        min-height: 250px !important;
+    }
+}
+
+/* Tablet and medium screens */
+@media (min-width: 769px) and (max-width: 1024px) {
+    #map-card {
+        max-height: 75vh !important;
+        min-height: 400px !important;
+        width: 24rem !important; /* 384px, slightly larger than mobile */
+    }
+
+    #map-card .overflow-y-auto {
+        flex: 1 !important;
+        min-height: 0 !important;
+        max-height: calc(75vh - 8rem) !important; /* Account for header space */
+    }
+}
+
+/* Large screens with height constraints */
+@media (min-width: 1025px) and (max-height: 800px) {
+    #map-card {
+        max-height: 80vh !important;
+        min-height: 450px !important;
+    }
+
+    #map-card .overflow-y-auto {
+        max-height: calc(80vh - 10rem) !important;
+    }
 }
 
 /* Small mobile devices */
@@ -194,4 +233,49 @@
     .mobile-compact-spacing .space-y-2 > * + * {
         margin-top: 0.5rem !important;
     }
-} 
+}
+
+/* Very small screens and short devices */
+@media (max-width: 360px), (max-height: 600px) {
+    #map-card {
+        max-height: 80vh !important;
+        min-height: 280px !important;
+    }
+
+    #map-card .p-4 {
+        padding: 0.375rem !important; /* 6px for very tight spaces */
+    }
+
+    #map-card .overflow-y-auto {
+        max-height: calc(80vh - 6rem) !important;
+    }
+
+    /* Further reduce text sizes on very small screens */
+    #map-card h3 {
+        font-size: 0.75rem !important; /* 12px */
+        line-height: 1rem !important;
+    }
+
+    #map-card p,
+    #map-card span {
+        font-size: 0.6875rem !important; /* 11px */
+    }
+}
+
+/* Extremely short screens (landscape phones with browser UI) */
+@media (max-height: 500px) {
+    #map-card {
+        max-height: 90vh !important;
+        min-height: 250px !important;
+    }
+
+    #map-card .overflow-y-auto {
+        max-height: calc(90vh - 5rem) !important;
+    }
+
+    /* Hide image slideshow on very short screens to save space */
+    #map-card .mb-4.relative,
+    #map-card .mb-4.h-32 {
+        display: none !important;
+    }
+}

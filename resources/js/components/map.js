@@ -64,6 +64,9 @@ class MapComponent {
             });
         });
 
+        // Load initial data from API
+        this.loadMapData();
+
         this.map.on('zoomend', () => {
         });
 
@@ -75,6 +78,129 @@ class MapComponent {
                 this.closeMapCard();
             }
         });
+
+        // Keyboard navigation for map
+        this.map.getContainer().setAttribute('tabindex', '0');
+        this.map.getContainer().setAttribute('role', 'application');
+        this.map.getContainer().setAttribute('aria-label', 'Mapa interativo de acessibilidade - Use as setas para navegar');
+        
+        this.map.getContainer().addEventListener('keydown', (e) => {
+            this.handleMapKeydown(e);
+        });
+    }
+
+    handleMapKeydown(e) {
+        const panDistance = 100; // pixels to pan
+        const zoomStep = 1;
+        
+        switch (e.code) {
+            case 'ArrowUp':
+                e.preventDefault();
+                this.map.panBy([0, -panDistance]);
+                break;
+            case 'ArrowDown':
+                e.preventDefault();
+                this.map.panBy([0, panDistance]);
+                break;
+            case 'ArrowLeft':
+                e.preventDefault();
+                this.map.panBy([-panDistance, 0]);
+                break;
+            case 'ArrowRight':
+                e.preventDefault();
+                this.map.panBy([panDistance, 0]);
+                break;
+            case 'Equal':
+            case 'NumpadAdd':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    this.map.zoomIn(zoomStep);
+                }
+                break;
+            case 'Minus':
+            case 'NumpadSubtract':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    this.map.zoomOut(zoomStep);
+                }
+                break;
+            case 'Tab':
+                this.cycleMarkers(e.shiftKey);
+                break;
+            case 'Enter':
+            case 'Space':
+                if (this.selectedLocationId) {
+                    e.preventDefault();
+                    const location = this.getLocationById(this.selectedLocationId);
+                    if (location) {
+                        this.onMarkerClick(location);
+                    }
+                }
+                break;
+            case 'Escape':
+                e.preventDefault();
+                this.closeMapCard();
+                break;
+        }
+    }
+
+    cycleMarkers(reverse = false) {
+        const markerIds = Array.from(this.markers.keys());
+        if (markerIds.length === 0) return;
+
+        let currentIndex = -1;
+        if (this.selectedLocationId) {
+            currentIndex = markerIds.indexOf(this.selectedLocationId);
+        }
+
+        let nextIndex;
+        if (reverse) {
+            nextIndex = currentIndex > 0 ? currentIndex - 1 : markerIds.length - 1;
+        } else {
+            nextIndex = currentIndex < markerIds.length - 1 ? currentIndex + 1 : 0;
+        }
+
+        const nextLocationId = markerIds[nextIndex];
+        const marker = this.markers.get(nextLocationId);
+        
+        if (marker) {
+            this.selectedLocationId = nextLocationId;
+            this.updateMarkerStyles();
+            this.map.setView(marker.getLatLng(), Math.max(this.map.getZoom(), 16));
+            
+            // Announce to screen readers
+            this.announceLocation(marker.locationData);
+        }
+    }
+
+    announceLocation(location) {
+        // Create or update live region for screen reader announcements
+        let liveRegion = document.getElementById('map-live-region');
+        if (!liveRegion) {
+            liveRegion = document.createElement('div');
+            liveRegion.id = 'map-live-region';
+            liveRegion.setAttribute('aria-live', 'polite');
+            liveRegion.setAttribute('aria-atomic', 'true');
+            liveRegion.className = 'sr-only';
+            document.body.appendChild(liveRegion);
+        }
+        
+        liveRegion.textContent = `Focalizando ${location.name}. ${location.typeLabel}. Pressione Enter para abrir detalhes.`;
+    }
+
+    async loadMapData() {
+        try {
+            const response = await fetch('/api/locations/map');
+            if (!response.ok) {
+                throw new Error('Failed to load map data');
+            }
+            
+            const locations = await response.json();
+            this.updateMarkers(locations);
+        } catch (error) {
+            console.error('Error loading map data:', error);
+            // Fallback: could load data from a different source or show error
+        }
     }
 
     updateMarkers(results) {
@@ -97,11 +223,11 @@ class MapComponent {
     }
 
     addMarker(location) {
-        const { id, name, address, accessibility_level, latitude, longitude } = location;
+        const { id, name, type, latitude, longitude, typeColor } = location;
 
         const locationId = String(id);
 
-        const icon = this.createAccessibilityIcon(accessibility_level, locationId === this.selectedLocationId);
+        const icon = this.createAccessibilityIcon(type, typeColor, locationId === this.selectedLocationId);
 
         const marker = L.marker([latitude, longitude], { icon })
             .addTo(this.markerLayer);
@@ -118,18 +244,15 @@ class MapComponent {
         return marker;
     }
 
-    createAccessibilityIcon(accessibilityLevel, isSelected = false) {
+    createAccessibilityIcon(type, typeColor, isSelected = false) {
         let iconUrl = '/assets/images/green-pin.png'; // default
 
-        switch (accessibilityLevel) {
-            case 'acessivel':
+        switch (type) {
+            case 'accessible':
                 iconUrl = '/assets/images/green-pin.png';
                 break;
-            case 'parcial_acessivel':
-                iconUrl = '/assets/images/yellow-pin.png';
-                break;
-            case 'nao_acessivel':
-                iconUrl = '/assets/images/orange-pin.png';
+            case 'non_accessible':
+                iconUrl = '/assets/images/red-pin.png';
                 break;
         }
 
@@ -287,21 +410,10 @@ class MapComponent {
     }
 
     createMapCardHTML(location) {
-        const accessibilityText = {
-            'acessivel': 'Acessível',
-            'parcial_acessivel': 'Parcialmente Acessível',
-            'nao_acessivel': 'Não Acessível'
-        };
-
-        const accessibilityClass = {
-            'acessivel': 'bg-green-500',
-            'parcial_acessivel': 'bg-yellow-500',
-            'nao_acessivel': 'bg-accent-orange'
-        };
-
         const images = location.images || [];
         const hasImages = images.length > 0;
-        const description = location.description || [];
+        const infos = location.infos || [];
+        const hasInfos = infos.length > 0;
 
         let imagesHtml = '';
         if (hasImages) {
@@ -316,7 +428,7 @@ class MapComponent {
                                 style="${index === 0 ? '' : 'display: none;'}"
                             >
                                 <img 
-                                    src="${image}" 
+                                    src="${image.url}" 
                                     alt="${location.name} - Imagem ${index + 1} de ${maxImages}"
                                     class="w-full h-full object-cover"
                                     loading="lazy"
@@ -390,8 +502,8 @@ class MapComponent {
                                     ${location.name}
                                 </h3>
                             </div>
-                            <span class="inline-flex items-center px-3 py-1.5 md:px-2.5 md:py-1 font-semibold rounded-full text-xs text-black/75 flex-shrink-0 ${accessibilityClass[location.accessibility_level]}">
-                                ${accessibilityText[location.accessibility_level]}
+                            <span class="inline-flex items-center px-3 py-1.5 md:px-2.5 md:py-1 font-semibold rounded-full text-xs text-white flex-shrink-0 bg-${location.typeColor}-500">
+                                ${location.typeLabel}
                             </span>
                         </div>
 
@@ -403,7 +515,7 @@ class MapComponent {
                                 </svg>
                             </div>
                             <p id="map-card-description" class="text-sm text-primary/80 leading-relaxed">
-                                ${location.address}
+                                ${location.type || 'Local de acessibilidade'}
                             </p>
                         </div>
 
@@ -420,12 +532,60 @@ class MapComponent {
                             </div>
                         ` : ''}
 
-                        ${description.length > 0 ? `
+                        ${location.authors ? `
+                            <div class="flex items-start space-x-2">
+                                <div class="w-5 h-5 md:w-5 md:h-5 text-primary flex-shrink-0">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                </div>
+                                <p class="text-sm text-primary/80 leading-relaxed">
+                                    Autor(es): ${location.authors}
+                                </p>
+                            </div>
+                        ` : ''}
+
+                        ${hasInfos ? `
                             <div class="border-t border-white/10 pt-3">
-                                <h4 class="text-base md:text-sm font-semibold text-primary mb-2">Sobre este local</h4>
-                                <div class="max-h-80 overflow-y-auto soft-scrollbar space-y-3">
-                                    ${description.map(paragraph => `
-                                        <p class="text-sm text-primary/90 leading-relaxed">${paragraph}</p>
+                                <h4 class="text-base md:text-sm font-semibold text-primary mb-3">Informações Detalhadas</h4>
+                                <div class="max-h-80 overflow-y-auto soft-scrollbar space-y-2" x-data="{ openFaq: null }">
+                                    ${infos.map((info, index) => `
+                                        <div class="border border-white/10 rounded-lg">
+                                            <button 
+                                                type="button"
+                                                @click="openFaq = openFaq === ${index} ? null : ${index}"
+                                                class="w-full px-3 py-2 text-left flex items-center justify-between hover:bg-white/5 transition-colors duration-200 focus:outline-none focus:bg-white/5"
+                                                :aria-expanded="openFaq === ${index}"
+                                                aria-controls="faq-content-${index}"
+                                            >
+                                                <span class="text-sm font-medium text-primary/90">${info.title}</span>
+                                                <svg 
+                                                    class="w-4 h-4 text-primary/70 transition-transform duration-200"
+                                                    :class="{ 'rotate-180': openFaq === ${index} }"
+                                                    fill="none" 
+                                                    stroke="currentColor" 
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                </svg>
+                                            </button>
+                                            <div 
+                                                x-show="openFaq === ${index}"
+                                                x-transition:enter="transition ease-out duration-200"
+                                                x-transition:enter-start="opacity-0 max-h-0"
+                                                x-transition:enter-end="opacity-100 max-h-96"
+                                                x-transition:leave="transition ease-in duration-150"
+                                                x-transition:leave-start="opacity-100 max-h-96"
+                                                x-transition:leave-end="opacity-0 max-h-0"
+                                                id="faq-content-${index}"
+                                                class="overflow-hidden"
+                                                style="display: none;"
+                                            >
+                                                <div class="px-3 pb-3 border-t border-white/10">
+                                                    <p class="text-sm text-primary/80 leading-relaxed pt-2">${info.value}</p>
+                                                </div>
+                                            </div>
+                                        </div>
                                     `).join('')}
                                 </div>
                             </div>
@@ -579,7 +739,7 @@ class MapComponent {
         this.markers.forEach((marker, locationId) => {
             const location = this.getLocationById(locationId);
             if (location) {
-                const newIcon = this.createAccessibilityIcon(location.accessibility_level, locationId === this.selectedLocationId);
+                const newIcon = this.createAccessibilityIcon(location.type, location.typeColor, locationId === this.selectedLocationId);
                 marker.setIcon(newIcon);
             }
         });
