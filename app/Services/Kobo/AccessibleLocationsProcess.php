@@ -67,7 +67,7 @@ final class AccessibleLocationsProcess
 
         // Clear location caches after processing completes
         app(\App\Services\LocationService::class)->clearCache();
-        
+
         Log::info('Completed accessible locations processing', $stats);
         return $stats;
     }
@@ -80,6 +80,7 @@ final class AccessibleLocationsProcess
      */
     public function processRecord(array $koboRecord): string
     {
+        dd($koboRecord);
         $externalId = (string) ($koboRecord['_id'] ?? '');
 
         if (empty($externalId)) {

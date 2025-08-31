@@ -6,7 +6,14 @@ namespace App\Enum\Location;
 
 enum Type: string
 {
+    /**
+     * The type of location that is accessible.
+     */
     case ACCESSIBLE = 'accessible';
+
+    /**
+     * The type of location that is not accessible.
+     */
     case NON_ACCESSIBLE = 'non_accessible';
 
     /**
