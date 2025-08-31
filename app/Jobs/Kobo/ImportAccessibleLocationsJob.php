@@ -41,10 +41,21 @@ final class ImportAccessibleLocationsJob implements ShouldQueue
             Log::info('Accessible locations import job completed successfully', $stats);
 
         } catch (Exception $e) {
-            Log::error('Accessible locations import job failed', [
-                'error' => $e->getMessage(),
-                'options' => $this->options,
-            ]);
+            // Log connection failures specifically
+            if (str_contains($e->getMessage(), 'connection') || str_contains($e->getMessage(), 'non-200')) {
+                Log::error('Accessible locations import job failed due to Kobo API connection error', [
+                    'error' => $e->getMessage(),
+                    'options' => $this->options,
+                    'job' => 'ImportAccessibleLocationsJob',
+                    'failure_reason' => 'kobo_connection_failed',
+                ]);
+            } else {
+                Log::error('Accessible locations import job failed', [
+                    'error' => $e->getMessage(),
+                    'options' => $this->options,
+                    'job' => 'ImportAccessibleLocationsJob',
+                ]);
+            }
 
             throw $e;
         }
@@ -55,10 +66,24 @@ final class ImportAccessibleLocationsJob implements ShouldQueue
      */
     public function failed(Throwable $exception): void
     {
-        Log::error('Accessible locations import job failed permanently', [
-            'error' => $exception->getMessage(),
-            'trace' => $exception->getTraceAsString(),
-            'options' => $this->options,
-        ]);
+        // Log permanent failures with more context
+        if (str_contains($exception->getMessage(), 'connection') || str_contains($exception->getMessage(), 'non-200')) {
+            Log::error('Accessible locations import job failed permanently due to Kobo API connection error', [
+                'error' => $exception->getMessage(),
+                'trace' => $exception->getTraceAsString(),
+                'options' => $this->options,
+                'job' => 'ImportAccessibleLocationsJob',
+                'failure_reason' => 'kobo_connection_failed',
+                'retries_exhausted' => true,
+            ]);
+        } else {
+            Log::error('Accessible locations import job failed permanently', [
+                'error' => $exception->getMessage(),
+                'trace' => $exception->getTraceAsString(),
+                'options' => $this->options,
+                'job' => 'ImportAccessibleLocationsJob',
+                'retries_exhausted' => true,
+            ]);
+        }
     }
 }

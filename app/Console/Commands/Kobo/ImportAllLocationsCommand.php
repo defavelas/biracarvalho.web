@@ -7,7 +7,9 @@ namespace App\Console\Commands\Kobo;
 use App\Jobs\Kobo\ImportAccessibleLocationsJob;
 use App\Jobs\Kobo\ImportNonAccessibleLocationsJob;
 use App\Services\Kobo\AccessibleLocationsProcess;
+use App\Services\Kobo\AccessibleLocationsService;
 use App\Services\Kobo\NonAccessibleLocationsProcess;
+use App\Services\Kobo\NonAccessibleLocationsService;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -19,7 +21,7 @@ final class ImportAllLocationsCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'kobo:import-all 
+    protected $signature = 'kobo:import-all
                            {--sync : Run synchronously instead of dispatching jobs}
                            {--force : Force update existing records}
                            {--only-accessible : Import only accessible locations}
@@ -37,7 +39,9 @@ final class ImportAllLocationsCommand extends Command
      */
     public function handle(
         AccessibleLocationsProcess $accessibleProcessor,
-        NonAccessibleLocationsProcess $nonAccessibleProcessor
+        NonAccessibleLocationsProcess $nonAccessibleProcessor,
+        AccessibleLocationsService $accessibleService,
+        NonAccessibleLocationsService $nonAccessibleService,
     ): int {
         $this->info('Starting comprehensive locations import from KoboToolbox...');
 
@@ -46,8 +50,26 @@ final class ImportAllLocationsCommand extends Command
                 'force_update' => $this->option('force'),
             ];
 
-            $importAccessible = ! $this->option('only-non-accessible');
-            $importNonAccessible = ! $this->option('only-accessible');
+            // Determine which imports to run
+            $importAccessible = !$this->option('only-non-accessible');
+            $importNonAccessible = !$this->option('only-accessible');
+
+            // Validate Kobo connections before proceeding
+            $this->info('Validating Kobo API connections...');
+
+            if ($importAccessible) {
+                $this->info('Validating accessible locations connection...');
+                $accessibleService->validateConnection();
+                $this->info('✓ Accessible locations API connection validated');
+            }
+
+            if ($importNonAccessible) {
+                $this->info('Validating non-accessible locations connection...');
+                $nonAccessibleService->validateConnection();
+                $this->info('✓ Non-accessible locations API connection validated');
+            }
+
+            $this->info('✓ All Kobo API connections validated successfully');
 
             if ($this->option('sync')) {
                 // Run synchronously
@@ -55,7 +77,7 @@ final class ImportAllLocationsCommand extends Command
                 $totalStats = $this->runSynchronously($accessibleProcessor, $nonAccessibleProcessor, $importAccessible, $importNonAccessible);
                 $this->displayCombinedStats($totalStats);
             } else {
-                // Dispatch jobs
+                // Dispatch jobs only if connection validation passed
                 $this->info('Dispatching import jobs...');
                 $this->dispatchJobs($options, $importAccessible, $importNonAccessible);
                 $this->info('Import jobs dispatched successfully!');
@@ -66,10 +88,21 @@ final class ImportAllLocationsCommand extends Command
 
         } catch (Exception $e) {
             $this->error('Import failed: ' . $e->getMessage());
-            Log::error('Combined import command failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
+
+            // Log connection failures specifically
+            if (str_contains($e->getMessage(), 'connection') || str_contains($e->getMessage(), 'non-200')) {
+                $this->error('✗ Kobo API connection failed - jobs will not be dispatched');
+                Log::error('Kobo API connection validation failed - preventing job dispatch', [
+                    'command' => 'kobo:import-all',
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            } else {
+                Log::error('Import all command failed', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            }
 
             return self::FAILURE;
         }

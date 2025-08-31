@@ -6,6 +6,7 @@ namespace App\Console\Commands\Kobo;
 
 use App\Jobs\Kobo\ImportNonAccessibleLocationsJob;
 use App\Services\Kobo\NonAccessibleLocationsProcess;
+use App\Services\Kobo\NonAccessibleLocationsService;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -17,7 +18,7 @@ final class ImportNonAccessibleLocationsCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'kobo:import-non-accessible 
+    protected $signature = 'kobo:import-non-accessible
                            {--sync : Run synchronously instead of dispatching a job}
                            {--force : Force update existing records}';
 
@@ -31,11 +32,16 @@ final class ImportNonAccessibleLocationsCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle(NonAccessibleLocationsProcess $processor): int
+    public function handle(NonAccessibleLocationsProcess $processor, NonAccessibleLocationsService $service): int
     {
         $this->info('Starting non-accessible locations import from KoboToolbox...');
 
         try {
+            // Validate Kobo connection before proceeding
+            $this->info('Validating Kobo API connection...');
+            $service->validateConnection();
+            $this->info('✓ Kobo API connection validated successfully');
+
             $options = [
                 'force_update' => $this->option('force'),
             ];
@@ -46,7 +52,7 @@ final class ImportNonAccessibleLocationsCommand extends Command
                 $stats = $processor->processAll();
                 $this->displayStats($stats);
             } else {
-                // Dispatch job
+                // Dispatch job only if connection validation passed
                 $this->info('Dispatching import job...');
                 ImportNonAccessibleLocationsJob::dispatch($options);
                 $this->info('Import job dispatched successfully!');
@@ -57,10 +63,21 @@ final class ImportNonAccessibleLocationsCommand extends Command
 
         } catch (Exception $e) {
             $this->error('Import failed: ' . $e->getMessage());
-            Log::error('Non-accessible import command failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
+
+            // Log connection failures specifically
+            if (str_contains($e->getMessage(), 'connection') || str_contains($e->getMessage(), 'non-200')) {
+                $this->error('✗ Kobo API connection failed - jobs will not be dispatched');
+                Log::error('Kobo API connection validation failed - preventing job dispatch', [
+                    'command' => 'kobo:import-non-accessible',
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            } else {
+                Log::error('Import command failed', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            }
 
             return self::FAILURE;
         }

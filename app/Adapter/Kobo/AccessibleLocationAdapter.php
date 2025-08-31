@@ -156,12 +156,15 @@ final class AccessibleLocationAdapter
     }
 
     /**
-     * Extract location type from Kobo data.
+     * Extract location description from Kobo data.
      */
-    private function extractLocationDescription(array $data): ?string
+    private function extractLocationDescription(array $data): string
     {
         $rawType = $data['_3_Que_tipo_de_lugar_esse'] ?? null;
-        return $this->cleanValue($rawType);
+        $cleanedValue = $this->cleanValue($rawType);
+
+        // Ensure description is never null since database requires it
+        return $cleanedValue ?? 'Local acessível';
     }
 
     /**

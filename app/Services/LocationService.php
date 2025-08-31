@@ -23,14 +23,14 @@ final class LocationService
     {
         return Cache::remember('locations.published.map', self::CACHE_TTL, function () {
             Log::info('Loading published locations for map from database');
-            
+
             return Location::query()
                 ->published()
                 ->with(['images', 'infos'])
                 ->select([
                     'id',
-                    'name', 
-                    'type',
+                    'name',
+                    'description',
                     'latitude',
                     'longitude',
                     'type',
@@ -53,7 +53,7 @@ final class LocationService
     public function searchLocations(string $search = '', array $categories = []): Collection
     {
         $cacheKey = $this->generateSearchCacheKey($search, $categories);
-        
+
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($search, $categories) {
             Log::debug('Searching locations in database', [
                 'search' => $search,
@@ -68,7 +68,7 @@ final class LocationService
             if (!empty($search)) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('type', 'like', "%{$search}%")
+                      ->orWhere('description', 'like', "%{$search}%")
                       ->orWhere('authors', 'like', "%{$search}%");
                 });
             }
@@ -111,7 +111,7 @@ final class LocationService
             $total = Location::count();
             $published = Location::published()->count();
             $pending = Location::pending()->count();
-            
+
             $byType = [];
             foreach (Type::cases() as $type) {
                 $byType[$type->value] = Location::published()
@@ -139,7 +139,7 @@ final class LocationService
         return [
             'id' => $location->id,
             'name' => $location->name,
-            'type' => $location->type->value,
+            'description' => $location->description,
             'typeLabel' => $location->type->label(),
             'typeColor' => $location->type->color(),
             'latitude' => (float) $location->latitude,
@@ -179,13 +179,13 @@ final class LocationService
     {
         Cache::forget('locations.published.map');
         Cache::forget('locations.stats');
-        
+
         // Clear search caches (pattern-based clearing)
         $tags = ['locations.search'];
         if (method_exists(Cache::getStore(), 'tags')) {
             Cache::tags($tags)->flush();
         }
-        
+
         Log::info('Location caches cleared');
     }
 
@@ -198,12 +198,12 @@ final class LocationService
     private function generateSearchCacheKey(string $search, array $categories): string
     {
         $searchHash = md5($search);
-        
+
         // Ensure categories is always an array and sort it for consistent cache keys
         $categories = is_array($categories) ? $categories : [];
         sort($categories);
         $categoriesHash = md5(implode(',', $categories));
-        
+
         return "locations.search.{$searchHash}.{$categoriesHash}";
     }
 }

@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -6,49 +6,50 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Libre Franklin', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
-    
+    --font-sans:
+        "Libre Franklin", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+        "Segoe UI Symbol", "Noto Color Emoji";
+
     --color-primary: #653089;
-    --color-secondary: #CED842;
-    --color-accent-orange: #D55229;
-    --color-accent-pink: #E499AC;
-    --color-accent-dark: #2B433C;
+    --color-secondary: #ced842;
+    --color-accent-orange: #d55229;
+    --color-accent-pink: #e499ac;
+    --color-accent-dark: #2b433c;
 }
 
 @utility primary {
-  --tw-text-opacity: 1;
-  color: rgb(101 48 137 / var(--tw-text-opacity));
+    --tw-text-opacity: 1;
+    color: rgb(101 48 137 / var(--tw-text-opacity));
 }
 
 @utility bg-primary {
-  --tw-bg-opacity: 1;
-  background-color: rgb(101 48 137 / var(--tw-bg-opacity));
+    --tw-bg-opacity: 1;
+    background-color: rgb(101 48 137 / var(--tw-bg-opacity));
 }
 
 @utility border-primary {
-  --tw-border-opacity: 1;
-  border-color: rgb(101 48 137 / var(--tw-border-opacity));
+    --tw-border-opacity: 1;
+    border-color: rgb(101 48 137 / var(--tw-border-opacity));
 }
 
 @utility secondary {
-  --tw-text-opacity: 1;
-  color: rgb(206 216 66 / var(--tw-text-opacity));
+    --tw-text-opacity: 1;
+    color: rgb(206 216 66 / var(--tw-text-opacity));
 }
 
 @utility bg-secondary {
-  --tw-bg-opacity: 1;
-  background-color: rgb(206 216 66 / var(--tw-bg-opacity));
+    --tw-bg-opacity: 1;
+    background-color: rgb(206 216 66 / var(--tw-bg-opacity));
 }
 
 @utility accent-dark {
-  --tw-text-opacity: 1;
-  color: rgb(43 67 60 / var(--tw-text-opacity));
+    --tw-text-opacity: 1;
+    color: rgb(43 67 60 / var(--tw-text-opacity));
 }
 
 @utility result-highlighted {
     background-color: #f3f4f6;
-    border-left: 4px solid #CED842;
+    border-left: 4px solid #ced842;
 }
 
 .soft-scrollbar::-webkit-scrollbar {
@@ -78,17 +79,104 @@
 }
 
 .leaflet-control-zoom a {
-    background-color: #CED842 !important;
+    background-color: #ced842 !important;
     color: #653089 !important;
     border-color: #653089 !important;
 }
 
 .leaflet-control-zoom a:hover {
     background-color: #653089 !important;
-    color: #CED842 !important;
+    color: #ced842 !important;
 }
 
 #map-card-container {
     position: absolute;
     z-index: 200;
+}
+
+/* Map card responsive styles and scrolling improvements */
+@media (max-width: 768px) {
+    #map-card {
+        max-height: 70vh !important;
+        min-height: 300px !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    #map-card .overflow-y-auto {
+        flex: 1 !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        scrollbar-width: thin;
+    }
+
+    #map-card .overflow-y-auto::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    #map-card .overflow-y-auto::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    #map-card .overflow-y-auto::-webkit-scrollbar-thumb {
+        background: rgba(101, 48, 137, 0.3);
+        border-radius: 2px;
+    }
+}
+
+/* Tablet and medium screens */
+@media (min-width: 769px) and (max-width: 1024px) {
+    #map-card {
+        max-height: 75vh !important;
+        min-height: 400px !important;
+        width: 24rem !important;
+    }
+
+    #map-card .overflow-y-auto {
+        flex: 1 !important;
+        min-height: 0 !important;
+        max-height: calc(75vh - 8rem) !important;
+    }
+}
+
+/* Large screens with height constraints */
+@media (min-width: 1025px) and (max-height: 800px) {
+    #map-card {
+        max-height: 80vh !important;
+        min-height: 450px !important;
+    }
+
+    #map-card .overflow-y-auto {
+        max-height: calc(80vh - 10rem) !important;
+    }
+}
+
+/* Very small screens */
+@media (max-width: 360px), (max-height: 600px) {
+    #map-card {
+        max-height: 80vh !important;
+        min-height: 280px !important;
+    }
+
+    #map-card .overflow-y-auto {
+        max-height: calc(80vh - 6rem) !important;
+    }
+}
+
+/* Extremely short screens */
+@media (max-height: 500px) {
+    #map-card {
+        max-height: 90vh !important;
+        min-height: 250px !important;
+    }
+
+    #map-card .overflow-y-auto {
+        max-height: calc(90vh - 5rem) !important;
+    }
+
+    #map-card .mb-4.relative,
+    #map-card .mb-4.h-32 {
+        display: none !important;
+    }
 }

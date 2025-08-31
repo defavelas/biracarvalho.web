@@ -27,6 +27,7 @@ final class NonAccessibleLocationsProcess
      * Process and persist all non-accessible locations from Kobo.
      *
      * @return array{processed: int, created: int, updated: int, skipped: int, errors: int}
+     * @throws Exception when Kobo connection fails
      */
     public function processAll(): array
     {
@@ -41,6 +42,11 @@ final class NonAccessibleLocationsProcess
         ];
 
         try {
+            // Validate connection before attempting to fetch data
+            Log::info('Validating Kobo connection before processing non-accessible locations');
+            $this->nonAccessibleLocationsService->validateConnection();
+
+            Log::info('Fetching non-accessible locations data from Kobo API');
             $koboData = $this->nonAccessibleLocationsService->fetchAllData();
 
             foreach ($koboData as $record) {
@@ -59,10 +65,21 @@ final class NonAccessibleLocationsProcess
             }
 
         } catch (Exception $e) {
-            Log::error('Failed to fetch non-accessible locations data', [
-                'error' => $e->getMessage(),
-            ]);
+            // Log connection failures specifically and prevent further processing
+            if (str_contains($e->getMessage(), 'connection') || str_contains($e->getMessage(), 'non-200')) {
+                Log::error('Kobo API connection failed - skipping non-accessible locations processing', [
+                    'error' => $e->getMessage(),
+                    'service' => 'NonAccessibleLocationsProcess',
+                    'operation' => 'processAll',
+                ]);
+            } else {
+                Log::error('Failed to fetch non-accessible locations data', [
+                    'error' => $e->getMessage(),
+                    'service' => 'NonAccessibleLocationsProcess',
+                ]);
+            }
 
+            // Re-throw to prevent job completion when connection fails
             throw $e;
         }
 
@@ -239,8 +256,14 @@ final class NonAccessibleLocationsProcess
                 'Authorization' => 'Bearer ' . config('kobo.api_token'),
             ])->timeout(30)->get($url);
 
-            if ( ! $response->successful()) {
-                throw new Exception("HTTP {$response->status()}: {$response->body()}");
+            if (!$response->successful()) {
+                $errorMessage = "Failed to download image - HTTP {$response->status()}";
+                Log::warning('Image download failed with non-200 status', [
+                    'url' => $url,
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+                throw new Exception($errorMessage);
             }
 
             // Generate file path for public access

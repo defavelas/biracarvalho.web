@@ -23,8 +23,8 @@ final class Location extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'type',
         'name',
+        'description',
         'type',
         'latitude',
         'longitude',
@@ -95,12 +95,12 @@ final class Location extends Model
     public function approve(): bool
     {
         $result = $this->update(['published_at' => now()]);
-        
+
         if ($result) {
             // Clear location caches when a location is approved
             app(\App\Services\LocationService::class)->clearCache();
         }
-        
+
         return $result;
     }
 

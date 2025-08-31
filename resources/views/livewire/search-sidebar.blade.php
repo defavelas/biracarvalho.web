@@ -278,7 +278,7 @@
                                         {{ \Str::limit($result['name'], 48) }}
                                     </h3>
                                     <p class="text-sm md:text-xs leading-relaxed text-white/85">
-                                        {{ \Str::limit($result['type'], 64) ?? 'Local de acessibilidade' }}
+                                        {{ \Str::limit($result['description'], 64) ?? 'Local de acessibilidade' }}
                                     </p>
                                 </div>
 

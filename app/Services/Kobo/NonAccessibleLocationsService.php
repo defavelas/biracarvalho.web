@@ -14,9 +14,35 @@ final class NonAccessibleLocationsService
     public function __construct(private readonly KoboClient $koboClient) {}
 
     /**
+     * Test connection to Kobo API before attempting data operations.
+     *
+     * @return bool true if connection is successful
+     * @throws Exception when connection fails
+     */
+    public function validateConnection(): bool
+    {
+        Log::info('Validating Kobo API connection for non-accessible locations');
+
+        if (!$this->koboClient->testConnection()) {
+            $errorMessage = 'Kobo API connection validation failed - cannot proceed with data operations';
+
+            Log::error($errorMessage, [
+                'service' => 'NonAccessibleLocationsService',
+                'operation' => 'connection_validation',
+            ]);
+
+            throw new Exception($errorMessage);
+        }
+
+        Log::info('Kobo API connection validation successful for non-accessible locations');
+        return true;
+    }
+
+    /**
      * Fetch non-accessible locations data from Kobo API.
      *
      * @return array<string, mixed>
+     * @throws Exception when connection fails or returns non-200 status
      */
     public function fetchData(): array
     {
@@ -26,16 +52,16 @@ final class NonAccessibleLocationsService
             throw new InvalidArgumentException('Non-accessible form ID is not configured');
         }
 
+        // Validate connection before attempting to fetch data
+        $this->validateConnection();
+
         try {
             Log::info('Fetching non-accessible locations from Kobo', [
                 'form_id' => $formId,
             ]);
 
+            // KoboClient now throws exceptions for non-200 responses
             $response = $this->koboClient->getFormData($formId);
-
-            if ( ! $response->successful()) {
-                throw new RequestException($response);
-            }
 
             $data = $response->json();
 
@@ -46,10 +72,23 @@ final class NonAccessibleLocationsService
 
             return $data;
 
+        } catch (RequestException $e) {
+            $errorMessage = 'Kobo API returned non-200 status for non-accessible locations';
+
+            Log::error($errorMessage, [
+                'form_id' => $formId,
+                'status_code' => $e->response->status(),
+                'error' => $e->getMessage(),
+                'service' => 'NonAccessibleLocationsService',
+            ]);
+
+            throw new Exception("{$errorMessage}: {$e->getMessage()}", 0, $e);
+
         } catch (Exception $e) {
             Log::error('Failed to fetch non-accessible locations from Kobo', [
                 'form_id' => $formId,
                 'error' => $e->getMessage(),
+                'service' => 'NonAccessibleLocationsService',
             ]);
 
             throw $e;
@@ -76,6 +115,7 @@ final class NonAccessibleLocationsService
                 }
             }
 
+            // Connection is already validated in fetchData(), no need to re-validate
             $data = $this->fetchData();
 
             if (isset($data['results']) && is_array($data['results'])) {

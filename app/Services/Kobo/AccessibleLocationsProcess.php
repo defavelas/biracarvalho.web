@@ -27,6 +27,7 @@ final class AccessibleLocationsProcess
      * Process and persist all accessible locations from Kobo.
      *
      * @return array{processed: int, created: int, updated: int, skipped: int, errors: int}
+     * @throws Exception when Kobo connection fails
      */
     public function processAll(): array
     {
@@ -41,6 +42,11 @@ final class AccessibleLocationsProcess
         ];
 
         try {
+            // Validate connection before attempting to fetch data
+            Log::info('Validating Kobo connection before processing accessible locations');
+            $this->accessibleLocationsService->validateConnection();
+
+            Log::info('Fetching accessible locations data from Kobo API');
             $koboData = $this->accessibleLocationsService->fetchAllData();
 
             foreach ($koboData as $record) {
@@ -59,9 +65,21 @@ final class AccessibleLocationsProcess
             }
 
         } catch (Exception $e) {
-            Log::error('Failed to fetch accessible locations data', [
-                'error' => $e->getMessage(),
-            ]);
+            // Log connection failures specifically and prevent further processing
+            if (str_contains($e->getMessage(), 'connection') || str_contains($e->getMessage(), 'non-200')) {
+                Log::error('Kobo API connection failed - skipping accessible locations processing', [
+                    'error' => $e->getMessage(),
+                    'service' => 'AccessibleLocationsProcess',
+                    'operation' => 'processAll',
+                ]);
+            } else {
+                Log::error('Failed to fetch accessible locations data', [
+                    'error' => $e->getMessage(),
+                    'service' => 'AccessibleLocationsProcess',
+                ]);
+            }
+
+            // Re-throw to prevent job completion when connection fails
             throw $e;
         }
 
@@ -80,7 +98,6 @@ final class AccessibleLocationsProcess
      */
     public function processRecord(array $koboRecord): string
     {
-        dd($koboRecord);
         $externalId = (string) ($koboRecord['_id'] ?? '');
 
         if (empty($externalId)) {
@@ -89,6 +106,15 @@ final class AccessibleLocationsProcess
 
         // Transform the data
         $transformedData = $this->adapter->transform($koboRecord);
+
+        // Skip record if transformation returns null (invalid data)
+        if ($transformedData === null) {
+            Log::info('Skipped record due to invalid data', [
+                'external_id' => $externalId,
+                'reason' => 'Failed validation in adapter transform'
+            ]);
+            return 'skipped';
+        }
 
         // Check if location already exists
         $existingLocation = Location::where('external_id', $externalId)->first();
@@ -239,8 +265,14 @@ final class AccessibleLocationsProcess
                 'Authorization' => 'Bearer ' . config('kobo.api_token'),
             ])->timeout(30)->get($url);
 
-            if ( ! $response->successful()) {
-                throw new Exception("HTTP {$response->status()}: {$response->body()}");
+            if (!$response->successful()) {
+                $errorMessage = "Failed to download image - HTTP {$response->status()}";
+                Log::warning('Image download failed with non-200 status', [
+                    'url' => $url,
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+                throw new Exception($errorMessage);
             }
 
             // Generate file path for public access
