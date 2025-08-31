@@ -41,9 +41,9 @@
         </div>
     </div>
 
-    <!-- Mobile search results cards (50% screen height) -->
+    <!-- Mobile search results cards (45% screen height) -->
     @if((!empty($search) || array_sum($typeFilters) > 0) && $resultsOpen)
-    <div class="fixed bottom-0 left-0 right-0 h-[50vh] bg-primary/95 backdrop-blur-sm z-[999] transform transition-all duration-300 ease-in-out translate-y-0"
+    <div class="fixed bottom-0 left-0 right-0 h-[45vh] bg-primary/95 backdrop-blur-sm z-[999] transform transition-all duration-300 ease-in-out translate-y-0"
          style="background-image: linear-gradient(to bottom, rgba(101, 48, 137, 0.95), rgba(101, 48, 137, 0.98));">
 
         <!-- Results header -->
@@ -58,11 +58,6 @@
                 </span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button wire:click="closeResults"
-                        class="flex items-center justify-center w-8 h-8 bg-black/30 hover:bg-black/50 rounded-full text-white/70 hover:text-white transition-all duration-200"
-                        aria-label="Fechar resultados para melhor navegação no mapa">
-                        @svg('heroicon-o-x-mark', 'w-4 h-4')
-                    </button>
                     @if (array_sum($typeFilters) > 0 || !empty($search))
                         <button wire:click="clearFilters"
                             class="flex items-center justify-center w-8 h-8 bg-black/30 hover:bg-black/50 rounded-full text-white/70 hover:text-white transition-all duration-200"
@@ -70,6 +65,11 @@
                             @svg('heroicon-o-trash', 'w-4 h-4')
                         </button>
                     @endif
+                    <button wire:click="closeResults"
+                        class="flex items-center justify-center w-8 h-8 bg-black/30 hover:bg-black/50 rounded-full text-white/70 hover:text-white transition-all duration-200"
+                        aria-label="Fechar resultados para melhor navegação no mapa">
+                        @svg('heroicon-o-arrow-down', 'w-4 h-4')
+                    </button>
                 </div>
             </div>
         </div>
@@ -79,7 +79,7 @@
             <div class="p-2 space-y-2">
                 @forelse($results as $result)
                     <article
-                        class="bg-black/25 border border-black/20 rounded-lg p-3 hover:bg-black/35 hover:border-secondary cursor-pointer transition-all duration-200 group"
+                        class="text-white border-b border-black/30 p-2 {{ $selectedLocationId == $result['id'] ? 'bg-white rounded-lg border-0 !text-primary' : '' }} last:border-0 group cursor-pointer"
                         data-location-id="{{ $result['id'] }}"
                         role="button"
                         tabindex="0"
@@ -87,56 +87,43 @@
                         wire:click="focusLocation('{{ $result['id'] }}')"
                         wire:keydown.enter="focusLocation('{{ $result['id'] }}')"
                         wire:keydown.space="focusLocation('{{ $result['id'] }}')"
-                        wire:loading.class="opacity-75 pointer-events-none">
+                        wire:loading.class="opacity-75 pointer-events-none"
+                        title="{{ $result['name'] }} - {{ $result['typeLabel'] }}">
 
-                        <div class="flex items-start justify-between">
+                        <div class="flex items-start justify-between space-x-3">
+                            <div class="w-2 h-2 rounded-full mt-1 flex-shrink-0 bg-{{ $result['typeColor'] }}-500"
+                                 aria-hidden="true">
+                            </div>
                             <div class="flex-1 space-y-2">
-                                <div class="flex items-start gap-2">
-                                    <div class="w-3 h-3 rounded-full mt-1 flex-shrink-0 bg-{{ $result['typeColor'] }}-500"
-                                        aria-hidden="true">
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <h4 class="font-semibold text-secondary text-sm leading-tight mb-1 truncate">
-                                            {{ $result['name'] }}
-                                        </h4>
-                                        <p class="text-xs text-white/70 leading-relaxed line-clamp-2">
-                                            {{ $result['type'] ?? 'Local de acessibilidade' }}
-                                        </p>
-                                        @if($result['authors'])
-                                            <p class="text-xs text-white/60 leading-relaxed">
-                                                Por: {{ $result['authors'] }}
-                                            </p>
+                                <div class="flex-1 space-y-1">
+                                    <h3 class="font-semibold text-base leading-tight {{ $selectedLocationId == $result['id'] ? 'text-primary' : 'text-secondary' }}">
+                                        {{ \Str::limit($result['name'], 48) }}
+                                    </h3>
+                                    <p class="text-sm leading-tight text-opacity-85">
+                                        {{ \Str::limit($result['description'], 72) ?? 'Acesse este local para mais detalhes...' }}
+                                    </p>
+                                </div>
+
+                                @if (isset($result['images']) && count($result['images']) > 0)
+                                    <div class="flex -space-x-2">
+                                        @foreach (array_slice($result['images'], 0, 2) as $index => $image)
+                                            <div class="w-6 h-6 rounded-full overflow-hidden bg-black/25 border-2 {{$selectedLocationId == $result['id'] ? 'border-white' : 'border-primary'}}">
+                                                <img src="{{ $image['url'] }}"
+                                                    alt="Imagem {{ $index + 1 }} de {{ $result['name'] }}"
+                                                    class="w-full h-full object-cover" loading="lazy">
+                                            </div>
+                                        @endforeach
+                                        @if (count($result['images']) > 2)
+                                            <div class="w-6 h-6 rounded-full overflow-hidden bg-black/25 border-2 z-10 {{$selectedLocationId == $result['id'] ? 'border-white' : 'border-primary'}} flex items-center justify-center">
+                                                <span class="text-xs text-white/70 font-medium">+{{ count($result['images']) - 2 }}</span>
+                                            </div>
                                         @endif
                                     </div>
-                                </div>
-
-                                <div class="flex items-center justify-between">
-                                    <span
-                                        class="inline-flex items-center px-2 py-0.5 leading-4 font-medium rounded-full text-xs text-white bg-{{ $result['typeColor'] }}-500">
-                                        {{ $result['typeLabel'] }}
-                                    </span>
-
-                                    @if (isset($result['images']) && count($result['images']) > 0)
-                                        <div class="flex -space-x-1">
-                                            @foreach (array_slice($result['images'], 0, 2) as $index => $image)
-                                                <div class="w-6 h-6 rounded-full overflow-hidden bg-black/25 border border-white/30">
-                                                    <img src="{{ $image['url'] }}"
-                                                        alt="Imagem {{ $index + 1 }} de {{ $result['name'] }}"
-                                                        class="w-full h-full object-cover" loading="lazy">
-                                                </div>
-                                            @endforeach
-                                            @if (count($result['images']) > 2)
-                                                <div class="w-6 h-6 rounded-full bg-black/40 border border-white/30 flex items-center justify-center">
-                                                    <span class="text-xs text-white/70 font-medium">+{{ count($result['images']) - 2 }}</span>
-                                                </div>
-                                            @endif
-                                        </div>
-                                    @endif
-                                </div>
+                                @endif
                             </div>
 
-                            <div class="flex-shrink-0 self-center ml-3 group-hover:translate-x-1 transition-transform duration-200">
-                                @svg('heroicon-o-arrow-right', 'w-4 h-4 text-white/50 group-hover:text-secondary', ['aria-hidden' => 'true'])
+                            <div class="flex-shrink-0 self-start ml-auto group-hover:translate-x-1 transition-transform duration-200">
+                                <x-heroicon-o-arrow-right class="w-4 h-4 {{ $selectedLocationId == $result['id'] ? 'text-primary group-hover:text-primary' : 'text-secondary' }}" aria-hidden="true" />
                             </div>
                         </div>
                     </article>
@@ -158,9 +145,9 @@
     @if((!empty($search) || array_sum($typeFilters) > 0) && !$resultsOpen && $totalResults > 0)
     <div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[998]" id="mobile-results-indicator">
         <button wire:click="openResults"
-            class="flex items-center gap-2 bg-secondary text-primary px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 text-sm font-medium"
+            class="flex items-center gap-2 bg-secondary text-primary px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 text-sm font-semibold"
             aria-label="Mostrar {{ $totalResults }} {{ $totalResults === 1 ? 'resultado' : 'resultados' }}">
-            @svg('heroicon-o-chevron-up', 'w-4 h-4')
+            @svg('heroicon-o-arrow-up', 'w-4 h-4')
             <span>{{ $totalResults }} {{ $totalResults === 1 ? 'resultado' : 'resultados' }}</span>
         </button>
     </div>

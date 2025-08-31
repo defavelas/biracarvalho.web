@@ -86,11 +86,11 @@
                             </div>
                             <div class="flex-1 space-y-2">
                                 <div class="flex-1 space-y-2">
-                                    <h3 class="font-semibold text-base leading-tight">
+                                    <h3 class="font-semibold text-base leading-tight {{ $selectedLocationId == $result['id'] ? 'text-primary' : 'text-secondary' }}">
                                         {{ \Str::limit($result['name'], 48) }}
                                     </h3>
                                     <p class="text-sm leading-tight text-opacity-85">
-                                        {{ \Str::limit($result['description'], 64) ?? 'Acesse este local para mais detalhes...' }}
+                                        {{ \Str::limit($result['description'], 72) ?? 'Acesse este local para mais detalhes...' }}
                                     </p>
                                 </div>
 
