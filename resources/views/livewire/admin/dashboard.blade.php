@@ -6,9 +6,60 @@
     @endif
 
     <header class="mb-8">
-        <h1 class="text-3xl font-bold text-white mb-2">{{ __('Dashboard - Moderação') }}</h1>
+        <h1 class="text-3xl font-bold text-white mb-2">{{ __('Dashboard') }}</h1>
         <p class="text-white/80">{{ __('Gerencie os registros pendentes de aprovação') }}</p>
     </header>
+
+    <!-- Metrics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Total Records Card -->
+        <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm font-medium text-white/70">{{ __('Total de Registros') }}</h3>
+                    <p class="text-3xl font-bold text-white mt-2">{{ number_format($totalLocations) }}</p>
+                    @if($lastUpdatedAt)
+                        <p class="text-xs text-white/50 mt-1">{{ __('Última atualização:') }} {{ $lastUpdatedAt }} BRT</p>
+                    @endif
+                </div>
+                <div class="p-3 bg-blue-500/20 rounded-full">
+                    @svg('heroicon-o-map-pin', 'w-6 h-6 text-blue-400')
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Pending Card -->
+        <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm font-medium text-white/70">{{ __('Pendentes') }}</h3>
+                    <p class="text-3xl font-bold text-white mt-2">{{ number_format($totalPending) }}</p>
+                    <p class="text-xs text-white/50 mt-1">
+                        <span class="text-yellow-400">{{ number_format($totalPending) }}</span> de {{ number_format($totalLocations) }}
+                    </p>
+                </div>
+                <div class="p-3 bg-yellow-500/20 rounded-full">
+                    @svg('heroicon-o-clock', 'w-6 h-6 text-yellow-400')
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Published Card -->
+        <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm font-medium text-white/70">{{ __('Publicados') }}</h3>
+                    <p class="text-3xl font-bold text-white mt-2">{{ number_format($totalPublished) }}</p>
+                    <p class="text-xs text-white/50 mt-1">
+                        <span class="text-green-400">{{ number_format($totalPublished) }}</span> de {{ number_format($totalLocations) }}
+                    </p>
+                </div>
+                <div class="p-3 bg-green-500/20 rounded-full">
+                    @svg('heroicon-o-check-circle', 'w-6 h-6 text-green-400')
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6">
         <div class="flex justify-between items-center mb-6">
