@@ -13,10 +13,15 @@ final class NonAccessibleLocationAdapter
      * Transform Kobo survey data into Location, Image, and Info model arrays.
      *
      * @param array<string, mixed> $koboData
-     * @return array{location: array<string, mixed>, images: array<int, array<string, mixed>>, infos: array<int, array<string, mixed>>}
+     * @return array{location: array<string, mixed>, images: array<int, array<string, mixed>>, infos: array<int, array<string, mixed>>}|null
      */
-    public function transform(array $koboData): array
+    public function transform(array $koboData): ?array
     {
+        // Validate perspective question - skip record if empty
+        if (!$this->isValidPerspectiveQuestion($koboData)) {
+            return null;
+        }
+
         return [
             'location' => $this->transformLocation($koboData),
             'images' => $this->transformImages($koboData),
@@ -208,6 +213,9 @@ final class NonAccessibleLocationAdapter
             '_3_Que_tipo_de_lugar_esse', // Mapped to location.type
             '_10_Nome_dos_dois_pe_aram_este_formul_rio', // Mapped to location.authors
 
+            // Validation field (used to determine if record should be processed)
+            '_1_Na_sua_perspectiva_este_lu', // Perspective question for validation
+
             // Coordinate fields (mapped to location.latitude/longitude)
             '_4_Compartilhe_a_localiza_o', // GPS coordinates
             '_6_Compartilhe_a_localiza_o', // GPS coordinates variant
@@ -369,5 +377,16 @@ final class NonAccessibleLocationAdapter
         $cleaned = mb_trim($cleaned);
 
         return '' !== $cleaned ? $cleaned : null;
+    }
+
+    /**
+     * Validate if the perspective question has a value.
+     * Skip record processing if this field is empty.
+     */
+    private function isValidPerspectiveQuestion(array $data): bool
+    {
+        $perspectiveValue = $data['_1_Na_sua_perspectiva_este_lu'] ?? null;
+
+        return null !== $perspectiveValue && '' !== mb_trim((string) $perspectiveValue);
     }
 }
