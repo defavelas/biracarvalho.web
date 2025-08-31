@@ -289,13 +289,18 @@ class MapComponent {
         }
 
         const cardHtml = this.createMapCardHTML(location);
-        const closeButtonHtml = this.createCloseButtonHTML(location);
+        const isMobile = window.innerWidth < 768;
 
         mapContainer.insertAdjacentHTML("afterend", cardHtml);
-        mapContainer.insertAdjacentHTML("afterend", closeButtonHtml);
+
+        // Only add external close buttons for desktop
+        if (!isMobile) {
+            const closeButtonHtml = this.createCloseButtonHTML(location);
+            mapContainer.insertAdjacentHTML("afterend", closeButtonHtml);
+            this.currentCloseButton = document.getElementById("map-card-buttons");
+        }
 
         this.currentMapCard = document.getElementById("map-card-container");
-        this.currentCloseButton = document.getElementById("map-card-buttons");
 
         if (this.currentMapCard) {
             // Use requestAnimationFrame to ensure DOM is fully updated before positioning
@@ -306,8 +311,37 @@ class MapComponent {
             console.error("Map card container not found after insertion");
         }
 
-        if (typeof Alpine !== "undefined" && this.currentMapCard) {
-            Alpine.initTree(this.currentMapCard);
+        // Initialize Alpine for the map card (Livewire provides Alpine)
+        if (this.currentMapCard) {
+            // Wait for Livewire's Alpine to be available and force initialization
+            const initAlpine = () => {
+                if (typeof Alpine !== "undefined" && Alpine.initTree) {
+                    try {
+                        Alpine.initTree(this.currentMapCard);
+                        console.log("Alpine initialized for map card");
+                        
+                        // Debug: check if elements are properly initialized
+                        const imageSlideshow = this.currentMapCard.querySelector('[x-data*="currentSlide"]');
+                        const faqSection = this.currentMapCard.querySelector('[x-data*="openFaq"]');
+                        
+                        if (imageSlideshow) {
+                            console.log("Image slideshow found and should be working");
+                        }
+                        if (faqSection) {
+                            console.log("FAQ section found and should be working");
+                        }
+                        
+                    } catch (error) {
+                        console.error("Alpine initialization error:", error);
+                    }
+                } else {
+                    console.warn("Alpine not available yet, retrying...");
+                    setTimeout(initAlpine, 100);
+                }
+            };
+            
+            // Give Livewire time to load Alpine
+            requestAnimationFrame(initAlpine);
         }
     }
 
@@ -320,49 +354,50 @@ class MapComponent {
         try {
             const locationKey = String(location.id);
             const marker = this.markers.get(locationKey);
+            const isMobile = window.innerWidth < 768;
 
             if (marker) {
                 const markerLatLng = marker.getLatLng();
                 const markerPixel = this.map.latLngToContainerPoint(markerLatLng);
 
                 const mapRect = this.map.getContainer().getBoundingClientRect();
-                const cardWidth = 420;
+                const cardWidth = isMobile ? Math.min(mapRect.width - 32, 420) : 420;
                 const cardHeight = 360;
 
                 let left = markerPixel.x;
                 let top = markerPixel.y - cardHeight - 24;
 
-                if (left + cardWidth > mapRect.width) {
-                    left = mapRect.width - cardWidth - 24;
-                }
-                if (left < 24) {
-                    left = 24;
-                }
-                if (top < 24) {
-                    top = markerPixel.y + 48;
-                }
-                if (top + cardHeight > mapRect.height) {
-                    top = mapRect.height - cardHeight - 24;
+                if (isMobile) {
+                    // Center horizontally on mobile
+                    left = (mapRect.width - cardWidth) / 2;
+                    // Position at bottom of screen on mobile
+                    top = mapRect.height - 400;
+                } else {
+                    if (left + cardWidth > mapRect.width) {
+                        left = mapRect.width - cardWidth - 24;
+                    }
+                    if (left < 24) {
+                        left = 24;
+                    }
+                    if (top < 24) {
+                        top = markerPixel.y + 48;
+                    }
+                    if (top + cardHeight > mapRect.height) {
+                        top = mapRect.height - cardHeight - 24;
+                    }
                 }
 
+                this.currentMapCard.style.position = "absolute";
                 this.currentMapCard.style.left = `${left}px`;
                 this.currentMapCard.style.top = `${top}px`;
                 this.currentMapCard.style.transform = "none";
                 this.currentMapCard.style.display = "block";
+                this.currentMapCard.style.zIndex = "1002";
 
-                if (this.currentCloseButton) {
+                if (!isMobile && this.currentCloseButton) {
                     const mapContainerRect = this.map.getContainer().getBoundingClientRect();
                     const buttonLeft = mapContainerRect.left + left + cardWidth + 8;
                     const buttonTop = mapContainerRect.top + top;
-
-                    console.log("Positioning buttons:", {
-                        buttonLeft,
-                        buttonTop,
-                        mapRect: mapContainerRect,
-                        cardLeft: left,
-                        cardTop: top,
-                        cardWidth,
-                    });
 
                     this.currentCloseButton.style.position = "fixed";
                     this.currentCloseButton.style.left = `${buttonLeft}px`;
@@ -414,12 +449,19 @@ class MapComponent {
         const hasImages = images.length > 0;
         const infos = location.infos || [];
         const hasInfos = infos.length > 0;
+        
+        // Debug logging
+        console.log("Creating map card for:", location.name);
+        console.log("Has images:", hasImages, "count:", images.length);
+        console.log("Has infos:", hasInfos, "count:", infos.length);
+        console.log("Images data:", images);
+        console.log("Infos data:", infos);
 
         let imagesHtml = "";
         if (hasImages) {
             const maxImages = Math.min(images.length, 5);
             imagesHtml = `
-                <div class="mb-3 md:mb-4 relative" x-data="{ currentSlide: 0, totalSlides: ${maxImages} }">
+                <div class="mb-3 md:mb-4 relative" x-data="{ currentSlide: 0, totalSlides: ${maxImages} }" x-init="console.log('Image gallery initialized with', totalSlides, 'images')">
                     <div class="relative h-40 md:h-48 bg-black/25 rounded-lg overflow-hidden group">
                         ${images
                             .slice(0, maxImages)
@@ -428,7 +470,7 @@ class MapComponent {
                             <div
                                 class="absolute inset-0 transition-opacity duration-300"
                                 x-show="currentSlide === ${index}"
-                                style="${index === 0 ? "" : "display: none;"}"
+                                x-transition
                             >
                                 <img
                                     src="${image.url}"
@@ -447,7 +489,7 @@ class MapComponent {
                             <button
                                 type="button"
                                 @click="currentSlide = currentSlide === 0 ? totalSlides - 1 : currentSlide - 1"
-                                class="absolute left-2 top-1/2 transform -translate-y-1/2 w-10 h-10 md:w-8 md:h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 md:opacity-100 transition-opacity duration-200 mobile-slideshow-nav cursor-pointer"
+                                class="absolute left-2 top-1/2 transform -translate-y-1/2 w-10 h-10 md:w-8 md:h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
                                 aria-label="Imagem anterior"
                             >
                                 <svg class="w-5 h-5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -457,7 +499,7 @@ class MapComponent {
                             <button
                                 type="button"
                                 @click="currentSlide = currentSlide === totalSlides - 1 ? 0 : currentSlide + 1"
-                                class="absolute right-2 top-1/2 transform -translate-y-1/2 w-10 h-10 md:w-8 md:h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 md:opacity-100 transition-opacity duration-200 mobile-slideshow-nav cursor-pointer"
+                                class="absolute right-2 top-1/2 transform -translate-y-1/2 w-10 h-10 md:w-8 md:h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
                                 aria-label="Próxima imagem"
                             >
                                 <svg class="w-5 h-5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -484,53 +526,80 @@ class MapComponent {
                     </div>
                 </div>
             `;
-        } else {
-            imagesHtml = `
-                <div class="mb-2 md:mb-4 h-40 md:h-48 bg-black/25 rounded-lg flex items-center justify-center">
-                    <svg class="w-8 h-8 text-primary/50 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                    <span class="text-sm text-primary/50">Sem imagens disponíveis</span>
-                </div>
-            `;
         }
+
+        // Detect if mobile
+        const isMobile = window.innerWidth < 768;
 
         return `
             <div id="map-card-container">
                 <div
                     id="map-card"
-                    class="w-full max-w-[calc(100vw-2rem)] md:w-[420px] md:max-w-[420px] bg-white rounded-lg shadow-xl pb-2 border-4 border-secondary"
+                    class="w-full max-w-[calc(100vw-2rem)] md:w-[420px] md:max-w-[420px] max-h-[80vh] overflow-y-auto bg-white rounded-lg shadow-xl pb-2 border-4 border-secondary"
                     role="dialog"
                     aria-labelledby="map-card-title"
                     aria-describedby="map-card-description"
                 >
+                    ${
+                        hasImages
+                            ? `
                     <div class="p-2 pb-0 mobile-compact-spacing relative">
                         <span class="text-left inline-block px-4 py-0.5 rounded-full bg-${location.typeColor}-500 shadow text-sm absolute top-4 left-4 z-50 text-white">
                             ${location.typeLabel}
                         </span>
                         ${imagesHtml}
                     </div>
-                    <div class="px-2">
-                        <h3 id="map-card-title" class="text-lg font-semibold text-primary leading-tight mb-1">
-                            ${location.name}
-                        </h3>
+                    `
+                            : ""
+                    }
+                    <div class="px-4 py-3">
+                        ${
+                            !hasImages
+                                ? `
+                        <span class="inline-block px-3 py-1 rounded-full bg-${location.typeColor}-500 shadow text-xs text-white mb-3">
+                            ${location.typeLabel}
+                        </span>
+                        `
+                                : ""
+                        }
+                        <div class="flex items-center justify-between">
+                            <h3 id="map-card-title" class="text-lg font-semibold text-primary leading-tight mb-1">
+                                ${location.name}
+                            </h3>
+                            ${
+                                isMobile
+                                    ? `
+                            <button
+                                type="button"
+                                onclick="closeMapCard()"
+                                class="md:hidden flex-shrink-0 ml-2 w-8 h-8 rounded-full bg-secondary flex items-center justify-center"
+                                aria-label="Fechar detalhes"
+                            >
+                                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                            `
+                                    : ""
+                            }
+                        </div>
                         <p class="text-sm text-primary/80 mb-2">
-                            ${location.description}
+                            ${location.description || "Sem descrição disponível"}
                         </p>
                         <div class="text-xs text-primary/80 leading-tight mb-4 flex justify-between items-center">
                             <span class="text-left">
-                                ${location.authors ? `Contribuição ${location.authors}` : ""}
+                                ${location.authors ? `Contribuição ${location.authors}` : "Contribuição anônima"}
                             </span>
                             <span class="text-right">
-                                ${location.createdAt}
+                                ${location.createdAt || ""}
                             </span>
                         </div>
                         ${
                             hasInfos
                                 ? `
                             <div>
-                                <strong class="font-semibold text-primary">Informações do local</strong>
-                                <div class="max-h-80 overflow-y-auto soft-scrollbar" x-data="{ openFaq: null }">
+                                <strong class="font-semibold text-primary block mb-2">Informações do local</strong>
+                                <div x-data="{ openFaq: null }" x-init="console.log('FAQ initialized with', ${infos.length}, 'items')">
                                     ${infos
                                         .map(
                                             (info, index) => `
@@ -539,8 +608,6 @@ class MapComponent {
                                                 type="button"
                                                 @click="openFaq = openFaq === ${index} ? null : ${index}"
                                                 class="w-full py-2 text-left flex items-center justify-between focus:outline-none cursor-pointer"
-                                                :aria-expanded="openFaq === ${index}"
-                                                aria-controls="faq-content-${index}"
                                             >
                                                 <span class="text-sm font-semibold text-primary">${info.title}</span>
                                                 <svg
@@ -556,17 +623,15 @@ class MapComponent {
                                             <div
                                                 x-show="openFaq === ${index}"
                                                 x-transition:enter="transition ease-out duration-200"
-                                                x-transition:enter-start="opacity-0 max-h-0"
-                                                x-transition:enter-end="opacity-100 max-h-96"
+                                                x-transition:enter-start="opacity-0 transform -translate-y-2"
+                                                x-transition:enter-end="opacity-100 transform translate-y-0"
                                                 x-transition:leave="transition ease-in duration-150"
-                                                x-transition:leave-start="opacity-100 max-h-96"
-                                                x-transition:leave-end="opacity-0 max-h-0"
+                                                x-transition:leave-start="opacity-100 transform translate-y-0"
+                                                x-transition:leave-end="opacity-0 transform -translate-y-2"
                                                 id="faq-content-${index}"
                                                 class="overflow-hidden"
-                                                style="display: none;"
                                             >
-                                                <p class="text-sm text-primary/80 leading-relaxed">${info.value}</p>
-                                            </div>
+                                                <p class="text-sm text-primary/80 leading-relaxed pb-2">${info.value}</p></div>
                                         </div>
                                     `,
                                         )
@@ -579,13 +644,12 @@ class MapComponent {
                      </div>
                  </div>
              </div>
-         </div>
          `;
     }
 
     createCloseButtonHTML(location) {
         return `
-            <div id="map-card-buttons" class="!hidden md:!flex flex-col gap-2" style="position: absolute; z-index: 1003; display: flex; flex-direction: column; gap: 8px;">
+            <div id="map-card-buttons" class="flex flex-col gap-2" style="position: absolute; z-index: 1003; display: flex; flex-direction: column; gap: 8px;">
                 <button
                     id="map-card-close-button"
                     type="button"

@@ -95,19 +95,28 @@
                                 </div>
 
                                 @if (isset($result['images']) && count($result['images']) > 0)
-                                    <div class="flex -space-x-2">
+                                    <div class="flex -space-x-2 mt-2">
                                         @foreach (array_slice($result['images'], 0, 2) as $index => $image)
-                                            <div class="w-8 h-8 rounded-full overflow-hidden bg-black/25 border-2 {{$selectedLocationId == $result['id'] ? 'border-white' : 'border-primary'}}">
+                                            <div class="w-8 h-8 rounded-full overflow-hidden bg-black/25 border-2 {{$selectedLocationId == $result['id'] ? 'border-white' : 'border-primary'}} flex-shrink-0">
                                                 <img src="{{ $image['url'] }}"
                                                     alt="Imagem {{ $index + 1 }} de {{ $result['name'] }}"
-                                                    class="w-full h-full object-cover" loading="lazy">
+                                                    class="w-full h-full object-cover" loading="lazy"
+                                                    onerror="this.style.display='block'; this.style.backgroundColor='rgba(0,0,0,0.3)'; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjNjUzMDg5IiBmaWxsLW9wYWNpdHk9IjAuNSIvPgo8cGF0aCBkPSJNOCAxMkw0IDE2TDggMjBNMjQgMTJMMjggMTZMMjQgMjAiIHN0cm9rZT0iI0NFRDg0MiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+Cg==';">
                                             </div>
                                         @endforeach
                                         @if (count($result['images']) > 2)
-                                            <div class="w-8 h-8 rounded-full overflow-hidden bg-black/25 border-2 z-10 {{$selectedLocationId == $result['id'] ? 'border-white' : 'border-primary'}}">
-                                                <span class="text-xs text-white/70 font-medium">+{{ count($result['images']) - 2 }}</span>
+                                            <div class="w-8 h-8 rounded-full overflow-hidden bg-black/25 border-2 z-10 {{$selectedLocationId == $result['id'] ? 'border-white' : 'border-primary'}} flex items-center justify-center flex-shrink-0">
+                                                <span class="text-xs text-white/70 font-bold">+{{ count($result['images']) - 2 }}</span>
                                             </div>
                                         @endif
+                                    </div>
+                                @else
+                                    <div class="flex mt-2">
+                                        <div class="w-8 h-8 rounded-full bg-black/25 border-2 {{$selectedLocationId == $result['id'] ? 'border-white' : 'border-primary'}} flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-4 h-4 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                            </svg>
+                                        </div>
                                     </div>
                                 @endif
                             </div>
