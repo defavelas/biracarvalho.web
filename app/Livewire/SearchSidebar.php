@@ -4,23 +4,23 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use Livewire\Attributes\Reactive;
+use App\Enum\Location\Type;
+use App\Services\LocationService;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
-class SearchSidebar extends Component
+final class SearchSidebar extends Component
 {
     public string $search = '';
-    
-    public array $accessibilityFilters = [
-        'acessivel' => false,
-        'nao_acessivel' => false,
-        'parcial_acessivel' => false,
+
+    public array $typeFilters = [
+        'accessible' => false,
+        'non_accessible' => false,
     ];
-    
+
     public bool $collapsed = false;
     public bool $resultsOpen = true;
-    
+
     public array $results = [];
     public int $totalResults = 0;
     public ?string $selectedLocationId = null;
@@ -49,19 +49,19 @@ class SearchSidebar extends Component
     public function updatedSearch(): void
     {
         $this->loadResults();
-        if (!empty($this->search)) {
+        if ( ! empty($this->search)) {
             $this->resultsOpen = true;
         }
     }
 
     /**
-     * Handle accessibility filter updates.
+     * Handle type filter updates.
      */
-    public function updatedAccessibilityFilters(): void
+    public function updatedTypeFilters(): void
     {
         $this->loadResults();
         $this->dispatch('results-updated', results: $this->results);
-        if (array_sum($this->accessibilityFilters) > 0) {
+        if (array_sum($this->typeFilters) > 0) {
             $this->resultsOpen = true;
         }
     }
@@ -71,7 +71,7 @@ class SearchSidebar extends Component
      */
     public function toggleSidebar(): void
     {
-        $this->collapsed = !$this->collapsed;
+        $this->collapsed = ! $this->collapsed;
     }
 
     /**
@@ -79,21 +79,20 @@ class SearchSidebar extends Component
      */
     public function clearFilters(): void
     {
-        $this->accessibilityFilters = [
-            'acessivel' => false,
-            'nao_acessivel' => false,
-            'parcial_acessivel' => false,
+        $this->typeFilters = [
+            'accessible' => false,
+            'non_accessible' => false,
         ];
 
         $this->search = '';
         $this->selectedLocationId = null;
         $this->resultsOpen = false;
-        
+
         $this->loadResults();
-        
+
         $this->dispatch('filters-cleared');
         $this->dispatch('results-updated', results: $this->results);
-        
+
         $this->js("
             if (window.mapComponentInstance) {
                 window.mapComponentInstance.closeMapCard();
@@ -124,45 +123,18 @@ class SearchSidebar extends Component
     public function focusLocation($locationId): void
     {
         $this->selectedLocationId = (string) $locationId;
-        
+
         // Close results on mobile when focusing on a location
         $this->resultsOpen = false;
-        
+
         $this->dispatch('focus-location', locationId: (string) $locationId);
-        
+
         $this->js("
             if (window.mapComponentInstance) {
                 window.mapComponentInstance.closeMapCard();
-                window.mapComponentInstance.focusLocation('$locationId');
+                window.mapComponentInstance.focusLocation('{$locationId}');
             }
         ");
-    }
-
-    /**
-     * Load and filter results based on current search and filter criteria.
-     */
-    private function loadResults(): void
-    {
-        $mockResults = config('places.mock_locations', []);
-
-        if (!empty($this->search)) {
-            $mockResults = array_filter($mockResults, function ($result) {
-                return stripos($result['name'], $this->search) !== false ||
-                       stripos($result['address'], $this->search) !== false;
-            });
-        }
-
-        $activeFilters = array_keys(array_filter($this->accessibilityFilters));
-        if (!empty($activeFilters)) {
-            $mockResults = array_filter($mockResults, function ($result) use ($activeFilters) {
-                return in_array($result['accessibility_level'], $activeFilters);
-            });
-        }
-
-        $this->results = array_values($mockResults);
-        $this->totalResults = count($this->results);
-        
-        $this->dispatch('results-updated', results: $this->results);
     }
 
     /**
@@ -172,4 +144,43 @@ class SearchSidebar extends Component
     {
         return view('livewire.search-sidebar');
     }
-} 
+
+    /**
+     * Load and filter results based on current search and filter criteria.
+     */
+    private function loadResults(): void
+    {
+        try {
+            $locationService = app(LocationService::class);
+
+            $activeCategories = array_keys(array_filter($this->typeFilters ?? []));
+
+            // Ensure we always pass an array
+            if (!is_array($activeCategories)) {
+                $activeCategories = [];
+            }
+
+            $locations = $locationService->searchLocations($this->search ?? '', $activeCategories);
+
+            $this->results = $locationService->transformCollectionForMap($locations);
+
+            // Randomize the order of results
+            shuffle($this->results);
+
+            $this->totalResults = count($this->results);
+
+            $this->dispatch('results-updated', results: $this->results);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error loading results in SearchSidebar', [
+                'error' => $e->getMessage(),
+                'search' => $this->search ?? null,
+                'typeFilters' => $this->typeFilters ?? null,
+            ]);
+
+            // Fallback to empty results
+            $this->results = [];
+            $this->totalResults = 0;
+            $this->dispatch('results-updated', results: $this->results);
+        }
+    }
+}

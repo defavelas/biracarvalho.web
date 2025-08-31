@@ -1,0 +1,17 @@
+#!/bin/bash
+# This script allows running PHP commands inside the Laravel Sail container
+
+# Check if the Sail container is running
+if ! docker ps | grep -q "biracarvalhoweb-laravel.test-1"; then
+    echo "Error: Laravel Sail container is not running."
+    echo "Please start it with: ./vendor/bin/sail up"
+    exit 1
+fi
+
+# Execute the command in the container
+# Check if running in a TTY
+if [ -t 1 ]; then
+    docker exec -it biracarvalhoweb-laravel.test-1 php "$@"
+else
+    docker exec biracarvalhoweb-laravel.test-1 php "$@"
+fi

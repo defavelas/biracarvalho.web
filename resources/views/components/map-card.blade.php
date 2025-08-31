@@ -4,16 +4,16 @@
 ])
 
 @if($location && $show)
-<div 
-    id="map-card" 
-    class="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-80 bg-secondary border-4 border-black/15 rounded-lg shadow-xl z-[200] transition-all duration-300 ease-in-out flex flex-col max-h-[70vh]"
+<div
+    id="map-card"
+    class="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-80 bg-secondary border-4 border-black/15 rounded-lg shadow-xl z-[200] transition-all duration-300 ease-in-out flex flex-col max-h-[70vh] md:max-h-[75vh] lg:max-h-[80vh] min-h-[300px] md:min-h-[400px] lg:min-h-[450px]"
     role="dialog"
     aria-labelledby="map-card-title"
     aria-describedby="map-card-description"
 >
     <!-- Close Button -->
-    <button 
-        type="button" 
+    <button
+        type="button"
         onclick="closeMapCard()"
         class="absolute -top-2 -right-2 w-8 h-8 bg-primary text-secondary rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors duration-200 z-10"
         aria-label="Fechar detalhes do local"
@@ -26,8 +26,8 @@
         <!-- Title and Accessibility Badge -->
         <div class="flex items-start justify-between space-x-3 mb-3">
             <div class="flex-1">
-                <h3 id="map-card-title" class="text-[13px] md:text-lg font-medium md:font-semibold text-primary leading-tight">
-                    {{ $location['name'] }}
+                <h3 id="map-card-title" class="text-[13px] md:text-lg font-bold md:font-bold text-primary leading-tight">
+                    <strong>{{ $location['name'] }}</strong>
                 </h3>
             </div>
             <span class="inline-flex items-center px-1.5 py-0.5 md:px-2.5 md:py-1 font-normal md:font-semibold rounded-full text-[9px] md:text-xs text-black/75 flex-shrink-0
@@ -65,7 +65,7 @@
     </div>
 
     <!-- Scrollable Content -->
-    <div class="flex-1 overflow-y-auto p-4">
+    <div class="flex-1 overflow-y-auto overflow-x-hidden p-4 min-h-0">
         <!-- Image Slideshow Section -->
         @if(isset($location['images']) && count($location['images']) > 0)
             <div class="mb-4 relative">
@@ -90,7 +90,7 @@
 
             <!-- Action Buttons -->
             <div class="flex space-x-2 pt-4 border-t border-white/10">
-                <button 
+                <button
                     type="button"
                     onclick="centerMapOnLocation({{ $location['latitude'] }}, {{ $location['longitude'] }})"
                     class="flex-1 bg-primary/20 hover:bg-primary/30 text-primary font-medium py-2 px-3 rounded-md transition-colors duration-200 text-sm flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -98,7 +98,7 @@
                     @svg('heroicon-o-map', 'w-4 h-4')
                     <span>Centralizar</span>
                 </button>
-                <button 
+                <button
                     type="button"
                     onclick="highlightLocationInSidebar('{{ $location['id'] }}')"
                     class="flex-1 bg-primary/20 hover:bg-primary/30 text-primary font-medium py-2 px-3 rounded-md transition-colors duration-200 text-sm flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -110,4 +110,4 @@
         </div>
     </div>
 </div>
-@endif 
+@endif
