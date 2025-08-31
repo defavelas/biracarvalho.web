@@ -185,7 +185,7 @@ class MapComponent {
             document.body.appendChild(liveRegion);
         }
         
-        liveRegion.textContent = `Focalizando ${location.name}. ${location.categoryLabel}. Pressione Enter para abrir detalhes.`;
+        liveRegion.textContent = `Focalizando ${location.name}. ${location.typeLabel}. Pressione Enter para abrir detalhes.`;
     }
 
     async loadMapData() {
@@ -223,11 +223,11 @@ class MapComponent {
     }
 
     addMarker(location) {
-        const { id, name, category, latitude, longitude, categoryColor } = location;
+        const { id, name, type, latitude, longitude, typeColor } = location;
 
         const locationId = String(id);
 
-        const icon = this.createAccessibilityIcon(category, categoryColor, locationId === this.selectedLocationId);
+        const icon = this.createAccessibilityIcon(type, typeColor, locationId === this.selectedLocationId);
 
         const marker = L.marker([latitude, longitude], { icon })
             .addTo(this.markerLayer);
@@ -244,10 +244,10 @@ class MapComponent {
         return marker;
     }
 
-    createAccessibilityIcon(category, categoryColor, isSelected = false) {
+    createAccessibilityIcon(type, typeColor, isSelected = false) {
         let iconUrl = '/assets/images/green-pin.png'; // default
 
-        switch (category) {
+        switch (type) {
             case 'accessible':
                 iconUrl = '/assets/images/green-pin.png';
                 break;
@@ -502,8 +502,8 @@ class MapComponent {
                                     ${location.name}
                                 </h3>
                             </div>
-                            <span class="inline-flex items-center px-3 py-1.5 md:px-2.5 md:py-1 font-semibold rounded-full text-xs text-white flex-shrink-0 bg-${location.categoryColor}-500">
-                                ${location.categoryLabel}
+                            <span class="inline-flex items-center px-3 py-1.5 md:px-2.5 md:py-1 font-semibold rounded-full text-xs text-white flex-shrink-0 bg-${location.typeColor}-500">
+                                ${location.typeLabel}
                             </span>
                         </div>
 
@@ -739,7 +739,7 @@ class MapComponent {
         this.markers.forEach((marker, locationId) => {
             const location = this.getLocationById(locationId);
             if (location) {
-                const newIcon = this.createAccessibilityIcon(location.category, location.categoryColor, locationId === this.selectedLocationId);
+                const newIcon = this.createAccessibilityIcon(location.type, location.typeColor, locationId === this.selectedLocationId);
                 marker.setIcon(newIcon);
             }
         });

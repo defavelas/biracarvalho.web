@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Admin\Locations;
 
-use App\Enum\Location\Category;
+use App\Enum\Location\Type;
 use App\Models\Location;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -17,8 +17,8 @@ final class Records extends Component
     #[Url(as: 'q')]
     public string $search = '';
 
-    #[Url(as: 'category')]
-    public string $categoryFilter = '';
+    #[Url(as: 'type')]
+    public string $typeFilter = '';
 
     #[Url(as: 'status')]
     public string $statusFilter = '';
@@ -31,7 +31,7 @@ final class Records extends Component
         $this->resetPage();
     }
 
-    public function updatingCategoryFilter(): void
+    public function updatingTypeFilter(): void
     {
         $this->resetPage();
     }
@@ -79,7 +79,7 @@ final class Records extends Component
     {
         return Location::query()
             ->when($this->search, fn($query) => $query->where('name', 'like', "%{$this->search}%"))
-            ->when($this->categoryFilter, fn($query) => $query->where('category', $this->categoryFilter))
+            ->when($this->typeFilter, fn($query) => $query->where('type', $this->typeFilter))
             ->when($this->statusFilter, function ($query) {
                 return $this->statusFilter === 'pending' 
                     ? $query->pending() 
@@ -94,7 +94,7 @@ final class Records extends Component
     {
         return view('livewire.admin.locations.records', [
             'locations' => $this->locations,
-            'categories' => Category::options(),
+            'categories' => Type::options(),
         ])
             ->title('Bira Carvalho: Locais de acessibilidade')
             ->layout('layouts.admin');

@@ -1,6 +1,6 @@
 ---
-description: 
-globs: 
+description:
+globs:
 alwaysApply: true
 ---
 ---
@@ -40,7 +40,7 @@ Suggestions provided by Cursor during code completion:
 - Suggest **job queues** for asynchronous tasks (e.g., processing CSV uploads: `dispatch(new ProcessCsvImport($importJob));`).
 - Autocomplete **database migrations** for MySQL 8+, prioritizing **UUIDs for primary/foreign keys** and **indexes on all searchable columns**. For example, for a locations table:
   `$table->uuid('id')->primary();`
-  `$table->foreignUuid('category_id')->constrained('categories');`
+  `$table->foreignUuid('type_id')->constrained('categories');`
   `$table->string('name')->index();`
   `$table->string('accessibility_level')->default('unknown')->index();`
   `$table->decimal('latitude', 10, 8);`

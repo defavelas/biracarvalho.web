@@ -17,9 +17,9 @@ return new class () extends Migration {
             $table->uuid('id')->primary();
 
             $table->string('name');
-            $table->text('type');
+            $table->text('description');
 
-            $table->enum('category', Location\Category::values());
+            $table->enum('type', Location\Type::values());
 
             $table->decimal('latitude', 10, 8);
             $table->decimal('longitude', 11, 8);
@@ -33,7 +33,7 @@ return new class () extends Migration {
             $table->softDeletes();
             $table->timestamps();
 
-            $table->index(['category']);
+            $table->index(['type']);
             $table->index(['published_at']);
             $table->index(['latitude', 'longitude']);
         });

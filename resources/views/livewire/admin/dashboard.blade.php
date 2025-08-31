@@ -15,7 +15,7 @@
             <h2 class="text-xl font-semibold text-white">
                 {{ __('Registros Pendentes') }} ({{ $pendingLocations->total() }})
             </h2>
-            
+
             <div class="text-sm text-white/70">
                 {{ __('Máximo 25 registros por página') }}
             </div>
@@ -29,28 +29,28 @@
                             <div class="flex-1">
                                 <div class="flex items-center gap-3 mb-2">
                                     <h3 class="text-lg font-medium text-white">{{ $location->name }}</h3>
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{{ $location->category->color() }}-500/20 text-{{ $location->category->color() }}-200 border border-{{ $location->category->color() }}-500/30">
-                                        {{ $location->category->label() }}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{{ $location->type->color() }}-500/20 text-{{ $location->type->color() }}-200 border border-{{ $location->type->color() }}-500/30">
+                                        {{ $location->type->label() }}
                                     </span>
                                 </div>
-                                
+
                                 @if($location->type)
                                     <p class="text-white/80 text-sm mb-2">{{ $location->type }}</p>
                                 @endif
-                                
+
                                 <div class="flex items-center gap-4 text-sm text-white/60">
                                     <span class="flex items-center gap-1">
                                         @svg('heroicon-o-map-pin', 'w-4 h-4')
                                         {{ number_format($location->latitude, 6) }}, {{ number_format($location->longitude, 6) }}
                                     </span>
-                                    
+
                                     @if($location->authors)
                                         <span class="flex items-center gap-1">
                                             @svg('heroicon-o-user', 'w-4 h-4')
                                             {{ $location->authors }}
                                         </span>
                                     @endif
-                                    
+
                                     <span class="flex items-center gap-1">
                                         @svg('heroicon-o-clock', 'w-4 h-4')
                                         {{ $location->created_at->format('d/m/Y H:i') }}
@@ -64,9 +64,9 @@
                                     </div>
                                 @endif
                             </div>
-                            
+
                             <div class="flex flex-col sm:flex-row gap-3">
-                                <button 
+                                <button
                                     wire:click="approve('{{ $location->id }}')"
                                     wire:confirm="{{ __('Tem certeza que deseja aprovar este registro?') }}"
                                     class="inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"
@@ -74,8 +74,8 @@
                                     @svg('heroicon-o-check', 'w-4 h-4 mr-2')
                                     {{ __('Aprovar') }}
                                 </button>
-                                
-                                <button 
+
+                                <button
                                     wire:click="reject('{{ $location->id }}')"
                                     wire:confirm="{{ __('Tem certeza que deseja rejeitar este registro? Esta ação não pode ser desfeita.') }}"
                                     class="inline-flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors duration-200"

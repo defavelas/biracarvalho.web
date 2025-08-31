@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Enum\Location;
 
-enum Category: string
+enum Type: string
 {
     case ACCESSIBLE = 'accessible';
     case NON_ACCESSIBLE = 'non_accessible';

@@ -3,9 +3,9 @@
     <div class="md:hidden">
         <!-- Mobile floating search container -->
         <div class="fixed top-4 left-2 right-2 z-[1001] transform transition-all duration-300 ease-in-out translate-y-0 opacity-100"
-             aria-label="Barra de pesquisa móvel" 
+             aria-label="Barra de pesquisa móvel"
              aria-hidden="false">
-            
+
             <!-- Compact search bar -->
             <div class="bg-primary rounded-lg shadow-xl border-4 border-black/15 overflow-hidden">
                 <div class="p-2 bg-no-repeat bg-top" style="background-image: url('{{ asset('assets/images/search-bg.jpg') }}');">
@@ -26,20 +26,20 @@
 
                     <!-- Filter buttons with labels (row 1) -->
                     <div class="flex flex-wrap justify-start items-center gap-2 my-2">
-                            <button type="button" 
-                                    wire:click="$toggle('categoryFilters.accessible')"
-                                    class="flex items-center gap-1 px-2 py-1 rounded-full border border-black/20 text-xs transition-all duration-200 {{ $categoryFilters['accessible'] ? 'bg-green-500 border-green-500 text-black font-medium' : 'bg-black/20 text-white/80 font-medium' }}"
-                                    aria-label="{{ $categoryFilters['accessible'] ? 'Desativar filtro Acessível' : 'Ativar filtro Acessível' }}"
-                                    aria-pressed="{{ $categoryFilters['accessible'] ? 'true' : 'false' }}">
-                                <div class="w-2 h-2 rounded-full {{ $categoryFilters['accessible'] ? 'bg-white' : 'bg-green-500' }}"></div>
+                            <button type="button"
+                                    wire:click="$toggle('typeFilters.accessible')"
+                                    class="flex items-center gap-1 px-2 py-1 rounded-full border border-black/20 text-xs transition-all duration-200 {{ $typeFilters['accessible'] ? 'bg-green-500 border-green-500 text-black font-medium' : 'bg-black/20 text-white/80 font-medium' }}"
+                                    aria-label="{{ $typeFilters['accessible'] ? 'Desativar filtro Acessível' : 'Ativar filtro Acessível' }}"
+                                    aria-pressed="{{ $typeFilters['accessible'] ? 'true' : 'false' }}">
+                                <div class="w-2 h-2 rounded-full {{ $typeFilters['accessible'] ? 'bg-white' : 'bg-green-500' }}"></div>
                                 <span>Acessível</span>
                             </button>
-                            <button type="button" 
-                                    wire:click="$toggle('categoryFilters.non_accessible')"
-                                    class="flex items-center gap-1 px-2 py-1 rounded-full border border-black/20 text-xs transition-all duration-200 {{ $categoryFilters['non_accessible'] ? 'bg-red-500 border-red-500 text-white font-medium' : 'bg-black/20 text-white/80 font-medium' }}"
-                                    aria-label="{{ $categoryFilters['non_accessible'] ? 'Desativar filtro Não Acessível' : 'Ativar filtro Não Acessível' }}"
-                                    aria-pressed="{{ $categoryFilters['non_accessible'] ? 'true' : 'false' }}">
-                                <div class="w-2 h-2 rounded-full {{ $categoryFilters['non_accessible'] ? 'bg-white' : 'bg-red-500' }}"></div>
+                            <button type="button"
+                                    wire:click="$toggle('typeFilters.non_accessible')"
+                                    class="flex items-center gap-1 px-2 py-1 rounded-full border border-black/20 text-xs transition-all duration-200 {{ $typeFilters['non_accessible'] ? 'bg-red-500 border-red-500 text-white font-medium' : 'bg-black/20 text-white/80 font-medium' }}"
+                                    aria-label="{{ $typeFilters['non_accessible'] ? 'Desativar filtro Não Acessível' : 'Ativar filtro Não Acessível' }}"
+                                    aria-pressed="{{ $typeFilters['non_accessible'] ? 'true' : 'false' }}">
+                                <div class="w-2 h-2 rounded-full {{ $typeFilters['non_accessible'] ? 'bg-white' : 'bg-red-500' }}"></div>
                                 <span>Não Acessível</span>
                             </button>
                     </div>
@@ -49,7 +49,7 @@
                         <p class="text-xs font-mono text-white/90 min-h-8 flex items-center">
                             {{ $totalResults }} {{ $totalResults === 1 ? 'local' : 'locais' }}
                         </p>
-                        @if (array_sum($categoryFilters) > 0 || !empty($search))
+                        @if (array_sum($typeFilters) > 0 || !empty($search))
                             <button wire:click="clearFilters"
                                 class="flex items-center justify-center w-8 h-8 bg-black/20 hover:bg-black/30 rounded-full text-white/80 hover:text-white transition-colors duration-200"
                                 aria-label="Limpar todos os filtros">
@@ -62,10 +62,10 @@
         </div>
 
         <!-- Mobile search results cards (50% screen height) -->
-        @if((!empty($search) || array_sum($categoryFilters) > 0) && $resultsOpen)
+        @if((!empty($search) || array_sum($typeFilters) > 0) && $resultsOpen)
         <div class="fixed bottom-0 left-0 right-0 h-[50vh] bg-primary/95 backdrop-blur-sm z-[999] transform transition-all duration-300 ease-in-out translate-y-0"
              style="background-image: linear-gradient(to bottom, rgba(101, 48, 137, 0.95), rgba(101, 48, 137, 0.98));">
-            
+
             <!-- Results header -->
             <div class="p-2.5 bg-black/20">
                 <div class="flex items-center justify-between">
@@ -83,7 +83,7 @@
                             aria-label="Fechar resultados para melhor navegação no mapa">
                             @svg('heroicon-o-x-mark', 'w-4 h-4')
                         </button>
-                        @if (array_sum($categoryFilters) > 0 || !empty($search))
+                        @if (array_sum($typeFilters) > 0 || !empty($search))
                             <button wire:click="clearFilters"
                                 class="flex items-center justify-center w-8 h-8 bg-black/30 hover:bg-black/50 rounded-full text-white/70 hover:text-white transition-all duration-200"
                                 aria-label="Limpar todos os filtros">
@@ -100,19 +100,19 @@
                     @forelse($results as $result)
                         <article
                             class="bg-black/25 border border-black/20 rounded-lg p-3 hover:bg-black/35 hover:border-secondary cursor-pointer transition-all duration-200 group"
-                            data-location-id="{{ $result['id'] }}" 
-                            role="button" 
+                            data-location-id="{{ $result['id'] }}"
+                            role="button"
                             tabindex="0"
-                            aria-label="Ver {{ $result['name'] }} no mapa - {{ $result['categoryLabel'] }}"
+                            aria-label="Ver {{ $result['name'] }} no mapa - {{ $result['typeLabel'] }}"
                             wire:click="focusLocation('{{ $result['id'] }}')"
                             wire:keydown.enter="focusLocation('{{ $result['id'] }}')"
                             wire:keydown.space="focusLocation('{{ $result['id'] }}')"
                             wire:loading.class="opacity-75 pointer-events-none">
-                            
+
                             <div class="flex items-start justify-between">
                                 <div class="flex-1 space-y-2">
                                     <div class="flex items-start gap-2">
-                                        <div class="w-3 h-3 rounded-full mt-1 flex-shrink-0 bg-{{ $result['categoryColor'] }}-500"
+                                        <div class="w-3 h-3 rounded-full mt-1 flex-shrink-0 bg-{{ $result['typeColor'] }}-500"
                                             aria-hidden="true">
                                         </div>
                                         <div class="flex-1 min-w-0">
@@ -132,8 +132,8 @@
 
                                     <div class="flex items-center justify-between">
                                         <span
-                                            class="inline-flex items-center px-2 py-0.5 leading-4 font-medium rounded-full text-xs text-white bg-{{ $result['categoryColor'] }}-500">
-                                            {{ $result['categoryLabel'] }}
+                                            class="inline-flex items-center px-2 py-0.5 leading-4 font-medium rounded-full text-xs text-white bg-{{ $result['typeColor'] }}-500">
+                                            {{ $result['typeLabel'] }}
                                         </span>
 
                                         @if (isset($result['images']) && count($result['images']) > 0)
@@ -166,7 +166,7 @@
                                 @svg('heroicon-o-magnifying-glass', 'w-6 h-6 text-secondary')
                             </div>
                             <h4 class="text-sm font-semibold text-secondary mb-1">Nenhum resultado encontrado</h4>
-                            <p class="text-xs text-white/50">Tente ajustar seus filtros ou termo de pesquisa</p>
+                            <p class="text-xs text-white/50">Tente ajustar seus filtros de acessibilidade ou termo de pesquisa</p>
                         </div>
                     @endforelse
                 </div>
@@ -175,7 +175,7 @@
         @endif
 
         <!-- Results indicator when closed -->
-        @if((!empty($search) || array_sum($categoryFilters) > 0) && !$resultsOpen && $totalResults > 0)
+        @if((!empty($search) || array_sum($typeFilters) > 0) && !$resultsOpen && $totalResults > 0)
         <div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[998]" id="mobile-results-indicator">
             <button wire:click="openResults"
                 class="flex items-center gap-2 bg-secondary text-primary px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 text-sm font-medium"
@@ -189,24 +189,24 @@
 
     <!-- Desktop: Full sidebar -->
     <aside
-        class="hidden md:block absolute 
+        class="hidden md:block absolute
                md:top-2 md:left-2 md:bottom-2 md:right-auto md:w-96 md:h-auto
-               bg-primary bg-no-repeat bg-top border-0 md:border-4 border-black/15 z-[100] shadow-xl 
-               transform transition-transform duration-300 ease-in-out 
-               md:rounded-xl overflow-hidden 
+               bg-primary bg-no-repeat bg-top border-0 md:border-4 border-black/15 z-[100] shadow-xl
+               transform transition-transform duration-300 ease-in-out
+               md:rounded-xl overflow-hidden
                {{ $collapsed ? '-translate-x-full' : 'translate-x-0' }}"
-        aria-label="Painel de pesquisa e filtros" 
-        style="background-image: url('{{ asset('assets/images/search-bg.jpg') }}');" 
-        role="complementary" 
+        aria-label="Painel de pesquisa e filtros"
+        style="background-image: url('{{ asset('assets/images/search-bg.jpg') }}');"
+        role="complementary"
         aria-hidden="{{ $collapsed ? 'true' : 'false' }}">
-    
+
     <div class="flex flex-col h-full">
         <!-- Mobile-optimized header -->
         <header class="p-3 md:p-2 safe-area-top">
             <div class="mb-4">
                 <img src="{{ asset('assets/images/logo.svg') }}" alt="Logo" class="w-20 md:w-24 m-0 md:m-2">
             </div>
-            
+
             <div class="relative">
                 <label for="search-input" class="sr-only">Pesquisar locais</label>
                 <input type="search" id="search-input" wire:model.live.debounce.300ms="search"
@@ -218,7 +218,7 @@
                 </div>
             </div>
             <div id="search-help" class="sr-only">
-                Digite para pesquisar por nome ou endereço de locais
+                Digite para pesquisar por nome de locais
             </div>
         </header>
 
@@ -227,9 +227,9 @@
             <fieldset class="space-y-3 md:space-y-2 mb-3 md:mb-2">
                 <div class="flex items-center justify-between">
                     <legend class="text-base md:text-lg font-semibold text-white">
-                        Categoria de Acessibilidade
+                        Acessibilidade
                     </legend>
-                    @if (array_sum($categoryFilters) > 0 || !empty($search))
+                    @if (array_sum($typeFilters) > 0 || !empty($search))
                         <button wire:click="clearFilters"
                             class="flex items-center justify-center w-8 h-8 md:w-auto md:h-auto text-sm text-primary font-semibold hover:underline cursor-pointer focus:outline-none focus:underline"
                             aria-label="Limpar todos os filtros">
@@ -239,11 +239,11 @@
                 </div>
 
                 <div class="space-y-3 md:space-y-2 mb-3 md:mb-2" wire:key="filter-toggles">
-                    <x-toggle-button wire:model.live="categoryFilters.accessible" :value="$categoryFilters['accessible']"
+                    <x-toggle-button wire:model.live="typeFilters.accessible" :value="$typeFilters['accessible']"
                         label="Acessível" trackClass="bg-black/20 border-white" thumbClass="bg-green-500"
                         labelClass="text-white text-sm" wire:key="filter-accessible" />
 
-                    <x-toggle-button wire:model.live="categoryFilters.non_accessible" :value="$categoryFilters['non_accessible']"
+                    <x-toggle-button wire:model.live="typeFilters.non_accessible" :value="$typeFilters['non_accessible']"
                         label="Não Acessível" trackClass="bg-black/20 border-white" thumbClass="bg-red-500"
                         labelClass="text-white text-sm" wire:key="filter-non-accessible" />
                 </div>
@@ -258,87 +258,69 @@
 
         <!-- Mobile-optimized results section -->
         <main class="flex-1 overflow-y-auto soft-scrollbar p-2 md:p-2 safe-area-bottom">
-            <div class="space-y-2" wire:key="results-{{ md5(json_encode($categoryFilters) . $search) }}">
+            <div class="space-y-2" wire:key="results-{{ md5(json_encode($typeFilters) . $search) }}">
                 @forelse($results as $result)
                     <article
                         class="bg-black/20 border-1 {{ $selectedLocationId == $result['id'] ? 'bg-secondary !text-primary shadow-md' : '!text-white border-black/30' }} rounded-lg p-3 md:p-2.5 hover:shadow-md hover:border-secondary cursor-pointer transition-all duration-200 group"
                         data-location-id="{{ $result['id'] }}" role="button" tabindex="0"
-                        aria-label="Ver {{ $result['name'] }} no mapa - {{ $result['categoryLabel'] }}"
+                        aria-label="Ver {{ $result['name'] }} no mapa - {{ $result['typeLabel'] }}"
                         wire:click="focusLocation('{{ $result['id'] }}')"
                         wire:keydown.enter="focusLocation('{{ $result['id'] }}')"
                         wire:keydown.space="focusLocation('{{ $result['id'] }}')"
                         wire:loading.class="opacity-75 pointer-events-none">
                         <div class="flex items-start justify-between space-x-3 md:space-x-2">
+                            <div class="w-2 h-2 rounded-full mt-1 flex-shrink-0 bg-{{ $result['typeColor'] }}-500"
+                                 aria-hidden="true">
+                            </div>
                             <div class="flex-1 space-y-2">
-                                <div class="flex items-start space-x-2">
-                                    <div class="w-4 h-4 md:w-3 md:h-3 rounded-full mt-1 flex-shrink-0 bg-{{ $result['categoryColor'] }}-500"
-                                        aria-hidden="true">
-                                    </div>
-                                    <div class="flex-1">
-                                        <h3 class="font-semibold text-base md:text-sm leading-tight mb-1">
-                                            {{ $result['name'] }}
-                                        </h3>
-                                        <p class="text-sm md:text-xs leading-relaxed">
-                                            {{ $result['type'] ?? 'Local de acessibilidade' }}
-                                        </p>
-                                        @if($result['authors'])
-                                            <p class="text-xs text-{{ $selectedLocationId == $result['id'] ? 'primary' : 'white' }}/60 leading-relaxed">
-                                                Por: {{ $result['authors'] }}
-                                            </p>
-                                        @endif
-                                    </div>
+                                <div class="flex-1 space-y-2">
+                                    <h3 class="font-semibold text-base md:text-sm leading-tight mb-1">
+                                        {{ \Str::limit($result['name'], 48) }}
+                                    </h3>
+                                    <p class="text-sm md:text-xs leading-relaxed text-white/85">
+                                        {{ \Str::limit($result['type'], 64) ?? 'Local de acessibilidade' }}
+                                    </p>
                                 </div>
 
                                 @if (isset($result['images']) && count($result['images']) > 0)
-                                    <div class="flex space-x-2" aria-label="Imagens do local">
-                                        @php
-                                            $images = $result['images'];
-                                            $totalImages = count($images);
-                                            $displayImages = array_slice($images, 0, 3);
-                                            $remainingCount = max(0, $totalImages - 3);
-                                        @endphp
+                                    <div class="flex flex-between">
+                                        <div class="flex space-x-2" aria-label="Imagens do local">
+                                            @php
+                                                $images = $result['images'];
+                                                $totalImages = count($images);
+                                                $displayImages = array_slice($images, 0, 3);
+                                                $remainingCount = max(0, $totalImages - 3);
+                                            @endphp
 
-                                        @foreach ($displayImages as $index => $image)
-                                            <div class="relative w-14 h-14 md:w-12 md:h-12 rounded-md overflow-hidden bg-black/20 flex-shrink-0">
-                                                <img src="{{ $image['url'] }}"
-                                                    alt="Imagem {{ $index + 1 }} de {{ $result['name'] }}"
-                                                    class="w-full h-full object-cover" loading="lazy">
-                                            </div>
-                                        @endforeach
+                                            @foreach ($displayImages as $index => $image)
+                                                <div class="relative w-12 h-12 md:w-8 md:h-8 rounded-md overflow-hidden bg-black/20 flex-shrink-0">
+                                                    <img src="{{ $image['url'] }}"
+                                                        alt="Imagem {{ $index + 1 }} de {{ $result['name'] }}"
+                                                        class="w-full h-full object-cover" loading="lazy">
+                                                </div>
+                                            @endforeach
 
-                                        @if ($remainingCount > 0)
-                                            <div class="w-14 h-14 md:w-12 md:h-12 rounded-md bg-black/20 flex items-center justify-center flex-shrink-0">
-                                                <span class="text-sm text-white/50 font-medium"
-                                                    aria-label="{{ $remainingCount }} imagens adicionais">
-                                                    +{{ $remainingCount }}
-                                                </span>
-                                            </div>
-                                        @endif
-                                    </div>
-                                @else
-                                    <div class="flex space-x-2">
-                                        @for ($i = 0; $i < 3; $i++)
-                                            <div class="w-14 h-14 md:w-12 md:h-12 rounded-md bg-black/25 flex items-center justify-center flex-shrink-0">
-                                                @svg('heroicon-o-photo', 'w-6 h-6 md:w-5 md:h-5 text-white/50')
-                                            </div>
-                                        @endfor
+                                            @if ($remainingCount > 0)
+                                                <div class="w-12 h-12 md:w-8 md:h-8 rounded-md bg-black/20 flex items-center justify-center flex-shrink-0">
+                                                    <span class="text-sm text-white/50 font-medium"
+                                                        aria-label="{{ $remainingCount }} imagens adicionais">
+                                                        +{{ $remainingCount }}
+                                                    </span>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div>
+
+                                        </div>
                                     </div>
                                 @endif
-
-                                <div class="flex items-center justify-between">
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-1.5 md:px-2 md:py-1 leading-5 font-semibold rounded-full text-sm md:text-xs text-white bg-{{ $result['categoryColor'] }}-500">
-                                        {{ $result['categoryLabel'] }}
-                                    </span>
-
-                                    @if (isset($result['latitude']) && isset($result['longitude']))
-                                        <span class="text-xs md:text-[10px] font-mono text-right hidden md:block"
-                                            aria-label="Coordenadas: Latitude {{ number_format($result['latitude'], 4) }}, Longitude {{ number_format($result['longitude'], 4) }}">
-                                            {{ number_format($result['latitude'], 4) }},
-                                            {{ number_format($result['longitude'], 4) }}
-                                        </span>
+                                <p class="text-xs text-{{ $selectedLocationId == $result['id'] ? 'primary' : 'white' }}/60 leading-relaxed">
+                                    @if($result['authors'])
+                                        Por: {{ $result['authors'] }}
+                                    @else
+                                        Por: Anônimo
                                     @endif
-                                </div>
+                                </p>
                             </div>
 
                             <div class="flex-shrink-0 self-start ml-auto group-hover:translate-x-1 transition-transform duration-200">
@@ -352,7 +334,7 @@
                             @svg('heroicon-o-magnifying-glass', 'w-8 h-8 text-secondary')
                         </div>
                         <h3 class="text-base font-semibold text-secondary mb-1">Nenhum resultado encontrado</h3>
-                        <p class="text-sm text-white/50">Tente ajustar seus filtros ou termo de pesquisa</p>
+                        <p class="text-sm text-white/50">Tente ajustar seus filtros de acessibilidade ou termo de pesquisa</p>
                     </div>
                 @endforelse
             </div>

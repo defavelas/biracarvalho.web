@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enum\Location\Category;
+use App\Enum\Location\Type;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -25,7 +25,7 @@ final class Location extends Model
     protected $fillable = [
         'type',
         'name',
-        'category',
+        'type',
         'latitude',
         'longitude',
         'authors',
@@ -39,7 +39,7 @@ final class Location extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'category' => Category::class,
+        'type' => Type::class,
         'latitude' => 'decimal:8',
         'longitude' => 'decimal:8',
         'published_at' => 'datetime',

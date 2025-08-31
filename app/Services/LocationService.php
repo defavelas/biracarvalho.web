@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Enum\Location\Category;
+use App\Enum\Location\Type;
 use App\Models\Location;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -30,7 +30,7 @@ final class LocationService
                 ->select([
                     'id',
                     'name', 
-                    'category',
+                    'type',
                     'latitude',
                     'longitude',
                     'type',
@@ -73,9 +73,9 @@ final class LocationService
                 });
             }
 
-            // Apply category filters
+            // Apply type filters
             if (!empty($categories)) {
-                $query->whereIn('category', $categories);
+                $query->whereIn('type', $categories);
             }
 
             return $query
@@ -103,7 +103,7 @@ final class LocationService
     /**
      * Get location statistics for dashboard.
      *
-     * @return array{total: int, published: int, pending: int, by_category: array<string, int>}
+     * @return array{total: int, published: int, pending: int, by_type: array<string, int>}
      */
     public function getLocationStats(): array
     {
@@ -112,10 +112,10 @@ final class LocationService
             $published = Location::published()->count();
             $pending = Location::pending()->count();
             
-            $byCategory = [];
-            foreach (Category::cases() as $category) {
-                $byCategory[$category->value] = Location::published()
-                    ->where('category', $category->value)
+            $byType = [];
+            foreach (Type::cases() as $type) {
+                $byType[$type->value] = Location::published()
+                    ->where('type', $type->value)
                     ->count();
             }
 
@@ -123,7 +123,7 @@ final class LocationService
                 'total' => $total,
                 'published' => $published,
                 'pending' => $pending,
-                'by_category' => $byCategory,
+                'by_type' => $byType,
             ];
         });
     }
@@ -139,9 +139,9 @@ final class LocationService
         return [
             'id' => $location->id,
             'name' => $location->name,
-            'category' => $location->category->value,
-            'categoryLabel' => $location->category->label(),
-            'categoryColor' => $location->category->color(),
+            'type' => $location->type->value,
+            'typeLabel' => $location->type->label(),
+            'typeColor' => $location->type->color(),
             'latitude' => (float) $location->latitude,
             'longitude' => (float) $location->longitude,
             'type' => $location->type,

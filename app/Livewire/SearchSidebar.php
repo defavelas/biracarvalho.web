@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
-use App\Enum\Location\Category;
+use App\Enum\Location\Type;
 use App\Services\LocationService;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -13,7 +13,7 @@ final class SearchSidebar extends Component
 {
     public string $search = '';
 
-    public array $categoryFilters = [
+    public array $typeFilters = [
         'accessible' => false,
         'non_accessible' => false,
     ];
@@ -55,13 +55,13 @@ final class SearchSidebar extends Component
     }
 
     /**
-     * Handle category filter updates.
+     * Handle type filter updates.
      */
-    public function updatedCategoryFilters(): void
+    public function updatedTypeFilters(): void
     {
         $this->loadResults();
         $this->dispatch('results-updated', results: $this->results);
-        if (array_sum($this->categoryFilters) > 0) {
+        if (array_sum($this->typeFilters) > 0) {
             $this->resultsOpen = true;
         }
     }
@@ -79,7 +79,7 @@ final class SearchSidebar extends Component
      */
     public function clearFilters(): void
     {
-        $this->categoryFilters = [
+        $this->typeFilters = [
             'accessible' => false,
             'non_accessible' => false,
         ];
@@ -152,17 +152,21 @@ final class SearchSidebar extends Component
     {
         try {
             $locationService = app(LocationService::class);
-            
-            $activeCategories = array_keys(array_filter($this->categoryFilters ?? []));
-            
+
+            $activeCategories = array_keys(array_filter($this->typeFilters ?? []));
+
             // Ensure we always pass an array
             if (!is_array($activeCategories)) {
                 $activeCategories = [];
             }
-            
+
             $locations = $locationService->searchLocations($this->search ?? '', $activeCategories);
-            
+
             $this->results = $locationService->transformCollectionForMap($locations);
+
+            // Randomize the order of results
+            shuffle($this->results);
+
             $this->totalResults = count($this->results);
 
             $this->dispatch('results-updated', results: $this->results);
@@ -170,9 +174,9 @@ final class SearchSidebar extends Component
             \Illuminate\Support\Facades\Log::error('Error loading results in SearchSidebar', [
                 'error' => $e->getMessage(),
                 'search' => $this->search ?? null,
-                'categoryFilters' => $this->categoryFilters ?? null,
+                'typeFilters' => $this->typeFilters ?? null,
             ]);
-            
+
             // Fallback to empty results
             $this->results = [];
             $this->totalResults = 0;

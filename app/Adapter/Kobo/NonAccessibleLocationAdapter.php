@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Adapter\Kobo;
 
-use App\Enum\Location\Category;
+use App\Enum\Location\Type;
 use Illuminate\Support\Str;
 
 final class NonAccessibleLocationAdapter
@@ -37,8 +37,8 @@ final class NonAccessibleLocationAdapter
         return [
             'external_id' => (string) ($data['_id'] ?? ''),
             'name' => $this->extractLocationName($data),
-            'type' => $this->extractLocationType($data),
-            'category' => Category::NON_ACCESSIBLE,
+            'description' => $this->extractLocationDescription($data),
+            'type' => Type::NON_ACCESSIBLE,
             'latitude' => $coordinates['latitude'],
             'longitude' => $coordinates['longitude'],
             'authors' => $this->extractAuthors($data),
@@ -153,7 +153,7 @@ final class NonAccessibleLocationAdapter
     /**
      * Extract location type from Kobo data.
      */
-    private function extractLocationType(array $data): ?string
+    private function extractLocationDescription(array $data): ?string
     {
         $rawType = $data['_3_Que_tipo_de_lugar_esse'] ?? null;
         return $this->cleanValue($rawType);
@@ -202,17 +202,17 @@ final class NonAccessibleLocationAdapter
             '__version__',
             'meta/instanceID',
             'meta/rootUuid',
-            
+
             // Fields mapped to location model
             '_2_Qual_o_nome_desse_lugar_ou_ponto', // Mapped to location.name
             '_3_Que_tipo_de_lugar_esse', // Mapped to location.type
             '_10_Nome_dos_dois_pe_aram_este_formul_rio', // Mapped to location.authors
-            
+
             // Coordinate fields (mapped to location.latitude/longitude)
             '_4_Compartilhe_a_localiza_o', // GPS coordinates
             '_6_Compartilhe_a_localiza_o', // GPS coordinates variant
             '_4_Compartilhe_a_localiza_o_001', // GPS coordinates variant
-            
+
             // Media file fields (not survey questions)
             '_7_Tire_uma_foto_que_mostre_o_local', // Image filename
             '_8_Tire_mais_uma_fot_gora_de_outro_ngulo', // Image filename
@@ -265,26 +265,26 @@ final class NonAccessibleLocationAdapter
     private function decodeValueFromConfig(string $value): string
     {
         $mappings = config('kobo.non_accessible', []);
-        
+
         // Try direct mapping first
         if (isset($mappings[$value])) {
             return $mappings[$value];
         }
-        
+
         // For multi-value fields (space-separated), split and map each part
         if (str_contains($value, ' ')) {
             $parts = explode(' ', $value);
             $decodedParts = [];
-            
+
             foreach ($parts as $part) {
                 if ('' !== trim($part)) {
                     $decodedParts[] = $mappings[$part] ?? $this->fallbackDecode($part);
                 }
             }
-            
+
             return implode(', ', array_filter($decodedParts));
         }
-        
+
         return $this->fallbackDecode($value);
     }
 
@@ -297,7 +297,7 @@ final class NonAccessibleLocationAdapter
         $decoded = str_replace('_', ' ', $value);
         $decoded = preg_replace('/\s+/', ' ', $decoded);
         $decoded = mb_trim($decoded);
-        
+
         return '' !== $decoded ? $decoded : $value;
     }
 
@@ -358,7 +358,7 @@ final class NonAccessibleLocationAdapter
 
         // Apply basic cleaning first
         $cleaned = $this->cleanValue($name);
-        
+
         if (null === $cleaned) {
             return null;
         }

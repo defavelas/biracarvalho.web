@@ -30,13 +30,13 @@
             />
             
             <x-select
-                wire:model.live="categoryFilter"
+                wire:model.live="typeFilter"
                 label="Categoria"
                 placeholder="Todas as categorias"
                 theme="dark"
                 :options="collect([['value' => '', 'label' => 'Todas as categorias']])->merge(collect($categories)->map(fn($label, $value) => ['value' => $value, 'label' => $label]))"
-                id="category-filter"
-                for="category-filter"
+                id="type-filter"
+                for="type-filter"
             />
             
             <x-select
@@ -124,8 +124,8 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4">
-                                <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-{{ $location->category->color() }}-500/20 text-{{ $location->category->color() }}-300 border border-{{ $location->category->color() }}-500/30">
-                                    {{ $location->category->label() }}
+                                <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-{{ $location->type->color() }}-500/20 text-{{ $location->type->color() }}-300 border border-{{ $location->type->color() }}-500/30">
+                                    {{ $location->type->label() }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-sm text-white/80">
