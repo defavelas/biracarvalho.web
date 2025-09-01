@@ -70,6 +70,11 @@
     background: rgba(0, 0, 0, 0.5);
 }
 
+/* Alpine.js x-cloak to prevent flicker */
+[x-cloak] {
+    display: none !important;
+}
+
 .leaflet-layer {
     filter: grayscale(100%) sepia(100%) hue-rotate(235deg) saturate(1.25) brightness(0.5) contrast(1.25) !important;
 }
@@ -96,32 +101,23 @@
 
 /* Map card responsive styles and scrolling improvements */
 @media (max-width: 768px) {
+    #map-card-container {
+        position: fixed !important;
+        left: 1rem !important;
+        right: 1rem !important;
+        bottom: 1rem !important;
+        z-index: 1002 !important;
+    }
+
     #map-card {
-        max-height: 70vh !important;
-        min-height: 300px !important;
-        display: flex !important;
-        flex-direction: column !important;
+        max-height: 80vh !important;
+        overflow: visible !important;
     }
 
-    #map-card .overflow-y-auto {
-        flex: 1 !important;
-        min-height: 0 !important;
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
-        scrollbar-width: thin;
-    }
-
-    #map-card .overflow-y-auto::-webkit-scrollbar {
-        width: 4px;
-    }
-
-    #map-card .overflow-y-auto::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    #map-card .overflow-y-auto::-webkit-scrollbar-thumb {
-        background: rgba(101, 48, 137, 0.3);
-        border-radius: 2px;
+    /* Ensure proper scrolling for mobile map card FAQ section only */
+    #map-card .soft-scrollbar {
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
     }
 }
 
@@ -132,12 +128,6 @@
         min-height: 400px !important;
         width: 24rem !important;
     }
-
-    #map-card .overflow-y-auto {
-        flex: 1 !important;
-        min-height: 0 !important;
-        max-height: calc(75vh - 8rem) !important;
-    }
 }
 
 /* Large screens with height constraints */
@@ -146,10 +136,6 @@
         max-height: 80vh !important;
         min-height: 450px !important;
     }
-
-    #map-card .overflow-y-auto {
-        max-height: calc(80vh - 10rem) !important;
-    }
 }
 
 /* Very small screens */
@@ -157,10 +143,6 @@
     #map-card {
         max-height: 80vh !important;
         min-height: 280px !important;
-    }
-
-    #map-card .overflow-y-auto {
-        max-height: calc(80vh - 6rem) !important;
     }
 }
 
@@ -171,12 +153,82 @@
         min-height: 250px !important;
     }
 
-    #map-card .overflow-y-auto {
-        max-height: calc(90vh - 5rem) !important;
-    }
-
     #map-card .mb-4.relative,
     #map-card .mb-4.h-32 {
         display: none !important;
+    }
+}
+
+/* Mobile sidebar card improvements */
+@media (max-width: 768px) {
+    /* Make sidebar card images more visible on mobile */
+    .fixed.bottom-0 .flex.-space-x-2 {
+        margin-top: 0.5rem !important;
+    }
+    
+    .fixed.bottom-0 .w-6.h-6 {
+        width: 2rem !important;  /* 32px instead of 24px */
+        height: 2rem !important; /* 32px instead of 24px */
+        border-width: 3px !important; /* thicker border for better visibility */
+    }
+    
+    .fixed.bottom-0 .text-xs {
+        font-size: 0.6rem !important; /* smaller text in +number indicator */
+        font-weight: 700 !important;
+    }
+    
+    /* Ensure images are visible and not cut off */
+    .fixed.bottom-0 article {
+        padding-bottom: 0.75rem !important; /* more space for images */
+    }
+    
+    /* Make sure content is visible */
+    .fixed.bottom-0 .space-y-2 {
+        gap: 0.5rem !important;
+    }
+    
+    .fixed.bottom-0 .leading-tight {
+        line-height: 1.3 !important;
+    }
+}
+
+/* Enhanced mobile sidebar cards */
+@media (max-width: 768px) {
+    .fixed.bottom-0 article {
+        min-height: 120px !important;
+    }
+    
+    /* Ensure mobile map card elements are visible */
+    #map-card[role="dialog"] {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Ensure slideshow container is visible */
+    #map-card[role="dialog"] [x-data] {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: relative !important;
+    }
+    
+    /* Ensure image gallery is visible */
+    #map-card[role="dialog"] .relative.h-40,
+    #map-card[role="dialog"] .relative.h-48,
+    #map-card[role="dialog"] .mb-3.relative,
+    #map-card[role="dialog"] .mb-4.relative {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        height: 10rem !important;
+    }
+    
+    /* Ensure FAQ section is visible */
+    #map-card[role="dialog"] strong:contains("Informações do local"),
+    #map-card[role="dialog"] div:has(strong:contains("Informações")) {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
     }
 }
