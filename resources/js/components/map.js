@@ -319,18 +319,17 @@ class MapComponent {
                     try {
                         Alpine.initTree(this.currentMapCard);
                         console.log("Alpine initialized for map card");
-                        
+
                         // Debug: check if elements are properly initialized
                         const imageSlideshow = this.currentMapCard.querySelector('[x-data*="currentSlide"]');
                         const faqSection = this.currentMapCard.querySelector('[x-data*="openFaq"]');
-                        
+
                         if (imageSlideshow) {
                             console.log("Image slideshow found and should be working");
                         }
                         if (faqSection) {
                             console.log("FAQ section found and should be working");
                         }
-                        
                     } catch (error) {
                         console.error("Alpine initialization error:", error);
                     }
@@ -339,7 +338,7 @@ class MapComponent {
                     setTimeout(initAlpine, 100);
                 }
             };
-            
+
             // Give Livewire time to load Alpine
             requestAnimationFrame(initAlpine);
         }
@@ -449,28 +448,20 @@ class MapComponent {
         const hasImages = images.length > 0;
         const infos = location.infos || [];
         const hasInfos = infos.length > 0;
-        
-        // Debug logging
-        console.log("Creating map card for:", location.name);
-        console.log("Has images:", hasImages, "count:", images.length);
-        console.log("Has infos:", hasInfos, "count:", infos.length);
-        console.log("Images data:", images);
-        console.log("Infos data:", infos);
 
         let imagesHtml = "";
         if (hasImages) {
             const maxImages = Math.min(images.length, 5);
             imagesHtml = `
-                <div class="mb-3 md:mb-4 relative" x-data="{ currentSlide: 0, totalSlides: ${maxImages} }" x-init="console.log('Image gallery initialized with', totalSlides, 'images')">
+                <div class="mb-3 md:mb-4 relative" x-data="{ currentSlide: 0, totalSlides: ${maxImages} }">
                     <div class="relative h-40 md:h-48 bg-black/25 rounded-lg overflow-hidden group">
                         ${images
                             .slice(0, maxImages)
                             .map(
                                 (image, index) => `
                             <div
-                                class="absolute inset-0 transition-opacity duration-300"
+                                class="absolute inset-0 transition-opacity duration-150"
                                 x-show="currentSlide === ${index}"
-                                x-transition
                             >
                                 <img
                                     src="${image.url}"
@@ -535,7 +526,7 @@ class MapComponent {
             <div id="map-card-container">
                 <div
                     id="map-card"
-                    class="w-full max-w-[calc(100vw-2rem)] md:w-[420px] md:max-w-[420px] max-h-[80vh] overflow-y-auto bg-white rounded-lg shadow-xl pb-2 border-4 border-secondary"
+                    class="w-full md:w-[420px] max-w-[420px] max-h-[80vh] bg-white rounded-lg shadow-xl pb-2 border-4 border-secondary"
                     role="dialog"
                     aria-labelledby="map-card-title"
                     aria-describedby="map-card-description"
@@ -599,7 +590,7 @@ class MapComponent {
                                 ? `
                             <div>
                                 <strong class="font-semibold text-primary block mb-2">Informações do local</strong>
-                                <div x-data="{ openFaq: null }" x-init="console.log('FAQ initialized with', ${infos.length}, 'items')">
+                                <div class="max-h-48 overflow-y-auto soft-scrollbar" x-data="{ openFaq: null }">
                                     ${infos
                                         .map(
                                             (info, index) => `
@@ -622,12 +613,12 @@ class MapComponent {
                                             </button>
                                             <div
                                                 x-show="openFaq === ${index}"
-                                                x-transition:enter="transition ease-out duration-200"
-                                                x-transition:enter-start="opacity-0 transform -translate-y-2"
-                                                x-transition:enter-end="opacity-100 transform translate-y-0"
-                                                x-transition:leave="transition ease-in duration-150"
-                                                x-transition:leave-start="opacity-100 transform translate-y-0"
-                                                x-transition:leave-end="opacity-0 transform -translate-y-2"
+                                                x-transition:enter="transition ease-out duration-100"
+                                                x-transition:enter-start="opacity-0"
+                                                x-transition:enter-end="opacity-100"
+                                                x-transition:leave="transition ease-in duration-100"
+                                                x-transition:leave-start="opacity-100"
+                                                x-transition:leave-end="opacity-0"
                                                 id="faq-content-${index}"
                                                 class="overflow-hidden"
                                             >
