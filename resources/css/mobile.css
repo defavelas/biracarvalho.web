@@ -20,20 +20,18 @@
         transform: none !important;
     }
 
-    /* Hide absolute buttons on mobile */
-    #map-card .absolute {
+    /* Hide absolute buttons on mobile - but NOT slideshow elements */
+    #map-card .absolute:not([class*="inset-0"]):not([class*="left-2"]):not([class*="right-2"]):not([class*="bottom-2"]) {
         display: none !important;
     }
 
-    /* Hide action buttons at bottom of card on mobile - comprehensive approach */
+    /* Hide action buttons at bottom of card on mobile - but NOT slideshow buttons */
     #map-card .flex.space-x-2.pt-4,
     #map-card .flex.space-x-2.pt-2,
     #map-card button[onclick*="centerMapOnLocation"],
     #map-card button[onclick*="highlightLocationInSidebar"],
-    #map-card button[type="button"]:not(.absolute),
     #map-card .flex-1.bg-primary\/20,
-    #map-card .space-x-2 button,
-    #map-card button:not([aria-label*="Fechar"]) {
+    #map-card .space-x-2 button:not([aria-label*="Imagem"]):not([aria-label*="Próxima"]):not([aria-label*="Ir para"]) {
         display: none !important;
         visibility: hidden !important;
         opacity: 0 !important;
@@ -63,7 +61,7 @@
     }
 
     /* Hide results area when card is opened */
-    body:has(#map-card) .fixed.bottom-0.h-\\[50vh\\] {
+    body:has(#map-card) .fixed.bottom-0[class*="h-[50vh]"] {
         display: none !important;
     }
 
@@ -273,9 +271,75 @@
         max-height: calc(90vh - 5rem) !important;
     }
 
-    /* Hide image slideshow on very short screens to save space */
-    #map-card .mb-4.relative,
-    #map-card .mb-4.h-32 {
+    /* Only hide decorative elements on very short screens, not slideshow */
+    #map-card .h-32:not([class*="slideshow"]):not([x-data]) {
         display: none !important;
+    }
+    
+    /* Ensure slideshow elements are always visible on mobile */
+    #map-card [x-data*="currentSlide"] {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: relative !important;
+    }
+    
+    #map-card [x-data*="currentSlide"] .absolute {
+        display: block !important;
+        position: absolute !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        height: auto !important;
+        width: auto !important;
+    }
+    
+    #map-card [x-data*="currentSlide"] button {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        height: auto !important;
+        width: auto !important;
+    }
+    
+    #map-card [x-data*="currentSlide"] .inset-0 {
+        display: block !important;
+        position: absolute !important;
+        top: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    #map-card [aria-label*="Imagem"],
+    #map-card [aria-label*="Próxima"],
+    #map-card [aria-label*="Ir para"] {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        height: auto !important;
+        width: auto !important;
+    }
+    
+    /* Ensure FAQ elements are always visible on mobile */
+    #map-card [x-data*="openFaq"],
+    #map-card [x-data*="openFaq"] button,
+    #map-card [x-data*="openFaq"] div,
+    #map-card [x-show],
+    #map-card [id*="faq-content"] {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Make sure image container is visible */
+    #map-card .mb-3.relative,
+    #map-card .mb-4.relative {
+        display: block !important;
+        visibility: visible !important;
     }
 }
