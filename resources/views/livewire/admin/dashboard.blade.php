@@ -80,7 +80,7 @@
                             <div class="flex-1">
                                 <div class="flex items-center gap-3 mb-2">
                                     <h3 class="text-lg font-medium text-white">{{ $location->name }}</h3>
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{{ $location->type->color() }}-500/20 text-{{ $location->type->color() }}-200 border border-{{ $location->type->color() }}-500/30">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white border border-white/30" style="background-color: {{ $location->type->color() }}">
                                         {{ $location->type->label() }}
                                     </span>
                                 </div>

@@ -13,14 +13,14 @@
                     Gerencie os locais de acessibilidade e mobilidade urbana do programa.
                 </p>
             </header>
-            
+
         </div>
     </div>
 
     <!-- Filters Section -->
     <div class="bg-black/15 p-4 mb-4 rounded-md">
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
-            <x-input 
+            <x-input
                 wire:model.live.debounce.300ms="search"
                 label="Buscar"
                 placeholder="Nome, endereço ou descrição..."
@@ -28,7 +28,7 @@
                 id="search"
                 for="search"
             />
-            
+
             <x-select
                 wire:model.live="typeFilter"
                 label="Categoria"
@@ -38,7 +38,7 @@
                 id="type-filter"
                 for="type-filter"
             />
-            
+
             <x-select
                 wire:model.live="statusFilter"
                 label="Status"
@@ -52,7 +52,7 @@
                 id="status-filter"
                 for="status-filter"
             />
-            
+
             <div class="flex items-end">
                 <div class="flex-1">
                     <div class="text-sm font-medium text-white/90 mb-2">Total de locais</div>
@@ -124,7 +124,7 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4">
-                                <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-{{ $location->type->color() }}-500/20 text-{{ $location->type->color() }}-300 border border-{{ $location->type->color() }}-500/30">
+                                <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full text-white" style="background-color: {{ $location->type->color() }}">
                                     {{ $location->type->label() }}
                                 </span>
                             </td>
@@ -170,7 +170,7 @@
                                             Aprovar
                                         </button>
                                     @endif
-                                    <button wire:click="confirmDelete('{{ $location->id }}')" 
+                                    <button wire:click="confirmDelete('{{ $location->id }}')"
                                             class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-red-300 hover:text-white bg-red-500/10 hover:bg-red-500/20 rounded-lg border border-red-500/30 transition-all duration-200">
                                         <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -215,7 +215,7 @@
                      x-transition:enter="ease-out duration-300"
                      x-transition:enter-start="opacity-0"
                      x-transition:enter-end="opacity-100"></div>
-                
+
                 <div class="inline-block align-bottom bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full"
                      x-transition:enter="ease-out duration-400"
                      x-transition:enter-start="opacity-0 translate-y-8 scale-95"
@@ -232,23 +232,23 @@
                                     Confirmar Exclusão
                                 </h3>
                                 <p class="text-sm text-white/80">
-                                    Tem certeza que deseja excluir o local "<strong class="text-secondary">{{ $selectedLocation->name }}</strong>"? 
+                                    Tem certeza que deseja excluir o local "<strong class="text-secondary">{{ $selectedLocation->name }}</strong>"?
                                     Esta ação não pode ser desfeita e todos os dados associados serão permanentemente removidos.
                                 </p>
                             </div>
                         </div>
                     </div>
                     <div class="bg-white/5 px-6 py-4 flex flex-row-reverse gap-3">
-                        <button wire:click="delete" 
-                                type="button" 
+                        <button wire:click="delete"
+                                type="button"
                                 class="inline-flex items-center justify-center rounded-lg px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold text-sm shadow-lg transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-red-500/25">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                             </svg>
                             Confirmar Exclusão
                         </button>
-                        <button wire:click="closeModals" 
-                                type="button" 
+                        <button wire:click="closeModals"
+                                type="button"
                                 class="inline-flex items-center justify-center rounded-lg px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-medium text-sm border border-white/20 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-white/25">
                             Cancelar
                         </button>
@@ -258,4 +258,3 @@
         </div>
     @endif
 </div>
-

@@ -245,14 +245,14 @@ class MapComponent {
     }
 
     createAccessibilityIcon(type, typeColor, isSelected = false) {
-        let iconUrl = "/assets/images/green-pin.png"; // default
+        let iconUrl = "/assets/images/accessible.png"; // default
 
         switch (type) {
             case "accessible":
-                iconUrl = "/assets/images/green-pin.png";
+                iconUrl = "/assets/images/accessible.png";
                 break;
             case "non_accessible":
-                iconUrl = "/assets/images/red-pin.png";
+                iconUrl = "/assets/images/non_accessible.png";
                 break;
         }
 
@@ -535,7 +535,7 @@ class MapComponent {
                         hasImages
                             ? `
                     <div class="p-2 pb-0 mobile-compact-spacing relative">
-                        <span class="text-left inline-block px-4 py-0.5 rounded-full bg-${location.typeColor}-500 shadow text-sm absolute top-4 left-4 z-50 text-white">
+                        <span class="text-left inline-block px-4 py-0.5 rounded-full shadow text-sm absolute top-4 left-4 z-50 text-white" style="background-color: ${location.typeColor}">
                             ${location.typeLabel}
                         </span>
                         ${imagesHtml}

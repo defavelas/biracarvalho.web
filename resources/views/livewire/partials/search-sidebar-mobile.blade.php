@@ -90,10 +90,8 @@
                         wire:loading.class="opacity-75 pointer-events-none"
                         title="{{ $result['name'] }} - {{ $result['typeLabel'] }}">
 
-                        <div class="flex items-start justify-between space-x-3">
-                            <div class="w-2 h-2 rounded-full mt-1 flex-shrink-0 bg-{{ $result['typeColor'] }}-500"
-                                 aria-hidden="true">
-                            </div>
+                        <div class="flex items-start justify-between space-x-4">
+                            <img src="{{ asset('assets/images/'.$result['type']->value.'.png') }}" alt="{{$result['typeLabel']}}" class="w-6 h-auto" />
                             <div class="flex-1 space-y-2">
                                 <div class="flex-1 space-y-1">
                                     <h3 class="font-semibold text-base leading-tight {{ $selectedLocationId == $result['id'] ? 'text-primary' : 'text-secondary' }}">

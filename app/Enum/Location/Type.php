@@ -59,8 +59,8 @@ enum Type: string
     public function color(): string
     {
         return match ($this) {
-            self::ACCESSIBLE => 'green',
-            self::NON_ACCESSIBLE => 'red',
+            self::ACCESSIBLE => '#00C950',
+            self::NON_ACCESSIBLE => '#F59E0C',
         };
     }
 }
