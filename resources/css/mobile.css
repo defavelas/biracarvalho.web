@@ -21,7 +21,8 @@
     }
 
     /* Hide absolute buttons on mobile - but NOT slideshow elements */
-    #map-card .absolute:not([class*="inset-0"]):not([class*="left-2"]):not([class*="right-2"]):not([class*="bottom-2"]) {
+    #map-card
+        .absolute:not([class*="inset-0"]):not([class*="left-2"]):not([class*="right-2"]):not([class*="bottom-2"]) {
         display: none !important;
     }
 
@@ -275,7 +276,7 @@
     #map-card .h-32:not([class*="slideshow"]):not([x-data]) {
         display: none !important;
     }
-    
+
     /* Ensure slideshow elements are always visible on mobile */
     #map-card [x-data*="currentSlide"] {
         display: block !important;
@@ -283,7 +284,7 @@
         opacity: 1 !important;
         position: relative !important;
     }
-    
+
     #map-card [x-data*="currentSlide"] .absolute {
         display: block !important;
         position: absolute !important;
@@ -293,7 +294,7 @@
         height: auto !important;
         width: auto !important;
     }
-    
+
     #map-card [x-data*="currentSlide"] button {
         display: flex !important;
         visibility: visible !important;
@@ -302,7 +303,7 @@
         height: auto !important;
         width: auto !important;
     }
-    
+
     #map-card [x-data*="currentSlide"] .inset-0 {
         display: block !important;
         position: absolute !important;
@@ -313,7 +314,7 @@
         visibility: visible !important;
         opacity: 1 !important;
     }
-    
+
     #map-card [aria-label*="Imagem"],
     #map-card [aria-label*="Próxima"],
     #map-card [aria-label*="Ir para"] {
@@ -324,7 +325,7 @@
         height: auto !important;
         width: auto !important;
     }
-    
+
     /* Ensure FAQ elements are always visible on mobile */
     #map-card [x-data*="openFaq"],
     #map-card [x-data*="openFaq"] button,
@@ -335,7 +336,7 @@
         visibility: visible !important;
         opacity: 1 !important;
     }
-    
+
     /* Make sure image container is visible */
     #map-card .mb-3.relative,
     #map-card .mb-4.relative {

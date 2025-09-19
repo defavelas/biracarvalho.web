@@ -360,7 +360,7 @@ class MapComponent {
                 const markerPixel = this.map.latLngToContainerPoint(markerLatLng);
 
                 const mapRect = this.map.getContainer().getBoundingClientRect();
-                const cardWidth = isMobile ? Math.min(mapRect.width - 32, 420) : 420;
+                const cardWidth = isMobile ? Math.min(mapRect.width - 32, 460) : 460;
                 const cardHeight = 360;
 
                 let left = markerPixel.x;
@@ -454,7 +454,7 @@ class MapComponent {
             const maxImages = Math.min(images.length, 5);
             imagesHtml = `
                 <div class="mb-3 md:mb-4 relative" x-data="{ currentSlide: 0, totalSlides: ${maxImages} }">
-                    <div class="relative h-40 md:h-48 bg-black/25 rounded-lg overflow-hidden group">
+                    <div class="relative h-48 md:h-64 bg-black/25 rounded-lg overflow-hidden group">
                         ${images
                             .slice(0, maxImages)
                             .map(
@@ -526,7 +526,7 @@ class MapComponent {
             <div id="map-card-container">
                 <div
                     id="map-card"
-                    class="w-full md:w-[420px] max-w-[420px] max-h-[80vh] bg-white rounded-lg shadow-xl pb-2 border-4 border-secondary"
+                    class="w-full md:w-[460px] max-w-[460px] max-h-[80vh] bg-white rounded-lg shadow-xl pb-2 border-4 border-secondary"
                     role="dialog"
                     aria-labelledby="map-card-title"
                     aria-describedby="map-card-description"
@@ -535,7 +535,7 @@ class MapComponent {
                         hasImages
                             ? `
                     <div class="p-2 pb-0 mobile-compact-spacing relative">
-                        <span class="text-left inline-block px-4 py-0.5 rounded-full shadow text-sm absolute top-4 left-4 z-50 text-white" style="background-color: ${location.typeColor}">
+                        <span class="text-left inline-block px-4 py-0.5 rounded-full shadow absolute top-4 left-4 z-50 text-white" style="background-color: ${location.typeColor}">
                             ${location.typeLabel}
                         </span>
                         ${imagesHtml}
@@ -543,11 +543,11 @@ class MapComponent {
                     `
                             : ""
                     }
-                    <div class="px-4 py-3">
+                    <div class="p-4 md:px-4">
                         ${
                             !hasImages
                                 ? `
-                        <span class="inline-block px-3 py-1 rounded-full bg-${location.typeColor}-500 shadow text-xs text-white mb-3">
+                        <span class="inline-block px-3 py-1 rounded-full shadow  text-white mb-3" style="background-color: ${location.typeColor}">
                             ${location.typeLabel}
                         </span>
                         `
@@ -574,10 +574,10 @@ class MapComponent {
                                     : ""
                             }
                         </div>
-                        <p class="text-sm text-primary/80 mb-2">
+                        <p class="text-base text-primary/80 mb-2">
                             ${location.description || "Sem descrição disponível"}
                         </p>
-                        <div class="text-xs text-primary/80 leading-tight mb-4 flex justify-between items-center">
+                        <div class="text-sm text-primary/80 leading-tight mb-4 flex justify-between items-center">
                             <span class="text-left">
                                 ${location.authors ? `Contribuição ${location.authors}` : "Contribuição anônima"}
                             </span>
@@ -589,7 +589,7 @@ class MapComponent {
                             hasInfos
                                 ? `
                             <div>
-                                <strong class="font-semibold text-primary block mb-2">Informações do local</strong>
+                                <strong class="text-lg font-semibold text-primary block mb-2">Informações do local</strong>
                                 <div class="max-h-48 overflow-y-auto soft-scrollbar" x-data="{ openFaq: null }">
                                     ${infos
                                         .map(
@@ -600,7 +600,7 @@ class MapComponent {
                                                 @click="openFaq = openFaq === ${index} ? null : ${index}"
                                                 class="w-full py-2 text-left flex items-center justify-between focus:outline-none cursor-pointer"
                                             >
-                                                <span class="text-sm font-semibold text-primary">${info.title}</span>
+                                                <span class="font-semibold text-primary">${info.title}</span>
                                                 <svg
                                                     class="w-4 h-4 text-primary/70 transition-transform duration-200"
                                                     :class="{ 'rotate-180': openFaq === ${index} }"
@@ -622,7 +622,8 @@ class MapComponent {
                                                 id="faq-content-${index}"
                                                 class="overflow-hidden"
                                             >
-                                                <p class="text-sm text-primary/80 leading-relaxed pb-2">${info.value}</p></div>
+                                                <p class="text-primary/80 leading-relaxed pb-2">${info.value}</p>
+                                            </div>
                                         </div>
                                     `,
                                         )

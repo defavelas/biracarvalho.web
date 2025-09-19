@@ -165,28 +165,28 @@
     .fixed.bottom-0 .flex.-space-x-2 {
         margin-top: 0.5rem !important;
     }
-    
+
     .fixed.bottom-0 .w-6.h-6 {
-        width: 2rem !important;  /* 32px instead of 24px */
+        width: 2rem !important; /* 32px instead of 24px */
         height: 2rem !important; /* 32px instead of 24px */
         border-width: 3px !important; /* thicker border for better visibility */
     }
-    
+
     .fixed.bottom-0 .text-xs {
         font-size: 0.6rem !important; /* smaller text in +number indicator */
         font-weight: 700 !important;
     }
-    
+
     /* Ensure images are visible and not cut off */
     .fixed.bottom-0 article {
         padding-bottom: 0.75rem !important; /* more space for images */
     }
-    
+
     /* Make sure content is visible */
     .fixed.bottom-0 .space-y-2 {
         gap: 0.5rem !important;
     }
-    
+
     .fixed.bottom-0 .leading-tight {
         line-height: 1.3 !important;
     }
@@ -197,14 +197,14 @@
     .fixed.bottom-0 article {
         min-height: 120px !important;
     }
-    
+
     /* Ensure mobile map card elements are visible */
     #map-card[role="dialog"] {
         display: block !important;
         visibility: visible !important;
         opacity: 1 !important;
     }
-    
+
     /* Ensure slideshow container is visible */
     #map-card[role="dialog"] [x-data] {
         display: block !important;
@@ -212,10 +212,10 @@
         opacity: 1 !important;
         position: relative !important;
     }
-    
+
     /* Ensure image gallery is visible */
-    #map-card[role="dialog"] .relative.h-40,
     #map-card[role="dialog"] .relative.h-48,
+    #map-card[role="dialog"] .relative.h-64,
     #map-card[role="dialog"] .mb-3.relative,
     #map-card[role="dialog"] .mb-4.relative {
         display: block !important;
@@ -223,7 +223,7 @@
         opacity: 1 !important;
         height: 10rem !important;
     }
-    
+
     /* Ensure FAQ section is visible */
     #map-card[role="dialog"] strong:contains("Informações do local"),
     #map-card[role="dialog"] div:has(strong:contains("Informações")) {
