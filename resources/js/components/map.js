@@ -355,36 +355,61 @@ class MapComponent {
             const marker = this.markers.get(locationKey);
             const isMobile = window.innerWidth < 768;
 
-            if (marker) {
-                const markerLatLng = marker.getLatLng();
-                const markerPixel = this.map.latLngToContainerPoint(markerLatLng);
+            if (marker && !isMobile) {
+                // For desktop, use Alpine Anchor with the marker element as anchor
+                const markerElement = marker.getElement();
+                if (markerElement) {
+                    // Get marker position for fallback
+                    const markerLatLng = marker.getLatLng();
+                    const markerPixel = this.map.latLngToContainerPoint(markerLatLng);
+                    const mapRect = this.map.getContainer().getBoundingClientRect();
 
-                const mapRect = this.map.getContainer().getBoundingClientRect();
-                const cardWidth = isMobile ? Math.min(mapRect.width - 32, 460) : 460;
-                const cardHeight = 360;
+                    // Initialize with fallback positioning
+                    this.currentMapCard.style.position = "absolute";
+                    this.currentMapCard.style.left = `${Math.max(24, markerPixel.x - 230)}px`;
+                    this.currentMapCard.style.top = `${Math.max(24, markerPixel.y - 380)}px`;
+                    this.currentMapCard.style.display = "block";
+                    this.currentMapCard.style.zIndex = "1002";
 
-                let left = markerPixel.x;
-                let top = markerPixel.y - cardHeight - 24;
-
-                if (isMobile) {
-                    // Center horizontally on mobile
-                    left = (mapRect.width - cardWidth) / 2;
-                    // Position at bottom of screen on mobile
-                    top = mapRect.height - 400;
-                } else {
-                    if (left + cardWidth > mapRect.width) {
-                        left = mapRect.width - cardWidth - 24;
-                    }
-                    if (left < 24) {
-                        left = 24;
-                    }
-                    if (top < 24) {
-                        top = markerPixel.y + 48;
-                    }
-                    if (top + cardHeight > mapRect.height) {
-                        top = mapRect.height - cardHeight - 24;
-                    }
+                    // Set up Alpine Anchor for better positioning when available
+                    setTimeout(() => {
+                        if (this.currentMapCard && typeof Alpine !== "undefined") {
+                            try {
+                                const containerElement = this.currentMapCard.parentElement;
+                                const alpineData = Alpine.$data(containerElement);
+                                if (alpineData && alpineData.anchorElement !== undefined) {
+                                    // Set the anchor element - this will trigger the reactive watcher
+                                    alpineData.anchorElement = markerElement;
+                                    console.log("Alpine Anchor element set for smart positioning");
+                                } else {
+                                    console.log("Alpine Anchor data not available, using fallback positioning");
+                                }
+                            } catch (error) {
+                                console.log("Alpine Anchor setup failed, using fallback positioning:", error);
+                            }
+                        }
+                    }, 100);
                 }
+
+                if (this.currentCloseButton) {
+                    // Position close button next to the card
+                    const cardRect = this.currentMapCard.getBoundingClientRect();
+                    const mapContainerRect = this.map.getContainer().getBoundingClientRect();
+                    const buttonLeft = cardRect.right - mapContainerRect.left + 8;
+                    const buttonTop = cardRect.top - mapContainerRect.top;
+
+                    this.currentCloseButton.style.position = "absolute";
+                    this.currentCloseButton.style.left = `${buttonLeft}px`;
+                    this.currentCloseButton.style.top = `${buttonTop}px`;
+                    this.currentCloseButton.style.display = "flex";
+                    this.currentCloseButton.style.zIndex = "1003";
+                }
+            } else if (isMobile) {
+                // Keep existing mobile positioning logic
+                const mapRect = this.map.getContainer().getBoundingClientRect();
+                const cardWidth = Math.min(mapRect.width - 32, 460);
+                const left = (mapRect.width - cardWidth) / 2;
+                const top = mapRect.height - 400;
 
                 this.currentMapCard.style.position = "absolute";
                 this.currentMapCard.style.left = `${left}px`;
@@ -392,18 +417,6 @@ class MapComponent {
                 this.currentMapCard.style.transform = "none";
                 this.currentMapCard.style.display = "block";
                 this.currentMapCard.style.zIndex = "1002";
-
-                if (!isMobile && this.currentCloseButton) {
-                    const mapContainerRect = this.map.getContainer().getBoundingClientRect();
-                    const buttonLeft = mapContainerRect.left + left + cardWidth + 8;
-                    const buttonTop = mapContainerRect.top + top;
-
-                    this.currentCloseButton.style.position = "fixed";
-                    this.currentCloseButton.style.left = `${buttonLeft}px`;
-                    this.currentCloseButton.style.top = `${buttonTop}px`;
-                    this.currentCloseButton.style.display = "flex";
-                    this.currentCloseButton.style.zIndex = "1003";
-                }
             } else {
                 this.fallbackCenterPosition();
             }
@@ -453,7 +466,7 @@ class MapComponent {
         if (hasImages) {
             const maxImages = Math.min(images.length, 5);
             imagesHtml = `
-                <div class="mb-3 md:mb-4 relative" x-data="{ currentSlide: 0, totalSlides: ${maxImages} }">
+                <div class="mb-3 md:mb-4 relative">
                     <div class="relative h-48 md:h-64 bg-black/25 rounded-lg overflow-hidden group">
                         ${images
                             .slice(0, maxImages)
@@ -523,13 +536,37 @@ class MapComponent {
         const isMobile = window.innerWidth < 768;
 
         return `
-            <div id="map-card-container">
+            <div
+                id="map-card-container"
+                x-data="{
+                    anchorElement: null,
+                    get hasAnchor() { return this.anchorElement !== null; }
+                }"
+                x-init="
+                    $watch('anchorElement', (value) => {
+                        if (value && window.innerWidth >= 768) {
+                            $nextTick(() => {
+                                // Apply Alpine Anchor programmatically when anchor is available
+                                if (typeof Alpine !== 'undefined' && Alpine.anchor) {
+                                    Alpine.anchor($el, value, {
+                                        placement: 'top-start',
+                                        offset: 8,
+                                        flip: true,
+                                        shift: true
+                                    });
+                                }
+                            });
+                        }
+                    })
+                "
+            >
                 <div
                     id="map-card"
-                    class="w-full md:w-[460px] max-w-[460px] max-h-[80vh] bg-white rounded-lg shadow-xl pb-2 border-4 border-secondary"
+                    class="w-full md:w-[460px] max-w-[460px] bg-white rounded-lg shadow-xl pb-2 border-4 border-secondary"
                     role="dialog"
                     aria-labelledby="map-card-title"
                     aria-describedby="map-card-description"
+                    x-data="{ currentSlide: 0, totalSlides: ${hasImages ? Math.min(images.length, 5) : 0}, openFaq: null }"
                 >
                     ${
                         hasImages
@@ -582,7 +619,20 @@ class MapComponent {
                                 ${location.authors ? `Contribuição ${location.authors}` : "Contribuição anônima"}
                             </span>
                             <span class="text-right">
-                                ${location.createdAt || ""}
+                                ${
+                                    location.createdAt
+                                        ? (() => {
+                                              try {
+                                                  const date = new Date(location.createdAt);
+                                                  return isNaN(date.getTime())
+                                                      ? location.createdAt
+                                                      : date.toLocaleDateString("pt-BR");
+                                              } catch {
+                                                  return location.createdAt;
+                                              }
+                                          })()
+                                        : ""
+                                }
                             </span>
                         </div>
                         ${
@@ -590,7 +640,7 @@ class MapComponent {
                                 ? `
                             <div>
                                 <strong class="text-lg font-semibold text-primary block mb-2">Informações do local</strong>
-                                <div class="max-h-48 overflow-y-auto soft-scrollbar" x-data="{ openFaq: null }">
+                                <div class="max-h-48 overflow-y-auto soft-scrollbar">
                                     ${infos
                                         .map(
                                             (info, index) => `
@@ -641,7 +691,7 @@ class MapComponent {
 
     createCloseButtonHTML(location) {
         return `
-            <div id="map-card-buttons" class="flex flex-col gap-2" style="position: absolute; z-index: 1003; display: flex; flex-direction: column; gap: 8px;">
+            <div id="map-card-buttons" class="flex flex-col gap-2" style="position: relative; z-index: 1003; display: flex; flex-direction: column; gap: 8px;">
                 <button
                     id="map-card-close-button"
                     type="button"
