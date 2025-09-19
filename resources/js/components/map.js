@@ -356,53 +356,13 @@ class MapComponent {
             const isMobile = window.innerWidth < 768;
 
             if (marker && !isMobile) {
-                // For desktop, use Alpine Anchor with the marker element as anchor
+                // For desktop, use smart collision detection positioning
                 const markerElement = marker.getElement();
                 if (markerElement) {
-                    // Get marker position for fallback
-                    const markerLatLng = marker.getLatLng();
-                    const markerPixel = this.map.latLngToContainerPoint(markerLatLng);
-                    const mapRect = this.map.getContainer().getBoundingClientRect();
-
-                    // Initialize with fallback positioning
-                    this.currentMapCard.style.position = "absolute";
-                    this.currentMapCard.style.left = `${Math.max(24, markerPixel.x - 230)}px`;
-                    this.currentMapCard.style.top = `${Math.max(24, markerPixel.y - 380)}px`;
-                    this.currentMapCard.style.display = "block";
-                    this.currentMapCard.style.zIndex = "1002";
-
-                    // Set up Alpine Anchor for better positioning when available
-                    setTimeout(() => {
-                        if (this.currentMapCard && typeof Alpine !== "undefined") {
-                            try {
-                                const containerElement = this.currentMapCard.parentElement;
-                                const alpineData = Alpine.$data(containerElement);
-                                if (alpineData && alpineData.anchorElement !== undefined) {
-                                    // Set the anchor element - this will trigger the reactive watcher
-                                    alpineData.anchorElement = markerElement;
-                                    console.log("Alpine Anchor element set for smart positioning");
-                                } else {
-                                    console.log("Alpine Anchor data not available, using fallback positioning");
-                                }
-                            } catch (error) {
-                                console.log("Alpine Anchor setup failed, using fallback positioning:", error);
-                            }
-                        }
-                    }, 100);
-                }
-
-                if (this.currentCloseButton) {
-                    // Position close button next to the card
-                    const cardRect = this.currentMapCard.getBoundingClientRect();
-                    const mapContainerRect = this.map.getContainer().getBoundingClientRect();
-                    const buttonLeft = cardRect.right - mapContainerRect.left + 8;
-                    const buttonTop = cardRect.top - mapContainerRect.top;
-
-                    this.currentCloseButton.style.position = "absolute";
-                    this.currentCloseButton.style.left = `${buttonLeft}px`;
-                    this.currentCloseButton.style.top = `${buttonTop}px`;
-                    this.currentCloseButton.style.display = "flex";
-                    this.currentCloseButton.style.zIndex = "1003";
+                    // Apply smart collision detection positioning
+                    this.applySmartPositioning(markerElement, location);
+                } else {
+                    this.fallbackCenterPosition();
                 }
             } else if (isMobile) {
                 // Keep existing mobile positioning logic
@@ -426,33 +386,190 @@ class MapComponent {
         }
     }
 
-    fallbackCenterPosition() {
+    getSidebarState() {
+        const sidebar = document.querySelector('aside[aria-label="Painel de pesquisa e filtros"]');
+        if (!sidebar) return { isOpen: false, width: 0, right: 0 };
+
+        const isHidden = window.innerWidth < 768; // Mobile breakpoint
+        if (isHidden) return { isOpen: false, width: 0, right: 0 };
+
+        // Check if sidebar is open by looking at transform classes
+        const hasTranslateX = sidebar.classList.contains('-translate-x-full');
+        const isOpen = !hasTranslateX;
+
+        if (!isOpen) return { isOpen: false, width: 0, right: 0 };
+
+        // Calculate sidebar dimensions when open
+        const sidebarRect = sidebar.getBoundingClientRect();
+        return {
+            isOpen: true,
+            width: sidebarRect.width,
+            right: sidebarRect.right
+        };
+    }
+
+    calculateAvailableMapArea() {
         const mapRect = this.map.getContainer().getBoundingClientRect();
-        const cardLeft = mapRect.width / 2 - 200;
-        const cardTop = mapRect.height / 2 - 150;
+        const sidebarState = this.getSidebarState();
+
+        let availableArea = {
+            left: 0,
+            top: 0,
+            width: mapRect.width,
+            height: mapRect.height,
+            right: mapRect.width
+        };
+
+        // Adjust for sidebar when open
+        if (sidebarState.isOpen) {
+            const sidebarOffset = sidebarState.right - mapRect.left;
+            availableArea.left = Math.max(0, sidebarOffset);
+            availableArea.width = Math.max(200, mapRect.width - sidebarOffset); // Minimum 200px width
+            availableArea.right = availableArea.left + availableArea.width;
+        }
+
+        return { area: availableArea, sidebar: sidebarState };
+    }
+
+    applySmartPositioning(markerElement, location) {
+        if (!this.currentMapCard || !markerElement) return;
+
+        // Get all necessary measurements with sidebar awareness
+        const mapRect = this.map.getContainer().getBoundingClientRect();
+        const markerRect = markerElement.getBoundingClientRect();
+        const { area: availableArea, sidebar: sidebarState } = this.calculateAvailableMapArea();
+        const cardWidth = 460;
+        
+        // Get dynamic card height after content is rendered
+        requestAnimationFrame(() => {
+            const cardHeight = this.currentMapCard.offsetHeight;
+            const offset = 8;
+            const margin = 24; // Minimum margin from viewport edges
+
+            // Calculate marker position relative to available area (not full map)
+            const markerX = markerRect.left - mapRect.left + (markerRect.width / 2);
+            const markerY = markerRect.top - mapRect.top + markerRect.height;
+
+            // Calculate available space in each direction (sidebar-aware)
+            const spaceAbove = markerRect.top - mapRect.top;
+            const spaceBelow = mapRect.bottom - markerRect.bottom;
+            const spaceLeft = markerRect.left - mapRect.left - availableArea.left;
+            const spaceRight = availableArea.right - markerRect.right;
+
+            let finalX, finalY;
+            let placement = 'top'; // Default preference
+
+            // Sidebar-aware positioning logic with preference adjustments
+            const preferRight = sidebarState.isOpen; // Prefer right side when sidebar is open
+
+            if (preferRight && spaceRight >= cardWidth + offset + margin) {
+                // 1. Try positioning to the right of marker (preferred when sidebar open)
+                placement = 'right';
+                finalX = Math.min(markerX + offset + (markerRect.width / 2), availableArea.right - cardWidth - margin);
+                finalY = Math.max(margin, Math.min(markerY - markerRect.height - cardHeight / 2, availableArea.height - cardHeight - margin));
+            }
+            else if (spaceAbove >= cardHeight + offset + margin) {
+                // 2. Try positioning above marker
+                placement = 'top';
+                finalX = Math.max(availableArea.left + margin, Math.min(markerX - cardWidth / 2, availableArea.right - cardWidth - margin));
+                finalY = markerY - cardHeight - offset - markerRect.height;
+            }
+            else if (spaceBelow >= cardHeight + offset + margin) {
+                // 3. Try positioning below marker
+                placement = 'bottom';
+                finalX = Math.max(availableArea.left + margin, Math.min(markerX - cardWidth / 2, availableArea.right - cardWidth - margin));
+                finalY = markerY + offset;
+            }
+            else if (!preferRight && spaceLeft >= cardWidth + offset + margin) {
+                // 4. Try positioning to the left of marker (only if sidebar closed)
+                placement = 'left';
+                finalX = Math.max(availableArea.left + margin, markerX - cardWidth - offset - (markerRect.width / 2));
+                finalY = Math.max(margin, Math.min(markerY - markerRect.height - cardHeight / 2, availableArea.height - cardHeight - margin));
+            }
+            else if (!preferRight && spaceRight >= cardWidth + offset + margin) {
+                // 5. Try positioning to the right of marker (fallback)
+                placement = 'right';
+                finalX = Math.min(markerX + offset + (markerRect.width / 2), availableArea.right - cardWidth - margin);
+                finalY = Math.max(margin, Math.min(markerY - markerRect.height - cardHeight / 2, availableArea.height - cardHeight - margin));
+            }
+            else {
+                // 6. Smart center positioning (sidebar-aware)
+                placement = 'center-available';
+                finalX = Math.max(availableArea.left + margin, (availableArea.left + availableArea.right - cardWidth) / 2);
+                finalY = Math.max(margin, (availableArea.height - cardHeight) / 2);
+            }
+
+            // Apply the calculated position
+            this.currentMapCard.style.left = `${finalX}px`;
+            this.currentMapCard.style.top = `${finalY}px`;
+            this.currentMapCard.style.position = "absolute";
+            this.currentMapCard.style.display = "block";
+            this.currentMapCard.style.zIndex = "150"; // Above sidebar (z-[100])
+
+            console.log(`Card positioned ${placement}:`, { 
+                finalX, 
+                finalY, 
+                cardHeight, 
+                placement,
+                sidebarOpen: sidebarState.isOpen,
+                availableWidth: availableArea.width,
+                sidebarOffset: sidebarState.isOpen ? availableArea.left : 0
+            });
+
+            // Position close button relative to the card
+            this.positionCloseButton(finalX, finalY, cardWidth, cardHeight);
+        });
+    }
+
+    positionCloseButton(cardX, cardY, cardWidth, cardHeight) {
+        if (!this.currentCloseButton) return;
+
+        // Position buttons to the right of the card by default
+        let buttonX = cardX + cardWidth + 8;
+        let buttonY = cardY;
+
+        // If buttons would go off-screen, position them inside or to the left
+        const mapRect = this.map.getContainer().getBoundingClientRect();
+        if (buttonX + 48 > mapRect.width) {
+            // Try left side
+            buttonX = cardX - 48 - 8;
+            if (buttonX < 0) {
+                // Position inside card at top-right
+                buttonX = cardX + cardWidth - 48 - 8;
+                buttonY = cardY + 8;
+            }
+        }
+
+        this.currentCloseButton.style.position = "absolute";
+        this.currentCloseButton.style.left = `${buttonX}px`;
+        this.currentCloseButton.style.top = `${buttonY}px`;
+        this.currentCloseButton.style.display = "flex";
+        this.currentCloseButton.style.zIndex = "151"; // Above cards (z-150)
+    }
+
+    fallbackCenterPosition() {
+        const { area: availableArea, sidebar: sidebarState } = this.calculateAvailableMapArea();
+        
+        // Smart fallback positioning (sidebar-aware)
+        const cardWidth = 400;
+        const cardHeight = 300;
+        const cardLeft = Math.max(availableArea.left + 24, (availableArea.left + availableArea.right - cardWidth) / 2);
+        const cardTop = Math.max(24, (availableArea.height - cardHeight) / 2);
 
         this.currentMapCard.style.left = `${cardLeft}px`;
         this.currentMapCard.style.top = `${cardTop}px`;
         this.currentMapCard.style.display = "block";
+        this.currentMapCard.style.zIndex = "150"; // Above sidebar
+
+        console.log("Fallback positioning (sidebar-aware):", {
+            cardLeft,
+            cardTop,
+            sidebarOpen: sidebarState.isOpen,
+            availableWidth: availableArea.width
+        });
 
         if (this.currentCloseButton) {
-            const mapContainerRect = this.map.getContainer().getBoundingClientRect();
-            const buttonLeft = mapContainerRect.left + cardLeft + 405;
-            const buttonTop = mapContainerRect.top + cardTop;
-
-            console.log("Fallback positioning buttons:", {
-                buttonLeft,
-                buttonTop,
-                mapRect: mapContainerRect,
-                cardLeft,
-                cardTop,
-            });
-
-            this.currentCloseButton.style.position = "fixed";
-            this.currentCloseButton.style.left = `${buttonLeft}px`;
-            this.currentCloseButton.style.top = `${buttonTop}px`;
-            this.currentCloseButton.style.display = "flex";
-            this.currentCloseButton.style.zIndex = "1003";
+            this.positionCloseButton(cardLeft, cardTop, cardWidth, cardHeight);
         }
     }
 
@@ -467,7 +584,7 @@ class MapComponent {
             const maxImages = Math.min(images.length, 5);
             imagesHtml = `
                 <div class="mb-3 md:mb-4 relative">
-                    <div class="relative h-48 md:h-64 bg-black/25 rounded-lg overflow-hidden group">
+                    <div class="relative h-56 md:h-64 bg-black/25 rounded-lg overflow-hidden group">
                         ${images
                             .slice(0, maxImages)
                             .map(
@@ -536,30 +653,7 @@ class MapComponent {
         const isMobile = window.innerWidth < 768;
 
         return `
-            <div
-                id="map-card-container"
-                x-data="{
-                    anchorElement: null,
-                    get hasAnchor() { return this.anchorElement !== null; }
-                }"
-                x-init="
-                    $watch('anchorElement', (value) => {
-                        if (value && window.innerWidth >= 768) {
-                            $nextTick(() => {
-                                // Apply Alpine Anchor programmatically when anchor is available
-                                if (typeof Alpine !== 'undefined' && Alpine.anchor) {
-                                    Alpine.anchor($el, value, {
-                                        placement: 'top-start',
-                                        offset: 8,
-                                        flip: true,
-                                        shift: true
-                                    });
-                                }
-                            });
-                        }
-                    })
-                "
-            >
+            <div id="map-card-container">
                 <div
                     id="map-card"
                     class="w-full md:w-[460px] max-w-[460px] bg-white rounded-lg shadow-xl pb-2 border-4 border-secondary"
