@@ -679,7 +679,7 @@ class MapComponent {
             <div id="map-card-container">
                 <div
                     id="map-card"
-                    class="w-[460px] max-w-[460px] bg-white rounded-lg shadow-xl pb-2 border-4 border-secondary flex flex-col max-h-[80vh] min-h-[300px] overflow-y-auto overflow-x-hidden"
+                    class="w-[460px] max-w-[460px] bg-white rounded-lg shadow-xl pb-2 border-4 border-secondary flex flex-col max-h-[80vh] min-h-[300px] overflow-y-auto overflow-x-hidden relative"
                     role="dialog"
                     aria-labelledby="map-card-title"
                     aria-describedby="map-card-description"
@@ -689,7 +689,7 @@ class MapComponent {
                     <button
                         type="button"
                         onclick="closeMapCard()"
-                        class="md:hidden absolute -top-6 -right-6 w-12 h-12 bg-secondary shadow-lg border-4 border-white rounded-full cursor-pointer flex items-center justify-center transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5 z-30"
+                        class="button-close absolute right-0 top-0 md:hidden w-12 h-12 bg-secondary shadow-lg border-4 border-white rounded-full cursor-pointer flex items-center justify-center transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5 z-50"
                         aria-label="Fechar detalhes do local"
                     >
                         <svg class="w-6 h-6 text-primary transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
