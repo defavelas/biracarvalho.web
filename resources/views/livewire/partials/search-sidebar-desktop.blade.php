@@ -39,20 +39,19 @@
         </header>
 
         <!-- Desktop filters section -->
-        <section class="px-3 py-2 md:p-2.5 bg-no-repeat bg-top bg-black/20">
-            <fieldset class="space-y-3 md:space-y-2 mb-3 md:mb-2">
-                <legend class="text-base font-semibold text-white mb-3">
+        <section class="px-3 py-2 md:p-2.5 bg-no-repeat bg-top bg-black/20 relative">
+            <fieldset class="flex items-center space-y-3 md:space-y-2 mb-3 md:mb-2">
+                <legend class="flex items-center justify-between text-base font-semibold text-white mb-3">
                     Filtrar por
                 </legend>
-                <div class="flex items-center justify-end">
-                    @if (array_sum($typeFilters) > 0 || !empty($search))
-                        <button wire:click="clearFilters"
-                            class="flex items-center justify-center w-8 h-8 md:w-auto md:h-auto text-sm text-primary font-semibold hover:underline cursor-pointer focus:outline-none focus:underline focus:ring-2 focus:ring-secondary focus:ring-offset-1 rounded"
-                            aria-label="Limpar todos os filtros">
-                            @svg('heroicon-o-trash', 'w-5 h-5 text-white/80')
-                        </button>
-                    @endif
-                </div>
+
+                @if (array_sum($typeFilters) > 0 || !empty($search))
+                    <button wire:click="clearFilters"
+                        class="absolute top-2 right-2 w-8 h-8 md:w-auto md:h-auto text-sm text-primary font-semibold hover:underline cursor-pointer focus:outline-none focus:underline focus:ring-2 focus:ring-secondary focus:ring-offset-1 rounded"
+                        aria-label="Limpar todos os filtros">
+                        @svg('heroicon-o-trash', 'w-5 h-5 text-white/80')
+                    </button>
+                @endif
 
                 <div class="flex items-center gap-x-4" wire:key="filter-toggles">
                     <x-toggle-button wire:model.live="typeFilters.accessible" :value="$typeFilters['accessible']"
@@ -80,7 +79,7 @@
 
         <!-- Desktop results section -->
         <main class="flex-1 overflow-y-auto soft-scrollbar p-2 md:p-2 safe-area-bottom"
-              x-data="{ 
+              x-data="{
                 currentIndex: -1,
                 navigate(direction) {
                   let cards = this.$el.querySelectorAll('[role=button]');
