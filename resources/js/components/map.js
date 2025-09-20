@@ -759,7 +759,7 @@ class MapComponent {
                     </div>
 
                     <!-- Content -->
-                    <div class="flex-1 px-2 space-y-3 overflow-y-auto">
+                    <div class="flex-1 px-2 space-y-3">
                         ${
                             hasInfos
                                 ? `

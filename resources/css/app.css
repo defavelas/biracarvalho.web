@@ -141,28 +141,37 @@
     overscroll-behavior: contain !important;
 }
 
-/* Completely hide scrollbar for map card container */
-#map-card::-webkit-scrollbar {
+/* Completely hide scrollbar for map card container and all nested scrollable elements */
+#map-card,
+#map-card .overflow-y-auto,
+#map-card .soft-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+#map-card::-webkit-scrollbar,
+#map-card .overflow-y-auto::-webkit-scrollbar,
+#map-card .soft-scrollbar::-webkit-scrollbar {
     width: 0px;
     height: 0px;
 }
 
-#map-card::-webkit-scrollbar-track {
+#map-card::-webkit-scrollbar-track,
+#map-card .overflow-y-auto::-webkit-scrollbar-track,
+#map-card .soft-scrollbar::-webkit-scrollbar-track {
     background: transparent;
 }
 
-#map-card::-webkit-scrollbar-thumb {
+#map-card::-webkit-scrollbar-thumb,
+#map-card .overflow-y-auto::-webkit-scrollbar-thumb,
+#map-card .soft-scrollbar::-webkit-scrollbar-thumb {
     background: transparent;
 }
 
-#map-card::-webkit-scrollbar-thumb:hover {
+#map-card::-webkit-scrollbar-thumb:hover,
+#map-card .overflow-y-auto::-webkit-scrollbar-thumb:hover,
+#map-card .soft-scrollbar::-webkit-scrollbar-thumb:hover {
     background: transparent;
-}
-
-/* Firefox scrollbar styling - completely hidden */
-#map-card {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
 }
 
 /* Desktop-specific card width enforcement */

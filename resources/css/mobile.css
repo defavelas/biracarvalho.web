@@ -115,23 +115,37 @@
         height: 120px !important;
     }
 
-    /* Invisible scrollbar for mobile map card */
-    #map-card::-webkit-scrollbar {
+    /* Invisible scrollbar for mobile map card and all nested scrollable elements */
+    #map-card,
+    #map-card .overflow-y-auto,
+    #map-card .soft-scrollbar {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    #map-card::-webkit-scrollbar,
+    #map-card .overflow-y-auto::-webkit-scrollbar,
+    #map-card .soft-scrollbar::-webkit-scrollbar {
         width: 0px;
         height: 0px;
     }
 
-    #map-card::-webkit-scrollbar-track {
+    #map-card::-webkit-scrollbar-track,
+    #map-card .overflow-y-auto::-webkit-scrollbar-track,
+    #map-card .soft-scrollbar::-webkit-scrollbar-track {
         background: transparent;
     }
 
-    #map-card::-webkit-scrollbar-thumb {
+    #map-card::-webkit-scrollbar-thumb,
+    #map-card .overflow-y-auto::-webkit-scrollbar-thumb,
+    #map-card .soft-scrollbar::-webkit-scrollbar-thumb {
         background: transparent;
     }
 
-    #map-card {
-        scrollbar-width: none;
-        -ms-overflow-style: none;
+    #map-card::-webkit-scrollbar-thumb:hover,
+    #map-card .overflow-y-auto::-webkit-scrollbar-thumb:hover,
+    #map-card .soft-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: transparent;
     }
     /* Ensure readable font sizes on mobile */
     #map-card h3 {
