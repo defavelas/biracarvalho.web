@@ -104,10 +104,10 @@
         max-height: 120px !important;
     }
 
-    #map-card [x-data*="currentSlide"] img {
+    /*#map-card [x-data*="currentSlide"] img {
         height: 120px !important;
         object-fit: cover !important;
-    }
+    }*/
 
     /* Adjust slideshow container height */
     #map-card .relative.h-32,
