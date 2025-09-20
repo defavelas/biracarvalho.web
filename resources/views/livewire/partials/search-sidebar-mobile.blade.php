@@ -1,5 +1,6 @@
 <!-- Mobile: Floating search bar -->
 <div class="md:hidden">
+    <h1 class="sr-only">Pesquisa de Locais</h1>
     <!-- Mobile floating search container -->
     <div class="fixed top-2 left-2 right-2 z-[1001] transform transition-all duration-300 ease-in-out translate-y-0 opacity-100"
          aria-label="Barra de pesquisa móvel"
@@ -15,28 +16,35 @@
                         <label for="mobile-search-input" class="sr-only">Pesquisar locais</label>
                         <input type="search" id="mobile-search-input" wire:model.live.debounce.300ms="search"
                             placeholder="Pesquisar locais..."
-                            class="bg-white w-full px-3 py-2 pr-8 text-base border-2 border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-black/25 transition-all duration-200"
-                            aria-describedby="mobile-search-help">
+                            class="bg-white w-full px-3 py-2 pr-8 text-base border-2 border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-black/25 focus:ring-offset-1 transition-all duration-200"
+                            aria-describedby="mobile-search-help"
+                            autofocus
+                            x-data
+                            x-init="$el.focus()"
+                            x-on:keydown.escape="$el.blur()">
                         <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                             @svg('heroicon-o-magnifying-glass', 'w-6 h-6 text-primary')
                         </div>
                     </div>
                 </div>
+                <div id="mobile-search-help" class="sr-only">
+                    Digite para pesquisar por nome de locais. Pressione Escape para sair do campo de pesquisa.
+                </div>
 
-                <div class="flex flex-col p-2 bg-black/20" wire:key="filter-toggles">
+                <fieldset class="flex flex-col p-2 bg-black/20" wire:key="filter-toggles">
                     <legend class="text-sm font-semibold text-white pb-1">
                         Filtrar por
                     </legend>
                     <div class="flex items-center gap-x-4">
                         <x-toggle-button wire:model.live="typeFilters.accessible" :value="$typeFilters['accessible']"
                             label="Acessível" trackClass="bg-black/20 border-white" thumbClass="bg-green-500"
-                            labelClass="text-white text-sm" wire:key="filter-accessible" />
+                            labelClass="text-white text-sm" />
 
                         <x-toggle-button wire:model.live="typeFilters.non_accessible" :value="$typeFilters['non_accessible']"
                             label="Não Acessível" trackClass="bg-black/20 border-white" thumbClass="bg-amber-500"
-                            labelClass="text-white text-sm" wire:key="filter-non-accessible" />
+                            labelClass="text-white text-sm" />
                     </div>
-                </div>
+                </fieldset>
             </div>
         </div>
     </div>
@@ -44,29 +52,47 @@
     <!-- Mobile search results cards (45% screen height) -->
     @if((!empty($search) || array_sum($typeFilters) > 0) && $resultsOpen)
     <div class="fixed bottom-0 left-0 right-0 h-[45vh] bg-primary/95 backdrop-blur-sm z-[999] transform transition-all duration-300 ease-in-out translate-y-0"
-         style="background-image: linear-gradient(to bottom, rgba(101, 48, 137, 0.95), rgba(101, 48, 137, 0.98));">
+         style="background-image: linear-gradient(to bottom, rgba(101, 48, 137, 0.95), rgba(101, 48, 137, 0.98));"
+         aria-modal="true"
+         role="dialog"
+         aria-labelledby="mobile-results-title"
+         x-data="{ 
+           focusFirst() { 
+             let focusable = this.$el.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex=\'-1\'])');
+             if (focusable) focusable.focus();
+           }
+         }"
+         x-init="focusFirst()"
+         x-trap.inert.noscroll="true"
+         x-on:keydown.escape="$wire.closeResults()">
 
         <!-- Results header -->
         <div class="p-2.5 bg-black/20">
             <div class="flex items-center justify-between">
                 <div>
-                <h3 class="text-sm font-semibold text-white">
+                <h2 id="mobile-results-title" class="text-sm font-semibold text-white">
                     Resultados da Pesquisa
-                </h3>
-                <span class="text-xs font-mono text-white/80">
-                    {{ $totalResults }} {{ $totalResults === 1 ? 'local' : 'locais' }}
+                </h2>
+                <span class="text-xs font-mono text-white/80" aria-live="polite" aria-atomic="true">
+                    {{ $totalResults }} {{ $totalResults === 1 ? 'local encontrado' : 'locais encontrados' }}
+                    @if(!empty($search))
+                        para "{{ $search }}"
+                    @endif
+                    @if(array_sum($typeFilters) > 0)
+                        com filtros aplicados
+                    @endif
                 </span>
                 </div>
                 <div class="flex items-center gap-2">
                     @if (array_sum($typeFilters) > 0 || !empty($search))
                         <button wire:click="clearFilters"
-                            class="flex items-center justify-center w-8 h-8 bg-black/30 hover:bg-black/50 rounded-full text-white/70 hover:text-white transition-all duration-200"
+                            class="flex items-center justify-center w-8 h-8 bg-black/30 hover:bg-black/50 rounded-full text-white/70 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-1"
                             aria-label="Limpar todos os filtros">
                             @svg('heroicon-o-trash', 'w-4 h-4')
                         </button>
                     @endif
                     <button wire:click="closeResults"
-                        class="flex items-center justify-center w-8 h-8 bg-black/30 hover:bg-black/50 rounded-full text-white/70 hover:text-white transition-all duration-200"
+                        class="flex items-center justify-center w-8 h-8 bg-black/30 hover:bg-black/50 rounded-full text-white/70 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-1"
                         aria-label="Fechar resultados para melhor navegação no mapa">
                         @svg('heroicon-o-arrow-down', 'w-4 h-4')
                     </button>
@@ -75,31 +101,47 @@
         </div>
 
         <!-- Scrollable results container -->
-        <div class="flex-1 overflow-y-auto soft-scrollbar" style="height: calc(50vh - 70px);">
+        <div class="flex-1 overflow-y-auto soft-scrollbar" style="height: calc(50vh - 70px);"
+             x-data="{ 
+               currentIndex: -1,
+               navigate(direction) {
+                 let cards = this.$el.querySelectorAll('[role=button]');
+                 if (cards.length === 0) return;
+                 if (direction === 'down') this.currentIndex = Math.min(this.currentIndex + 1, cards.length - 1);
+                 if (direction === 'up') this.currentIndex = Math.max(this.currentIndex - 1, 0);
+                 if (direction === 'home') this.currentIndex = 0;
+                 if (direction === 'end') this.currentIndex = cards.length - 1;
+                 cards[this.currentIndex].focus();
+               }
+             }"
+             x-on:keydown.arrow-down.prevent="navigate('down')"
+             x-on:keydown.arrow-up.prevent="navigate('up')"
+             x-on:keydown.home.prevent="navigate('home')"
+             x-on:keydown.end.prevent="navigate('end')">
             <div class="p-2 space-y-2">
                 @forelse($results as $result)
                     <article
-                        class="text-white border-b border-black/30 p-2 {{ $selectedLocationId == $result['id'] ? 'bg-white rounded-lg border-0 !text-primary' : '' }} last:border-0 group cursor-pointer"
+                        class="text-white border-b border-black/30 p-2 {{ $selectedLocationId == $result['id'] ? 'bg-white rounded-lg border-0 !text-primary' : '' }} last:border-0 group cursor-pointer focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-primary rounded-lg transition-all duration-200"
                         data-location-id="{{ $result['id'] }}"
                         role="button"
                         tabindex="0"
-                        aria-label="Ver {{ $result['name'] }} no mapa - {{ $result['typeLabel'] }}"
+                        aria-label="Visualizar {{ $result['name'] }} no mapa. Tipo: {{ $result['typeLabel'] }}. {{ isset($result['description']) ? \Str::limit($result['description'], 60) : 'Clique para mais detalhes.' }}"
+                        aria-describedby="mobile-result-{{ $result['id'] }}-desc"
                         wire:click="focusLocation('{{ $result['id'] }}')"
                         wire:keydown.enter="focusLocation('{{ $result['id'] }}')"
                         wire:keydown.space="focusLocation('{{ $result['id'] }}')"
                         wire:loading.class="opacity-75 pointer-events-none"
+                        wire:loading.attr="aria-busy"
                         title="{{ $result['name'] }} - {{ $result['typeLabel'] }}">
 
-                        <div class="flex items-start justify-between space-x-3">
-                            <div class="w-2 h-2 rounded-full mt-1 flex-shrink-0 bg-{{ $result['typeColor'] }}-500"
-                                 aria-hidden="true">
-                            </div>
+                        <div class="flex items-start justify-between space-x-4">
+                            <img src="{{ asset('assets/images/'.$result['type']->value.'.png') }}" alt="{{$result['typeLabel']}}" class="w-6 h-auto" />
                             <div class="flex-1 space-y-2">
                                 <div class="flex-1 space-y-1">
                                     <h3 class="font-semibold text-base leading-tight {{ $selectedLocationId == $result['id'] ? 'text-primary' : 'text-secondary' }}">
                                         {{ \Str::limit($result['name'], 48) }}
                                     </h3>
-                                    <p class="text-sm leading-tight text-opacity-85">
+                                    <p id="mobile-result-{{ $result['id'] }}-desc" class="text-sm leading-tight text-opacity-85">
                                         {{ \Str::limit($result['description'], 72) ?? 'Acesse este local para mais detalhes...' }}
                                     </p>
                                 </div>
@@ -154,7 +196,7 @@
     @if((!empty($search) || array_sum($typeFilters) > 0) && !$resultsOpen && $totalResults > 0)
     <div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[998]" id="mobile-results-indicator">
         <button wire:click="openResults"
-            class="flex items-center gap-2 bg-secondary text-primary px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 text-sm font-semibold"
+            class="flex items-center gap-2 bg-secondary text-primary px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             aria-label="Mostrar {{ $totalResults }} {{ $totalResults === 1 ? 'resultado' : 'resultados' }}">
             @svg('heroicon-o-arrow-up', 'w-4 h-4')
             <span>{{ $totalResults }} {{ $totalResults === 1 ? 'resultado' : 'resultados' }}</span>

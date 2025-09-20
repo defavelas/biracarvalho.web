@@ -1,14 +1,178 @@
 /* Mobile-specific styles for map and touch interactions */
 @media (max-width: 768px) {
-    /* Map card mobile optimizations */
+    /* Ensure natural content flow */
+    #map-card [x-data*="currentSlide"] {
+        position: relative !important;
+        margin-bottom: 1rem !important;
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    /* Remove any z-index issues and ensure natural flow */
+    #map-card .absolute.top-4.left-4,
+    #map-card .absolute.-top-2.-right-2,
+    #map-card .fixed,
+    #map-card .sticky {
+        position: relative !important;
+        z-index: auto !important;
+        margin-bottom: 1rem !important;
+    }
+
+    /* Ensure header content flows naturally */
+    #map-card .flex.items-center.justify-between {
+        flex-wrap: wrap !important;
+        gap: 0.5rem !important;
+    }
+
+    /* Optimize mobile card width */
+    #map-card {
+        width: 100% !important;
+        max-width: 460px !important;
+        margin: 0 auto !important;
+    }
+
+    /* Fixed positioning for mobile map card */
     #map-card-container {
         position: fixed !important;
-        bottom: 4rem !important; /* 64px spacing from footer */
-        left: 1rem !important;
-        right: 1rem !important;
-        top: auto !important;
+        top: 160px !important;
+        left: 8px !important;
+        right: 8px !important;
+        bottom: 16px !important;
+        width: auto !important;
+        max-width: none !important;
+        margin: 0 !important;
         transform: none !important;
-        z-index: 997 !important; /* Lower than results count button (998) */
+        z-index: 997 !important;
+    }
+
+    /* Ensure card fills the container naturally with scrolling */
+    #map-card {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: none !important;
+        max-height: none !important;
+        position: relative !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow-y: auto !important; /* Enable vertical scrolling */
+        overflow-x: hidden !important;
+        scroll-behavior: smooth !important;
+    }
+
+    /* CRITICAL: Strict accordion container height constraints */
+    #map-card .max-h-48,
+    #map-card [style*="max-height: 12rem"] {
+        max-height: 8rem !important; /* Reduced for mobile to prevent trespassing */
+        overflow: hidden !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* Ensure accordion content never exceeds container */
+    #map-card .accordion-content {
+        max-height: 6rem !important; /* Strict limit for accordion content */
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+
+    /* Mobile scrollable content adjustments */
+    #map-card .overflow-y-auto {
+        max-height: calc(100% - 80px) !important; /* Account for header and close button */
+        min-height: 10rem !important; /* Smaller minimum for mobile: 160px */
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+
+    /* Configure content area for card-level scrolling */
+    #map-card .flex-1 {
+        min-height: 0 !important;
+        max-height: none !important; /* Let card handle scrolling */
+        overflow-y: visible !important; /* Allow natural content flow */
+        overflow-x: hidden !important;
+    }
+
+    /* Ensure accordion content scrolls within its container */
+    #map-card .accordion-content {
+        max-height: 6rem !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+
+    /* Reduce mobile image height for better space utilization */
+    #map-card [x-data*="currentSlide"] {
+        height: 120px !important;
+        min-height: 120px !important;
+        max-height: 120px !important;
+    }
+
+    /*#map-card [x-data*="currentSlide"] img {
+        height: 120px !important;
+        object-fit: cover !important;
+    }*/
+
+    /* Adjust slideshow container height */
+    #map-card .relative.h-32,
+    #map-card .relative.h-48 {
+        height: 120px !important;
+    }
+
+    /* Invisible scrollbar for mobile map card and all nested scrollable elements */
+    #map-card,
+    #map-card .overflow-y-auto,
+    #map-card .soft-scrollbar {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    #map-card::-webkit-scrollbar,
+    #map-card .overflow-y-auto::-webkit-scrollbar,
+    #map-card .soft-scrollbar::-webkit-scrollbar {
+        width: 0px;
+        height: 0px;
+    }
+
+    #map-card::-webkit-scrollbar-track,
+    #map-card .overflow-y-auto::-webkit-scrollbar-track,
+    #map-card .soft-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    #map-card::-webkit-scrollbar-thumb,
+    #map-card .overflow-y-auto::-webkit-scrollbar-thumb,
+    #map-card .soft-scrollbar::-webkit-scrollbar-thumb {
+        background: transparent;
+    }
+
+    #map-card::-webkit-scrollbar-thumb:hover,
+    #map-card .overflow-y-auto::-webkit-scrollbar-thumb:hover,
+    #map-card .soft-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: transparent;
+    }
+    /* Ensure readable font sizes on mobile */
+    #map-card h3 {
+        font-size: 1.125rem !important; /* 18px - maintain text-lg */
+        line-height: 1.25rem !important;
+    }
+
+    #map-card p {
+        font-size: 1rem !important; /* 16px - maintain text-base */
+        line-height: 1.5rem !important;
+    }
+
+    #map-card .text-sm {
+        font-size: 0.875rem !important; /* 14px - readable on mobile */
+    }
+    /* Fixed positioning for mobile map card */
+    #map-card-container {
+        position: fixed !important;
+        top: 148px !important;
+        left: 8px !important;
+        right: 8px !important;
+        bottom: 16px !important;
+        width: auto !important;
+        max-width: none !important;
+        margin: 0 !important;
+        transform: none !important;
+        z-index: 997 !important;
     }
 
     #map-card {
@@ -21,7 +185,8 @@
     }
 
     /* Hide absolute buttons on mobile - but NOT slideshow elements */
-    #map-card .absolute:not([class*="inset-0"]):not([class*="left-2"]):not([class*="right-2"]):not([class*="bottom-2"]) {
+    #map-card
+        .absolute:not([class*="button-close"]):not([class*="left-2"]):not([class*="right-2"]):not([class*="bottom-2"]) {
         display: none !important;
     }
 
@@ -83,7 +248,7 @@
 
     /* Reduce padding in card header and content on mobile */
     #map-card .p-4 {
-        padding: 0.5rem !important; /* 8px instead of 16px for very compact mobile presentation */
+        padding: 0.75rem !important; /* 12px instead of 16px - less aggressive reduction */
     }
 
     /* Reduce spacing between elements on mobile */
@@ -222,17 +387,6 @@
     }
 }
 
-/* Small mobile devices */
-@media (max-width: 480px) {
-    .mobile-compact-spacing {
-        padding: 0.75rem !important;
-    }
-
-    .mobile-compact-spacing .space-y-2 > * + * {
-        margin-top: 0.5rem !important;
-    }
-}
-
 /* Very small screens and short devices */
 @media (max-width: 360px), (max-height: 600px) {
     #map-card {
@@ -248,15 +402,19 @@
         max-height: calc(80vh - 6rem) !important;
     }
 
-    /* Further reduce text sizes on very small screens */
+    /* Maintain readable font sizes on very small screens */
     #map-card h3 {
-        font-size: 0.75rem !important; /* 12px */
-        line-height: 1rem !important;
+        font-size: 1rem !important; /* 16px - maintain readability */
+        line-height: 1.25rem !important;
     }
 
-    #map-card p,
-    #map-card span {
-        font-size: 0.6875rem !important; /* 11px */
+    #map-card p {
+        font-size: 0.875rem !important; /* 14px - maintain readability */
+        line-height: 1.25rem !important;
+    }
+
+    #map-card .text-sm {
+        font-size: 0.8125rem !important; /* 13px - slightly larger than default */
     }
 }
 
@@ -275,7 +433,7 @@
     #map-card .h-32:not([class*="slideshow"]):not([x-data]) {
         display: none !important;
     }
-    
+
     /* Ensure slideshow elements are always visible on mobile */
     #map-card [x-data*="currentSlide"] {
         display: block !important;
@@ -283,7 +441,7 @@
         opacity: 1 !important;
         position: relative !important;
     }
-    
+
     #map-card [x-data*="currentSlide"] .absolute {
         display: block !important;
         position: absolute !important;
@@ -293,7 +451,7 @@
         height: auto !important;
         width: auto !important;
     }
-    
+
     #map-card [x-data*="currentSlide"] button {
         display: flex !important;
         visibility: visible !important;
@@ -302,7 +460,7 @@
         height: auto !important;
         width: auto !important;
     }
-    
+
     #map-card [x-data*="currentSlide"] .inset-0 {
         display: block !important;
         position: absolute !important;
@@ -313,7 +471,7 @@
         visibility: visible !important;
         opacity: 1 !important;
     }
-    
+
     #map-card [aria-label*="Imagem"],
     #map-card [aria-label*="Próxima"],
     #map-card [aria-label*="Ir para"] {
@@ -324,7 +482,7 @@
         height: auto !important;
         width: auto !important;
     }
-    
+
     /* Ensure FAQ elements are always visible on mobile */
     #map-card [x-data*="openFaq"],
     #map-card [x-data*="openFaq"] button,
@@ -335,7 +493,7 @@
         visibility: visible !important;
         opacity: 1 !important;
     }
-    
+
     /* Make sure image container is visible */
     #map-card .mb-3.relative,
     #map-card .mb-4.relative {

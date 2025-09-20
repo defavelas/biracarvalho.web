@@ -245,14 +245,14 @@ class MapComponent {
     }
 
     createAccessibilityIcon(type, typeColor, isSelected = false) {
-        let iconUrl = "/assets/images/green-pin.png"; // default
+        let iconUrl = "/assets/images/accessible.png"; // default
 
         switch (type) {
             case "accessible":
-                iconUrl = "/assets/images/green-pin.png";
+                iconUrl = "/assets/images/accessible.png";
                 break;
             case "non_accessible":
-                iconUrl = "/assets/images/red-pin.png";
+                iconUrl = "/assets/images/non_accessible.png";
                 break;
         }
 
@@ -355,54 +355,37 @@ class MapComponent {
             const marker = this.markers.get(locationKey);
             const isMobile = window.innerWidth < 768;
 
-            if (marker) {
-                const markerLatLng = marker.getLatLng();
-                const markerPixel = this.map.latLngToContainerPoint(markerLatLng);
-
-                const mapRect = this.map.getContainer().getBoundingClientRect();
-                const cardWidth = isMobile ? Math.min(mapRect.width - 32, 420) : 420;
-                const cardHeight = 360;
-
-                let left = markerPixel.x;
-                let top = markerPixel.y - cardHeight - 24;
-
-                if (isMobile) {
-                    // Center horizontally on mobile
-                    left = (mapRect.width - cardWidth) / 2;
-                    // Position at bottom of screen on mobile
-                    top = mapRect.height - 400;
+            if (marker && !isMobile) {
+                // For desktop, use smart collision detection positioning
+                const markerElement = marker.getElement();
+                if (markerElement) {
+                    // Apply smart collision detection positioning
+                    this.applySmartPositioning(markerElement, location);
                 } else {
-                    if (left + cardWidth > mapRect.width) {
-                        left = mapRect.width - cardWidth - 24;
-                    }
-                    if (left < 24) {
-                        left = 24;
-                    }
-                    if (top < 24) {
-                        top = markerPixel.y + 48;
-                    }
-                    if (top + cardHeight > mapRect.height) {
-                        top = mapRect.height - cardHeight - 24;
-                    }
+                    this.fallbackCenterPosition();
                 }
+            } else if (isMobile) {
+                // Use smart mobile positioning (consistent with desktop approach)
+                const mapRect = this.map.getContainer().getBoundingClientRect();
+                const markerElement = marker.getElement();
 
-                this.currentMapCard.style.position = "absolute";
-                this.currentMapCard.style.left = `${left}px`;
-                this.currentMapCard.style.top = `${top}px`;
-                this.currentMapCard.style.transform = "none";
-                this.currentMapCard.style.display = "block";
-                this.currentMapCard.style.zIndex = "1002";
+                if (markerElement) {
+                    // Apply smart positioning for mobile too
+                    this.applySmartPositioning(markerElement, location);
+                } else {
+                    // Mobile fallback positioning with consistent constraints
+                    const cardWidth = Math.min(mapRect.width - 32, 460);
+                    const left = (mapRect.width - cardWidth) / 2;
+                    const top = Math.max(20, mapRect.height - 420); // Account for mobile card height
 
-                if (!isMobile && this.currentCloseButton) {
-                    const mapContainerRect = this.map.getContainer().getBoundingClientRect();
-                    const buttonLeft = mapContainerRect.left + left + cardWidth + 8;
-                    const buttonTop = mapContainerRect.top + top;
-
-                    this.currentCloseButton.style.position = "fixed";
-                    this.currentCloseButton.style.left = `${buttonLeft}px`;
-                    this.currentCloseButton.style.top = `${buttonTop}px`;
-                    this.currentCloseButton.style.display = "flex";
-                    this.currentCloseButton.style.zIndex = "1003";
+                    this.currentMapCard.style.position = "absolute";
+                    this.currentMapCard.style.left = `${left}px`;
+                    this.currentMapCard.style.top = `${top}px`;
+                    this.currentMapCard.style.transform = "none";
+                    this.currentMapCard.style.display = "block";
+                    this.currentMapCard.style.zIndex = "1002";
+                    this.currentMapCard.style.width = `${cardWidth}px`;
+                    this.currentMapCard.style.maxHeight = "80vh"; // Consistent with CSS
                 }
             } else {
                 this.fallbackCenterPosition();
@@ -413,33 +396,203 @@ class MapComponent {
         }
     }
 
-    fallbackCenterPosition() {
+    getSidebarState() {
+        const sidebar = document.querySelector('aside[aria-label="Painel de pesquisa e filtros"]');
+        if (!sidebar) return { isOpen: false, width: 0, right: 0 };
+
+        const isHidden = window.innerWidth < 768; // Mobile breakpoint
+        if (isHidden) return { isOpen: false, width: 0, right: 0 };
+
+        // Check if sidebar is open by looking at transform classes
+        const hasTranslateX = sidebar.classList.contains("-translate-x-full");
+        const isOpen = !hasTranslateX;
+
+        if (!isOpen) return { isOpen: false, width: 0, right: 0 };
+
+        // Calculate sidebar dimensions when open
+        const sidebarRect = sidebar.getBoundingClientRect();
+        return {
+            isOpen: true,
+            width: sidebarRect.width,
+            right: sidebarRect.right,
+        };
+    }
+
+    calculateAvailableMapArea() {
         const mapRect = this.map.getContainer().getBoundingClientRect();
-        const cardLeft = mapRect.width / 2 - 200;
-        const cardTop = mapRect.height / 2 - 150;
+        const sidebarState = this.getSidebarState();
+
+        let availableArea = {
+            left: 0,
+            top: 0,
+            width: mapRect.width,
+            height: mapRect.height,
+            right: mapRect.width,
+        };
+
+        // Adjust for sidebar when open
+        if (sidebarState.isOpen) {
+            const sidebarOffset = sidebarState.right - mapRect.left;
+            availableArea.left = Math.max(0, sidebarOffset);
+            availableArea.width = Math.max(200, mapRect.width - sidebarOffset); // Minimum 200px width
+            availableArea.right = availableArea.left + availableArea.width;
+        }
+
+        return { area: availableArea, sidebar: sidebarState };
+    }
+
+    applySmartPositioning(markerElement, location) {
+        if (!this.currentMapCard || !markerElement) return;
+
+        // Get all necessary measurements with sidebar awareness
+        const mapRect = this.map.getContainer().getBoundingClientRect();
+        const markerRect = markerElement.getBoundingClientRect();
+        const { area: availableArea, sidebar: sidebarState } = this.calculateAvailableMapArea();
+        const cardWidth = 460;
+
+        // Get dynamic card height after content is rendered
+        requestAnimationFrame(() => {
+            const cardHeight = this.currentMapCard.offsetHeight;
+            const offset = 8;
+            const margin = 24; // Minimum margin from viewport edges
+
+            // Calculate marker position relative to available area (not full map)
+            const markerX = markerRect.left - mapRect.left + markerRect.width / 2;
+            const markerY = markerRect.top - mapRect.top + markerRect.height;
+
+            // Calculate available space in each direction (sidebar-aware)
+            const spaceAbove = markerRect.top - mapRect.top;
+            const spaceBelow = mapRect.bottom - markerRect.bottom;
+            const spaceLeft = markerRect.left - mapRect.left - availableArea.left;
+            const spaceRight = availableArea.right - markerRect.right;
+
+            let finalX, finalY;
+            let placement = "top"; // Default preference
+
+            // Sidebar-aware positioning logic with preference adjustments
+            const preferRight = sidebarState.isOpen; // Prefer right side when sidebar is open
+
+            if (preferRight && spaceRight >= cardWidth + offset + margin) {
+                // 1. Try positioning to the right of marker (preferred when sidebar open)
+                placement = "right";
+                finalX = Math.min(markerX + offset + markerRect.width / 2, availableArea.right - cardWidth - margin);
+                finalY = Math.max(
+                    margin,
+                    Math.min(markerY - markerRect.height - cardHeight / 2, availableArea.height - cardHeight - margin),
+                );
+            } else if (spaceAbove >= cardHeight + offset + margin) {
+                // 2. Try positioning above marker
+                placement = "top";
+                finalX = Math.max(
+                    availableArea.left + margin,
+                    Math.min(markerX - cardWidth / 2, availableArea.right - cardWidth - margin),
+                );
+                finalY = markerY - cardHeight - offset - markerRect.height;
+            } else if (spaceBelow >= cardHeight + offset + margin) {
+                // 3. Try positioning below marker
+                placement = "bottom";
+                finalX = Math.max(
+                    availableArea.left + margin,
+                    Math.min(markerX - cardWidth / 2, availableArea.right - cardWidth - margin),
+                );
+                finalY = markerY + offset;
+            } else if (!preferRight && spaceLeft >= cardWidth + offset + margin) {
+                // 4. Try positioning to the left of marker (only if sidebar closed)
+                placement = "left";
+                finalX = Math.max(availableArea.left + margin, markerX - cardWidth - offset - markerRect.width / 2);
+                finalY = Math.max(
+                    margin,
+                    Math.min(markerY - markerRect.height - cardHeight / 2, availableArea.height - cardHeight - margin),
+                );
+            } else if (!preferRight && spaceRight >= cardWidth + offset + margin) {
+                // 5. Try positioning to the right of marker (fallback)
+                placement = "right";
+                finalX = Math.min(markerX + offset + markerRect.width / 2, availableArea.right - cardWidth - margin);
+                finalY = Math.max(
+                    margin,
+                    Math.min(markerY - markerRect.height - cardHeight / 2, availableArea.height - cardHeight - margin),
+                );
+            } else {
+                // 6. Smart center positioning (sidebar-aware)
+                placement = "center-available";
+                finalX = Math.max(
+                    availableArea.left + margin,
+                    (availableArea.left + availableArea.right - cardWidth) / 2,
+                );
+                finalY = Math.max(margin, (availableArea.height - cardHeight) / 2);
+            }
+
+            // Apply the calculated position
+            this.currentMapCard.style.left = `${finalX}px`;
+            this.currentMapCard.style.top = `${finalY}px`;
+            this.currentMapCard.style.position = "absolute";
+            this.currentMapCard.style.display = "block";
+            this.currentMapCard.style.zIndex = "150"; // Above sidebar (z-[100])
+
+            console.log(`Card positioned ${placement}:`, {
+                finalX,
+                finalY,
+                cardHeight,
+                placement,
+                sidebarOpen: sidebarState.isOpen,
+                availableWidth: availableArea.width,
+                sidebarOffset: sidebarState.isOpen ? availableArea.left : 0,
+            });
+
+            // Position close button relative to the card
+            this.positionCloseButton(finalX, finalY, cardWidth, cardHeight);
+        });
+    }
+
+    positionCloseButton(cardX, cardY, cardWidth, cardHeight) {
+        if (!this.currentCloseButton) return;
+
+        // Position buttons to the right of the card by default
+        let buttonX = cardX + cardWidth + 8;
+        let buttonY = cardY;
+
+        // If buttons would go off-screen, position them inside or to the left
+        const mapRect = this.map.getContainer().getBoundingClientRect();
+        if (buttonX + 48 > mapRect.width) {
+            // Try left side
+            buttonX = cardX - 48 - 8;
+            if (buttonX < 0) {
+                // Position inside card at top-right
+                buttonX = cardX + cardWidth - 48 - 8;
+                buttonY = cardY + 8;
+            }
+        }
+
+        this.currentCloseButton.style.position = "absolute";
+        this.currentCloseButton.style.left = `${buttonX}px`;
+        this.currentCloseButton.style.top = `${buttonY}px`;
+        this.currentCloseButton.style.display = "flex";
+        this.currentCloseButton.style.zIndex = "151"; // Above cards (z-150)
+    }
+
+    fallbackCenterPosition() {
+        const { area: availableArea, sidebar: sidebarState } = this.calculateAvailableMapArea();
+
+        // Smart fallback positioning (sidebar-aware)
+        const cardWidth = 400;
+        const cardHeight = 300;
+        const cardLeft = Math.max(availableArea.left + 24, (availableArea.left + availableArea.right - cardWidth) / 2);
+        const cardTop = Math.max(24, (availableArea.height - cardHeight) / 2);
 
         this.currentMapCard.style.left = `${cardLeft}px`;
         this.currentMapCard.style.top = `${cardTop}px`;
         this.currentMapCard.style.display = "block";
+        this.currentMapCard.style.zIndex = "150"; // Above sidebar
+
+        console.log("Fallback positioning (sidebar-aware):", {
+            cardLeft,
+            cardTop,
+            sidebarOpen: sidebarState.isOpen,
+            availableWidth: availableArea.width,
+        });
 
         if (this.currentCloseButton) {
-            const mapContainerRect = this.map.getContainer().getBoundingClientRect();
-            const buttonLeft = mapContainerRect.left + cardLeft + 405;
-            const buttonTop = mapContainerRect.top + cardTop;
-
-            console.log("Fallback positioning buttons:", {
-                buttonLeft,
-                buttonTop,
-                mapRect: mapContainerRect,
-                cardLeft,
-                cardTop,
-            });
-
-            this.currentCloseButton.style.position = "fixed";
-            this.currentCloseButton.style.left = `${buttonLeft}px`;
-            this.currentCloseButton.style.top = `${buttonTop}px`;
-            this.currentCloseButton.style.display = "flex";
-            this.currentCloseButton.style.zIndex = "1003";
+            this.positionCloseButton(cardLeft, cardTop, cardWidth, cardHeight);
         }
     }
 
@@ -453,8 +606,8 @@ class MapComponent {
         if (hasImages) {
             const maxImages = Math.min(images.length, 5);
             imagesHtml = `
-                <div class="mb-3 md:mb-4 relative" x-data="{ currentSlide: 0, totalSlides: ${maxImages} }">
-                    <div class="relative h-40 md:h-48 bg-black/25 rounded-lg overflow-hidden group">
+                <div class="relative">
+                    <div class="relative h-56 md:h-64 bg-black/25 rounded-lg overflow-hidden group">
                         ${images
                             .slice(0, maxImages)
                             .map(
@@ -526,16 +679,28 @@ class MapComponent {
             <div id="map-card-container">
                 <div
                     id="map-card"
-                    class="w-full md:w-[420px] max-w-[420px] max-h-[80vh] bg-white rounded-lg shadow-xl pb-2 border-4 border-secondary"
+                    class="w-[460px] max-w-[460px] bg-white rounded-lg shadow-xl pb-2 border-4 border-secondary flex flex-col max-h-[80vh] min-h-[300px] overflow-y-auto overflow-x-hidden relative"
                     role="dialog"
                     aria-labelledby="map-card-title"
                     aria-describedby="map-card-description"
+                     x-data="{ currentSlide: 0, totalSlides: ${hasImages ? Math.min(images.length, 5) : 0}, openFaq: null, scrollToContent(accordionId) { const element = document.getElementById(accordionId); if (element) { element.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); const cardContainer = document.getElementById('map-card'); if (cardContainer) { cardContainer.scrollTop = element.offsetTop - 10; } } } }"
                 >
+                    <!-- Close Button (Full-rounded, external positioning) -->
+                    <button
+                        type="button"
+                        onclick="closeMapCard()"
+                        class="button-close absolute right-0 top-0 md:hidden w-12 h-12 bg-secondary shadow-lg border-4 border-white rounded-full cursor-pointer flex items-center justify-center transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5 z-50"
+                        aria-label="Fechar detalhes do local"
+                    >
+                        <svg class="w-6 h-6 text-primary transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                     ${
                         hasImages
                             ? `
                     <div class="p-2 pb-0 mobile-compact-spacing relative">
-                        <span class="text-left inline-block px-4 py-0.5 rounded-full bg-${location.typeColor}-500 shadow text-sm absolute top-4 left-4 z-50 text-white">
+                        <span class="text-left inline-block px-4 py-0.5 rounded-full shadow absolute top-4 left-4 z-50 text-white" style="background-color: ${location.typeColor}">
                             ${location.typeLabel}
                         </span>
                         ${imagesHtml}
@@ -543,11 +708,12 @@ class MapComponent {
                     `
                             : ""
                     }
-                    <div class="px-4 py-3">
+                    <!-- Fixed Header -->
+                    <div class="pt-2.5 px-2 flex-shrink-0">
                         ${
                             !hasImages
                                 ? `
-                        <span class="inline-block px-3 py-1 rounded-full bg-${location.typeColor}-500 shadow text-xs text-white mb-3">
+                        <span class="inline-block px-3 py-1 rounded-full shadow  text-white mb-3" style="background-color: ${location.typeColor}">
                             ${location.typeLabel}
                         </span>
                         `
@@ -557,50 +723,71 @@ class MapComponent {
                             <h3 id="map-card-title" class="text-lg font-semibold text-primary leading-tight mb-1">
                                 ${location.name}
                             </h3>
-                            ${
-                                isMobile
-                                    ? `
-                            <button
-                                type="button"
-                                onclick="closeMapCard()"
-                                class="md:hidden flex-shrink-0 ml-2 w-8 h-8 rounded-full bg-secondary flex items-center justify-center"
-                                aria-label="Fechar detalhes"
-                            >
-                                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                            </button>
-                            `
-                                    : ""
-                            }
+
                         </div>
-                        <p class="text-sm text-primary/80 mb-2">
+                        <p class="text-base text-primary/80 mb-2">
                             ${location.description || "Sem descrição disponível"}
                         </p>
-                        <div class="text-xs text-primary/80 leading-tight mb-4 flex justify-between items-center">
+                        <div class="text-sm text-primary/80 leading-tight mb-4 flex justify-between items-center">
                             <span class="text-left">
                                 ${location.authors ? `Contribuição ${location.authors}` : "Contribuição anônima"}
                             </span>
                             <span class="text-right">
-                                ${location.createdAt || ""}
+                                ${
+                                    location.createdAt
+                                        ? (() => {
+                                              try {
+                                                  const date = new Date(location.createdAt);
+                                                  return isNaN(date.getTime())
+                                                      ? location.createdAt
+                                                      : date.toLocaleDateString("pt-BR");
+                                              } catch {
+                                                  return location.createdAt;
+                                              }
+                                          })()
+                                        : ""
+                                }
                             </span>
                         </div>
+
+                        <!-- Accordion Section Label (Fixed in Header) -->
+                        ${
+                            hasInfos
+                                ? `<strong class="text-base md:text-lg font-semibold text-primary block">Informações do local</strong>`
+                                : ""
+                        }
+                    </div>
+
+                    <!-- Content -->
+                    <div class="flex-1 px-2 space-y-3">
                         ${
                             hasInfos
                                 ? `
-                            <div>
-                                <strong class="font-semibold text-primary block mb-2">Informações do local</strong>
-                                <div class="max-h-48 overflow-y-auto soft-scrollbar" x-data="{ openFaq: null }">
-                                    ${infos
-                                        .map(
-                                            (info, index) => `
+                             <div class="max-h-48 overflow-y-auto soft-scrollbar relative group" style="max-height: 12rem; overflow: hidden;">
+                                     ${infos
+                                         .map(
+                                             (info, index) => `
                                         <div>
                                             <button
                                                 type="button"
-                                                @click="openFaq = openFaq === ${index} ? null : ${index}"
+                                                 @click="openFaq = openFaq === ${index} ? null : ${index};
+                                                          $nextTick(() => {
+                                                            scrollToContent('faq-content-${index}');
+                                                            // Force card height recalculation
+                                                            const cardContainer = document.getElementById('map-card');
+
+                                                            if (cardContainer) {
+                                                              // Only scroll card if content exceeds viewport
+                                                              const cardRect = cardContainer.getBoundingClientRect();
+                                                              const viewportHeight = window.innerHeight;
+                                                              if (cardRect.bottom > viewportHeight) {
+                                                                cardContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                                              }
+                                                            }
+                                                          })"
                                                 class="w-full py-2 text-left flex items-center justify-between focus:outline-none cursor-pointer"
                                             >
-                                                <span class="text-sm font-semibold text-primary">${info.title}</span>
+                                                 <span class="font-semibold text-primary text-sm md:text-base">${info.title}</span>
                                                 <svg
                                                     class="w-4 h-4 text-primary/70 transition-transform duration-200"
                                                     :class="{ 'rotate-180': openFaq === ${index} }"
@@ -611,36 +798,40 @@ class MapComponent {
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                                 </svg>
                                             </button>
-                                            <div
-                                                x-show="openFaq === ${index}"
-                                                x-transition:enter="transition ease-out duration-100"
-                                                x-transition:enter-start="opacity-0"
-                                                x-transition:enter-end="opacity-100"
-                                                x-transition:leave="transition ease-in duration-100"
-                                                x-transition:leave-start="opacity-100"
-                                                x-transition:leave-end="opacity-0"
-                                                id="faq-content-${index}"
-                                                class="overflow-hidden"
-                                            >
-                                                <p class="text-sm text-primary/80 leading-relaxed pb-2">${info.value}</p></div>
+                                             <div
+                                                 x-show="openFaq === ${index}"
+                                                 x-transition:enter="transition ease-out duration-300"
+                                                 x-transition:enter-start="opacity-0 max-h-0 overflow-hidden"
+                                                  x-transition:enter-end="opacity-100 max-h-48 overflow-hidden"
+                                                  x-transition:leave="transition ease-in duration-300"
+                                                  x-transition:leave-start="opacity-100 max-h-48 overflow-hidden"
+                                                 x-transition:leave-end="opacity-0 max-h-0 overflow-hidden"
+                                                 id="faq-content-${index}"
+                                                 class="accordion-transition"
+                                                 @click.away="openFaq = null"
+                                             >
+                                                 <div class="accordion-content p-2 bg-primary/5 rounded-md mt-1">
+                                                      <p class="text-primary/80 leading-relaxed text-sm md:text-base">${info.value}</p>
+                                                 </div>
+                                             </div>
                                         </div>
                                     `,
-                                        )
-                                        .join("")}
-                                </div>
-                            </div>
-                        `
+                                         )
+                                         .join("")}
+                                 </div>
+                             </div>
+                         `
                                 : ""
                         }
-                     </div>
-                 </div>
+                    </div>
+                  </div>
              </div>
          `;
     }
 
     createCloseButtonHTML(location) {
         return `
-            <div id="map-card-buttons" class="flex flex-col gap-2" style="position: absolute; z-index: 1003; display: flex; flex-direction: column; gap: 8px;">
+            <div id="map-card-buttons" class="flex flex-col gap-2" style="position: relative; z-index: 1003; display: flex; flex-direction: column; gap: 8px;">
                 <button
                     id="map-card-close-button"
                     type="button"

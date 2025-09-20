@@ -6,7 +6,7 @@
 @if($location && $show)
 <div
     id="map-card"
-    class="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-80 bg-secondary border-4 border-black/15 rounded-lg shadow-xl z-[200] transition-all duration-300 ease-in-out flex flex-col max-h-[70vh] md:max-h-[75vh] lg:max-h-[80vh] min-h-[300px] md:min-h-[400px] lg:min-h-[450px]"
+    class="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-80 bg-secondary border-4 border-black/15 rounded-lg shadow-xl z-[200] transition-all duration-300 ease-in-out flex flex-col max-h-[70vh] md:max-h-[75vh] lg:max-h-[80vh] min-h-[300px] md:min-h-[400px] lg:min-h-[450px] overflow-hidden"
     role="dialog"
     aria-labelledby="map-card-title"
     aria-describedby="map-card-description"
@@ -22,7 +22,7 @@
     </button>
 
     <!-- Fixed Header -->
-    <div class="p-4 border-b border-primary/20 flex-shrink-0">
+    <div class="flex-shrink-0">
         <!-- Title and Accessibility Badge -->
         <div class="flex items-start justify-between space-x-3 mb-3">
             <div class="flex-1">
@@ -65,7 +65,7 @@
     </div>
 
     <!-- Scrollable Content -->
-    <div class="flex-1 overflow-y-auto overflow-x-hidden p-4 min-h-0">
+    <div class="flex-1 overflow-y-auto overflow-x-hidden p-4 min-h-0 scroll-smooth" style="scroll-behavior: smooth; overscroll-behavior: contain;">
         <!-- Image Slideshow Section -->
         @if(isset($location['images']) && count($location['images']) > 0)
             <div class="mb-4 relative">

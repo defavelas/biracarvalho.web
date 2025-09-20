@@ -70,6 +70,127 @@
     background: rgba(0, 0, 0, 0.5);
 }
 
+/* Accordion content height management */
+.accordion-content {
+    max-height: 8rem; /* Limit individual accordion content height */
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-behavior: smooth;
+}
+
+.accordion-transition {
+    transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out;
+    overflow: hidden;
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 768px) {
+    .accordion-content {
+        max-height: 6rem; /* Smaller on mobile for better UX */
+    }
+
+    #map-card .overflow-y-auto {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+
+    /* Consistent height constraints for mobile */
+    #map-card {
+        max-height: min(80vh, 500px) !important; /* Match desktop approach */
+        min-height: 300px !important;
+    }
+
+    /* Mobile-specific accordion container height */
+    #map-card .max-h-48,
+    #map-card [style*="max-height: 12rem"] {
+        max-height: 10rem !important; /* Slightly smaller on mobile */
+        overflow: hidden !important;
+    }
+
+    /* Mobile scrollable content adjustments */
+    #map-card .overflow-y-auto {
+        max-height: calc(100% - 100px) !important; /* Account for smaller header on mobile */
+        min-height: 12rem !important; /* Smaller minimum for mobile: 192px */
+    }
+}
+
+/* Ensure accordion doesn't break card bounds */
+#map-card .max-h-48,
+#map-card [style*="max-height: 12rem"] {
+    max-height: 12rem !important;
+    overflow: hidden !important;
+    flex-shrink: 0 !important;
+}
+
+#map-card .accordion-content {
+    max-height: 8rem !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+/* Additional constraints for JavaScript-generated cards */
+#map-card {
+    max-height: min(80vh, 600px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    width: 460px !important;
+    max-width: 460px !important;
+    scroll-behavior: smooth !important;
+    overscroll-behavior: contain !important;
+}
+
+/* Completely hide scrollbar for map card container and all nested scrollable elements */
+#map-card,
+#map-card .overflow-y-auto,
+#map-card .soft-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+#map-card::-webkit-scrollbar,
+#map-card .overflow-y-auto::-webkit-scrollbar,
+#map-card .soft-scrollbar::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+}
+
+#map-card::-webkit-scrollbar-track,
+#map-card .overflow-y-auto::-webkit-scrollbar-track,
+#map-card .soft-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#map-card::-webkit-scrollbar-thumb,
+#map-card .overflow-y-auto::-webkit-scrollbar-thumb,
+#map-card .soft-scrollbar::-webkit-scrollbar-thumb {
+    background: transparent;
+}
+
+#map-card::-webkit-scrollbar-thumb:hover,
+#map-card .overflow-y-auto::-webkit-scrollbar-thumb:hover,
+#map-card .soft-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: transparent;
+}
+
+/* Desktop-specific card width enforcement */
+@media (min-width: 769px) {
+    #map-card {
+        width: 460px !important;
+        max-width: 460px !important;
+        min-width: 460px !important;
+    }
+}
+
+#map-card .overflow-y-auto {
+    max-height: 12rem !important; /* Fixed height for accordion only */
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scroll-behavior: smooth !important;
+    overscroll-behavior: contain !important;
+}
+
 /* Alpine.js x-cloak to prevent flicker */
 [x-cloak] {
     display: none !important;
@@ -165,28 +286,28 @@
     .fixed.bottom-0 .flex.-space-x-2 {
         margin-top: 0.5rem !important;
     }
-    
+
     .fixed.bottom-0 .w-6.h-6 {
-        width: 2rem !important;  /* 32px instead of 24px */
+        width: 2rem !important; /* 32px instead of 24px */
         height: 2rem !important; /* 32px instead of 24px */
         border-width: 3px !important; /* thicker border for better visibility */
     }
-    
+
     .fixed.bottom-0 .text-xs {
         font-size: 0.6rem !important; /* smaller text in +number indicator */
         font-weight: 700 !important;
     }
-    
+
     /* Ensure images are visible and not cut off */
     .fixed.bottom-0 article {
         padding-bottom: 0.75rem !important; /* more space for images */
     }
-    
+
     /* Make sure content is visible */
     .fixed.bottom-0 .space-y-2 {
         gap: 0.5rem !important;
     }
-    
+
     .fixed.bottom-0 .leading-tight {
         line-height: 1.3 !important;
     }
@@ -197,14 +318,14 @@
     .fixed.bottom-0 article {
         min-height: 120px !important;
     }
-    
+
     /* Ensure mobile map card elements are visible */
     #map-card[role="dialog"] {
         display: block !important;
         visibility: visible !important;
         opacity: 1 !important;
     }
-    
+
     /* Ensure slideshow container is visible */
     #map-card[role="dialog"] [x-data] {
         display: block !important;
@@ -212,10 +333,10 @@
         opacity: 1 !important;
         position: relative !important;
     }
-    
+
     /* Ensure image gallery is visible */
-    #map-card[role="dialog"] .relative.h-40,
     #map-card[role="dialog"] .relative.h-48,
+    #map-card[role="dialog"] .relative.h-64,
     #map-card[role="dialog"] .mb-3.relative,
     #map-card[role="dialog"] .mb-4.relative {
         display: block !important;
@@ -223,7 +344,7 @@
         opacity: 1 !important;
         height: 10rem !important;
     }
-    
+
     /* Ensure FAQ section is visible */
     #map-card[role="dialog"] strong:contains("Informações do local"),
     #map-card[role="dialog"] div:has(strong:contains("Informações")) {
