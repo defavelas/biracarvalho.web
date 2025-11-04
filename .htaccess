@@ -18,6 +18,10 @@
     RewriteCond %{QUERY_STRING} concat.*\( [NC]
     RewriteRule .* - [F,L]
 
+    # Force HTTPS (must be first to ensure all traffic is secure)
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
     # Redirect to public/ directory for both domains
     RewriteCond %{HTTP_HOST} ^biracarvalho\.(bsonlabs\.com|observatoriodefavelas\.org\.br)$ [NC]
     RewriteCond %{REQUEST_URI} !^/public/
@@ -26,14 +30,6 @@
     # Allow traffic from both bsonlabs.com and observatoriodefavelas.org.br domains
     RewriteCond %{HTTP_HOST} ^(.*\.)?(bsonlabs\.com|observatoriodefavelas\.org\.br)$ [NC]
     RewriteRule ^ - [L]
-
-    # Force HTTPS
-    RewriteCond %{HTTPS} off
-    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
-    # Canonical domain redirect (www to non-www)
-    RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
-    RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 </IfModule>
 
 # Enhanced Security Headers for GEO and SEO
