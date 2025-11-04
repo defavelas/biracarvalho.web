@@ -18,13 +18,13 @@
     RewriteCond %{QUERY_STRING} concat.*\( [NC]
     RewriteRule .* - [F,L]
 
-    # Redirect to public/ directory for both naked domain and www
-    RewriteCond %{HTTP_HOST} ^(biracarvalho\.)?bsonlabs\.com$ [NC]
+    # Redirect to public/ directory for both domains
+    RewriteCond %{HTTP_HOST} ^biracarvalho\.(bsonlabs\.com|observatoriodefavelas\.org\.br)$ [NC]
     RewriteCond %{REQUEST_URI} !^/public/
     RewriteRule ^(.*)$ /public/$1 [L,NC]
 
-    # Allow traffic from bsonlabs.com domains
-    RewriteCond %{HTTP_HOST} ^(.*\.)?bsonlabs\.com$ [NC]
+    # Allow traffic from both bsonlabs.com and observatoriodefavelas.org.br domains
+    RewriteCond %{HTTP_HOST} ^(.*\.)?(bsonlabs\.com|observatoriodefavelas\.org\.br)$ [NC]
     RewriteRule ^ - [L]
 
     # Force HTTPS
