@@ -22,3 +22,13 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Cursor IDE
+.cursor/
+.cursorignore
+
+# Claude Code
+.claude/
+
+# Dynamic data files (fetched from API)
+storage/files/

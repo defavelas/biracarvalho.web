@@ -1,0 +1,1 @@
+feat(security): enforce HTTPS by moving redirect rule to top
