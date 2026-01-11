@@ -36,7 +36,7 @@ final class LocationService
                     'type',
                     'authors',
                     'published_at',
-                    'created_at'
+                    'created_at',
                 ])
                 ->orderBy('published_at', 'desc')
                 ->get();
@@ -64,17 +64,15 @@ final class LocationService
                 ->published()
                 ->with(['images', 'infos']);
 
-            // Apply search filter
-            if (!empty($search)) {
-                $query->where(function ($q) use ($search) {
+            if ( ! empty($search)) {
+                $query->where(function ($q) use ($search): void {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('description', 'like', "%{$search}%")
-                      ->orWhere('authors', 'like', "%{$search}%");
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhere('authors', 'like', "%{$search}%");
                 });
             }
 
-            // Apply type filters
-            if (!empty($categories)) {
+            if ( ! empty($categories)) {
                 $query->whereIn('type', $categories);
             }
 
@@ -92,12 +90,10 @@ final class LocationService
      */
     public function getLocationById(string $locationId): ?Location
     {
-        return Cache::remember("location.{$locationId}", self::CACHE_TTL, function () use ($locationId) {
-            return Location::query()
-                ->published()
-                ->with(['images', 'infos'])
-                ->find($locationId);
-        });
+        return Cache::remember("location.{$locationId}", self::CACHE_TTL, fn() => Location::query()
+            ->published()
+            ->with(['images', 'infos'])
+            ->find($locationId));
     }
 
     /**
@@ -180,7 +176,6 @@ final class LocationService
         Cache::forget('locations.published.map');
         Cache::forget('locations.stats');
 
-        // Clear search caches (pattern-based clearing)
         $tags = ['locations.search'];
         if (method_exists(Cache::getStore(), 'tags')) {
             Cache::tags($tags)->flush();
@@ -198,8 +193,6 @@ final class LocationService
     private function generateSearchCacheKey(string $search, array $categories): string
     {
         $searchHash = md5($search);
-
-        // Ensure categories is always an array and sort it for consistent cache keys
         $categories = is_array($categories) ? $categories : [];
         sort($categories);
         $categoriesHash = md5(implode(',', $categories));

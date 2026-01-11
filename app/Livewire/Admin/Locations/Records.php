@@ -52,10 +52,8 @@ final class Records extends Component
     {
         if ($this->selectedLocation) {
             $this->selectedLocation->delete();
-            
-            // Clear location caches when a location is deleted
             app(\App\Services\LocationService::class)->clearCache();
-            
+
             $this->showDeleteModal = false;
             $this->selectedLocation = null;
 
@@ -80,11 +78,9 @@ final class Records extends Component
         return Location::query()
             ->when($this->search, fn($query) => $query->where('name', 'like', "%{$this->search}%"))
             ->when($this->typeFilter, fn($query) => $query->where('type', $this->typeFilter))
-            ->when($this->statusFilter, function ($query) {
-                return $this->statusFilter === 'pending' 
-                    ? $query->pending() 
-                    : $query->published();
-            })
+            ->when($this->statusFilter, fn($query) => 'pending' === $this->statusFilter
+                    ? $query->pending()
+                    : $query->published())
             ->with(['images', 'infos'])
             ->latest()
             ->paginate(25);

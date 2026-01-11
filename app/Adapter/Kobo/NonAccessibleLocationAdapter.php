@@ -17,8 +17,7 @@ final class NonAccessibleLocationAdapter
      */
     public function transform(array $koboData): ?array
     {
-        // Validate perspective question - skip record if empty
-        if (!$this->isValidPerspectiveQuestion($koboData)) {
+        if ( ! $this->isValidPerspectiveQuestion($koboData)) {
             return null;
         }
 
@@ -47,7 +46,7 @@ final class NonAccessibleLocationAdapter
             'latitude' => $coordinates['latitude'],
             'longitude' => $coordinates['longitude'],
             'authors' => $this->extractAuthors($data),
-            'published_at' => null, // Set to null for moderation
+            'published_at' => null,
         ];
     }
 
@@ -65,10 +64,9 @@ final class NonAccessibleLocationAdapter
         foreach ($attachments as $attachment) {
             $downloadUrl = str_replace('/?format=json', '', $attachment['download_medium_url'] ?? '');
 
-            // Only process image attachments
             if ($this->isImageMimeType($attachment['mimetype'] ?? '')) {
                 $images[] = [
-                    'image_path' => null, // Will be set when file is downloaded
+                    'image_path' => null,
                     'original_filename' => $attachment['filename'] ?? '',
                     'download_url' => $downloadUrl ?? '',
                     'mimetype' => $attachment['mimetype'] ?? '',
@@ -92,22 +90,18 @@ final class NonAccessibleLocationAdapter
         $excludedKeys = $this->getExcludedInfoKeys();
 
         foreach ($data as $key => $value) {
-            // Skip system fields and fields already mapped to location
             if (in_array($key, $excludedKeys) || null === $value || '' === $value) {
                 continue;
             }
 
-            // Skip arrays and objects
             if (is_array($value)) {
                 continue;
             }
 
-            // Skip media files (check if value looks like a filename)
             if ($this->isMediaFile((string) $value)) {
                 continue;
             }
 
-            // Skip coordinate data (check if value looks like coordinates)
             if ($this->isCoordinateData((string) $value)) {
                 continue;
             }
@@ -163,7 +157,6 @@ final class NonAccessibleLocationAdapter
         $rawType = $data['_3_Que_tipo_de_lugar_esse'] ?? null;
         $cleanedValue = $this->cleanValue($rawType);
 
-        // Ensure description is never null since database requires it
         return $cleanedValue ?? 'Local não acessível';
     }
 
@@ -191,7 +184,6 @@ final class NonAccessibleLocationAdapter
     private function getExcludedInfoKeys(): array
     {
         return [
-            // System fields
             '_id',
             '_uuid',
             '_submission_time',
@@ -210,24 +202,16 @@ final class NonAccessibleLocationAdapter
             '__version__',
             'meta/instanceID',
             'meta/rootUuid',
-
-            // Fields mapped to location model
-            '_2_Qual_o_nome_desse_lugar_ou_ponto', // Mapped to location.name
-            '_3_Que_tipo_de_lugar_esse', // Mapped to location.type
-            '_10_Nome_dos_dois_pe_aram_este_formul_rio', // Mapped to location.authors
-
-            // Validation field (used to determine if record should be processed)
-            '_1_Na_sua_perspectiva_este_lu', // Perspective question for validation
-
-            // Coordinate fields (mapped to location.latitude/longitude)
-            '_4_Compartilhe_a_localiza_o', // GPS coordinates
-            '_6_Compartilhe_a_localiza_o', // GPS coordinates variant
-            '_4_Compartilhe_a_localiza_o_001', // GPS coordinates variant
-
-            // Media file fields (not survey questions)
-            '_7_Tire_uma_foto_que_mostre_o_local', // Image filename
-            '_8_Tire_mais_uma_fot_gora_de_outro_ngulo', // Image filename
-            '_9_Grave_um_udio_ex_ugar_n_o_acess_vel', // Audio filename
+            '_2_Qual_o_nome_desse_lugar_ou_ponto',
+            '_3_Que_tipo_de_lugar_esse',
+            '_10_Nome_dos_dois_pe_aram_este_formul_rio',
+            '_1_Na_sua_perspectiva_este_lu',
+            '_4_Compartilhe_a_localiza_o',
+            '_6_Compartilhe_a_localiza_o',
+            '_4_Compartilhe_a_localiza_o_001',
+            '_7_Tire_uma_foto_que_mostre_o_local',
+            '_8_Tire_mais_uma_fot_gora_de_outro_ngulo',
+            '_9_Grave_um_udio_ex_ugar_n_o_acess_vel',
         ];
     }
 
@@ -236,12 +220,10 @@ final class NonAccessibleLocationAdapter
      */
     private function decodeQuestionTitle(string $key): string
     {
-        // Basic decoding - replace underscores with spaces and clean up
         $title = str_replace('_', ' ', $key);
         $title = preg_replace('/^\d+\s+/', '', $title);
         $title = Str::title($title);
 
-        // Get question title mappings from config
         $mappings = config('kobo.non_accessible', []);
 
         return $mappings[$key] ?? $title;
@@ -256,13 +238,11 @@ final class NonAccessibleLocationAdapter
             return null;
         }
 
-        // First try to decode using config mappings
         $decoded = $this->decodeValueFromConfig($value);
         if ($decoded !== $value) {
             return $decoded;
         }
 
-        // Clean up common Kobo encoding issues
         $cleaned = str_replace('_', ' ', $value);
         $cleaned = preg_replace('/\s+/', ' ', $cleaned);
         $cleaned = mb_trim($cleaned);
@@ -277,18 +257,16 @@ final class NonAccessibleLocationAdapter
     {
         $mappings = config('kobo.non_accessible', []);
 
-        // Try direct mapping first
         if (isset($mappings[$value])) {
             return $mappings[$value];
         }
 
-        // For multi-value fields (space-separated), split and map each part
         if (str_contains($value, ' ')) {
             $parts = explode(' ', $value);
             $decodedParts = [];
 
             foreach ($parts as $part) {
-                if ('' !== trim($part)) {
+                if ('' !== mb_trim($part)) {
                     $decodedParts[] = $mappings[$part] ?? $this->fallbackDecode($part);
                 }
             }
@@ -304,7 +282,6 @@ final class NonAccessibleLocationAdapter
      */
     private function fallbackDecode(string $value): string
     {
-        // Clean up common Kobo encoding patterns
         $decoded = str_replace('_', ' ', $value);
         $decoded = preg_replace('/\s+/', ' ', $decoded);
         $decoded = mb_trim($decoded);
@@ -317,16 +294,15 @@ final class NonAccessibleLocationAdapter
      */
     private function isMediaFile(string $value): bool
     {
-        // Check for common media file patterns
         $mediaPatterns = [
-            '/\.(jpg|jpeg|png|gif|webp|heic)$/i', // Image extensions
-            '/\.(mp3|m4a|wav|aac|opus|mov)$/i',   // Audio/video extensions
-            '/^\d+.*\.(jpg|jpeg|png|gif|webp|heic|mp3|m4a|wav|aac|opus|mov)$/i', // Timestamped files
-            '/^[A-Za-z]+.*\d+.*\.(jpg|jpeg|png|gif|webp|heic|mp3|m4a|wav|aac|opus|mov)$/i', // Named files with numbers
-            '/^image-\d+/i', // Pattern like "image-12_24_41.jpg"
-            '/^IMG_\d+/i',   // Pattern like "IMG_20250604_111609"
-            '/Voz\s+\d+/i',  // Pattern like "Voz 250226_122459"
-            '/C:\\\\fakepath\\\\/i', // Windows fake path
+            '/\.(jpg|jpeg|png|gif|webp|heic)$/i',
+            '/\.(mp3|m4a|wav|aac|opus|mov)$/i',
+            '/^\d+.*\.(jpg|jpeg|png|gif|webp|heic|mp3|m4a|wav|aac|opus|mov)$/i',
+            '/^[A-Za-z]+.*\d+.*\.(jpg|jpeg|png|gif|webp|heic|mp3|m4a|wav|aac|opus|mov)$/i',
+            '/^image-\d+/i',
+            '/^IMG_\d+/i',
+            '/Voz\s+\d+/i',
+            '/C:\\\\fakepath\\\\/i',
         ];
 
         foreach ($mediaPatterns as $pattern) {
@@ -343,10 +319,9 @@ final class NonAccessibleLocationAdapter
      */
     private function isCoordinateData(string $value): bool
     {
-        // Check for coordinate patterns like "-22.855602 -43.247054 0.9000000357627869 100"
         $coordinatePatterns = [
-            '/^-?\d+\.\d+\s+-?\d+\.\d+/', // Latitude longitude pattern
-            '/^-?\d+\.\d+\s+-?\d+\.\d+\s+[\d\.\-]+/', // With additional precision/altitude data
+            '/^-?\d+\.\d+\s+-?\d+\.\d+/',
+            '/^-?\d+\.\d+\s+-?\d+\.\d+\s+[\d\.\-]+/',
         ];
 
         foreach ($coordinatePatterns as $pattern) {
@@ -367,14 +342,12 @@ final class NonAccessibleLocationAdapter
             return null;
         }
 
-        // Apply basic cleaning first
         $cleaned = $this->cleanValue($name);
 
         if (null === $cleaned) {
             return null;
         }
 
-        // Remove commas and apply title case
         $cleaned = str_replace(',', '', $cleaned);
         $cleaned = Str::title($cleaned);
         $cleaned = mb_trim($cleaned);
@@ -384,7 +357,6 @@ final class NonAccessibleLocationAdapter
 
     /**
      * Validate if the perspective question has a value.
-     * Skip record processing if this field is empty.
      */
     private function isValidPerspectiveQuestion(array $data): bool
     {

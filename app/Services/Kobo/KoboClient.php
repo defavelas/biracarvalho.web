@@ -44,7 +44,7 @@ final class KoboClient
                 ->timeout(60)
                 ->get($url, $params);
 
-            if (!$response->successful()) {
+            if ( ! $response->successful()) {
                 $errorMessage = "Kobo API request failed with status {$response->status()}";
 
                 Log::error('Kobo API connection failed - non-200 status returned', [

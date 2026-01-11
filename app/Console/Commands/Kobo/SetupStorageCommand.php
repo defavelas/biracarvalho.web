@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands\Kobo;
 
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
@@ -31,7 +32,7 @@ final class SetupStorageCommand extends Command
         try {
             // Create public images directory if it doesn't exist
             $publicImagesPath = storage_path('app/public/images/locations');
-            
+
             if ( ! File::exists($publicImagesPath)) {
                 File::makeDirectory($publicImagesPath, 0755, true);
                 $this->info('Created public images directory: ' . $publicImagesPath);
@@ -41,7 +42,7 @@ final class SetupStorageCommand extends Command
 
             // Create storage link if it doesn't exist
             $linkPath = public_path('storage');
-            
+
             if ( ! File::exists($linkPath)) {
                 $this->call('storage:link');
                 $this->info('Storage symlink created');
@@ -54,13 +55,13 @@ final class SetupStorageCommand extends Command
             $this->newLine();
             $this->info('Images will be accessible at: ' . $testUrl);
             $this->comment('Example URL: ' . $testUrl . 'example-uuid.jpg');
-            
+
             $this->newLine();
             $this->info('Kobo storage setup completed successfully!');
-            
+
             return self::SUCCESS;
-            
-        } catch (\Exception $e) {
+
+        } catch (Exception $e) {
             $this->error('Setup failed: ' . $e->getMessage());
             return self::FAILURE;
         }

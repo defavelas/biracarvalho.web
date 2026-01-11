@@ -24,8 +24,6 @@ final class Dashboard extends Component
     public function reject(Location $location): void
     {
         $location->delete();
-
-        // Clear location caches when a location is deleted
         app(\App\Services\LocationService::class)->clearCache();
 
         session()->flash('message', __('Local rejeitado e excluído.'));
@@ -60,7 +58,7 @@ final class Dashboard extends Component
     {
         $location = Location::latest('updated_at')->first();
 
-        if (!$location) {
+        if ( ! $location) {
             return null;
         }
 

@@ -97,7 +97,6 @@ final class Location extends Model
         $result = $this->update(['published_at' => now()]);
 
         if ($result) {
-            // Clear location caches when a location is approved
             app(\App\Services\LocationService::class)->clearCache();
         }
 
@@ -111,7 +110,7 @@ final class Location extends Model
      */
     public function isPending(): bool
     {
-        return is_null($this->published_at);
+        return null === $this->published_at;
     }
 
     /**
@@ -121,6 +120,6 @@ final class Location extends Model
      */
     public function isApproved(): bool
     {
-        return !is_null($this->published_at);
+        return null !== $this->published_at;
     }
 }

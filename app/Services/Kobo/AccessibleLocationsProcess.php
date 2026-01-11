@@ -108,10 +108,10 @@ final class AccessibleLocationsProcess
         $transformedData = $this->adapter->transform($koboRecord);
 
         // Skip record if transformation returns null (invalid data)
-        if ($transformedData === null) {
+        if (null === $transformedData) {
             Log::info('Skipped record due to invalid data', [
                 'external_id' => $externalId,
-                'reason' => 'Failed validation in adapter transform'
+                'reason' => 'Failed validation in adapter transform',
             ]);
             return 'skipped';
         }
@@ -265,7 +265,7 @@ final class AccessibleLocationsProcess
                 'Authorization' => 'Bearer ' . config('kobo.api_token'),
             ])->timeout(30)->get($url);
 
-            if (!$response->successful()) {
+            if ( ! $response->successful()) {
                 $errorMessage = "Failed to download image - HTTP {$response->status()}";
                 Log::warning('Image download failed with non-200 status', [
                     'url' => $url,

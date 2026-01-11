@@ -11,7 +11,6 @@
     aria-labelledby="map-card-title"
     aria-describedby="map-card-description"
 >
-    <!-- Close Button -->
     <button
         type="button"
         onclick="closeMapCard()"
@@ -21,9 +20,7 @@
         @svg('heroicon-o-x-mark', 'w-4 h-4')
     </button>
 
-    <!-- Fixed Header -->
     <div class="flex-shrink-0">
-        <!-- Title and Accessibility Badge -->
         <div class="flex items-start justify-between space-x-3 mb-3">
             <div class="flex-1">
                 <h3 id="map-card-title" class="text-[13px] md:text-lg font-bold md:font-bold text-primary leading-tight">
@@ -40,7 +37,6 @@
             </span>
         </div>
 
-        <!-- Address -->
         <div class="flex items-start space-x-2 mb-3">
             <div class="w-3.5 h-3.5 md:w-5 md:h-5 text-primary flex-shrink-0 mt-0.5">
                 @svg('heroicon-o-map-pin', 'w-3.5 h-3.5 md:w-5 md:h-5')
@@ -50,7 +46,6 @@
             </p>
         </div>
 
-        <!-- Coordinates -->
         @if(isset($location['latitude']) && isset($location['longitude']))
             <div class="flex items-center space-x-2">
                 <div class="w-3.5 h-3.5 md:w-5 md:h-5 text-primary flex-shrink-0">
@@ -64,31 +59,25 @@
         @endif
     </div>
 
-    <!-- Scrollable Content -->
     <div class="flex-1 overflow-y-auto overflow-x-hidden p-4 min-h-0 scroll-smooth" style="scroll-behavior: smooth; overscroll-behavior: contain;">
-        <!-- Image Slideshow Section -->
         @if(isset($location['images']) && count($location['images']) > 0)
             <div class="mb-4 relative">
                 <x-image-slideshow :images="$location['images']" :alt="$location['name']" />
             </div>
         @else
-            <!-- Placeholder when no images -->
             <div class="mb-4 h-32 bg-black/25 rounded-lg flex items-center justify-center">
                 @svg('heroicon-o-photo', 'w-8 h-8 text-white/50')
                 <span class="ml-2 text-sm text-white/50">Sem imagens disponíveis</span>
             </div>
         @endif
 
-        <!-- Additional Content Area -->
         <div class="space-y-3">
-            <!-- Description or other content can go here -->
             @if(isset($location['description']))
                 <div class="text-[11px] md:text-sm text-white/70 leading-relaxed">
                     {{ $location['description'] }}
                 </div>
             @endif
 
-            <!-- Action Buttons -->
             <div class="flex space-x-2 pt-4 border-t border-white/10">
                 <button
                     type="button"

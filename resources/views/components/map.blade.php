@@ -1,7 +1,7 @@
 @props(['id' => 'map', 'class' => ''])
 
-<div 
-    id="{{ $id }}" 
+<div
+    id="{{ $id }}"
     class="w-full h-screen relative z-[1] {{ $class }}"
     {{ $attributes }}
     data-map-center-lat="-22.851860351512137"
@@ -9,9 +9,7 @@
     data-map-zoom="20"
     aria-label="Mapa interativo de acessibilidade da Maré"
     role="application"
->
-    <!-- Map will be initialized here by Leaflet -->
-</div>
+></div>
 
 @push('scripts')
 <script>

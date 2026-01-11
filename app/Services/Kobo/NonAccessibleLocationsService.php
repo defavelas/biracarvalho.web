@@ -23,7 +23,7 @@ final class NonAccessibleLocationsService
     {
         Log::info('Validating Kobo API connection for non-accessible locations');
 
-        if (!$this->koboClient->testConnection()) {
+        if ( ! $this->koboClient->testConnection()) {
             $errorMessage = 'Kobo API connection validation failed - cannot proceed with data operations';
 
             Log::error($errorMessage, [

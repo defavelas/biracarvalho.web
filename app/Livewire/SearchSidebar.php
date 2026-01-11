@@ -6,6 +6,7 @@ namespace App\Livewire;
 
 use App\Enum\Location\Type;
 use App\Services\LocationService;
+use Exception;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -123,8 +124,6 @@ final class SearchSidebar extends Component
     public function focusLocation($locationId): void
     {
         $this->selectedLocationId = (string) $locationId;
-
-        // Close results on mobile when focusing on a location
         $this->resultsOpen = false;
 
         $this->dispatch('focus-location', locationId: (string) $locationId);
@@ -155,29 +154,25 @@ final class SearchSidebar extends Component
 
             $activeCategories = array_keys(array_filter($this->typeFilters ?? []));
 
-            // Ensure we always pass an array
-            if (!is_array($activeCategories)) {
+            if ( ! is_array($activeCategories)) {
                 $activeCategories = [];
             }
 
             $locations = $locationService->searchLocations($this->search ?? '', $activeCategories);
 
             $this->results = $locationService->transformCollectionForMap($locations);
-
-            // Randomize the order of results
             shuffle($this->results);
 
             $this->totalResults = count($this->results);
 
             $this->dispatch('results-updated', results: $this->results);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             \Illuminate\Support\Facades\Log::error('Error loading results in SearchSidebar', [
                 'error' => $e->getMessage(),
                 'search' => $this->search ?? null,
                 'typeFilters' => $this->typeFilters ?? null,
             ]);
 
-            // Fallback to empty results
             $this->results = [];
             $this->totalResults = 0;
             $this->dispatch('results-updated', results: $this->results);

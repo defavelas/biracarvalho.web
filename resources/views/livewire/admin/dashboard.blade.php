@@ -10,9 +10,7 @@
         <p class="text-white/80">{{ __('Gerencie os registros pendentes de aprovação') }}</p>
     </header>
 
-    <!-- Metrics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <!-- Total Records Card -->
         <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6">
             <div class="flex items-center justify-between">
                 <div>
@@ -28,7 +26,6 @@
             </div>
         </div>
 
-        <!-- Total Pending Card -->
         <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6">
             <div class="flex items-center justify-between">
                 <div>
@@ -44,7 +41,6 @@
             </div>
         </div>
 
-        <!-- Total Published Card -->
         <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6">
             <div class="flex items-center justify-between">
                 <div>
