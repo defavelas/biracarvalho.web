@@ -37,4 +37,8 @@ return [
         ],
     ],
 
+    'accessibility' => [
+        'support_email' => env('A11Y_SUPPORT_MAIL', 'acessibilidade@biracarvalho.observatoriodefavelas.org.br'),
+    ],
+
 ];

@@ -10,11 +10,25 @@ final class App extends Component
 {
     public bool $sidebarCollapsed = false;
 
+    public bool $showAccessibilityModal = false;
+
     public function toggleSidebar(): void
     {
         $this->sidebarCollapsed = ! $this->sidebarCollapsed;
 
         $this->dispatch('sidebar-toggled', collapsed: $this->sidebarCollapsed);
+    }
+
+    public function openAccessibilityModal(): void
+    {
+        $this->sidebarCollapsed = true;
+        $this->dispatch('sidebar-toggled', collapsed: true);
+        $this->showAccessibilityModal = true;
+    }
+
+    public function closeAccessibilityModal(): void
+    {
+        $this->showAccessibilityModal = false;
     }
 
     public function render()
