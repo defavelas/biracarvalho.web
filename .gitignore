@@ -30,5 +30,8 @@ Thumbs.db
 # Claude Code
 .claude/
 
+# OpenCode
+.opencode/
+
 # Dynamic data files (fetched from API)
 storage/files/
