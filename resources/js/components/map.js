@@ -42,8 +42,14 @@ class MapComponent {
         L.control
             .zoom({
                 position: "bottomright",
+                zoomInTitle: "Aproximar mapa",
+                zoomOutTitle: "Afastar mapa",
+                zoomInText: "+",
+                zoomOutText: "−",
             })
             .addTo(this.map);
+
+        this.fixZoomButtonsAccessibility();
 
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -808,7 +814,6 @@ class MapComponent {
                                                  x-transition:leave-end="opacity-0 max-h-0 overflow-hidden"
                                                  id="faq-content-${index}"
                                                  class="accordion-transition"
-                                                 @click.away="openFaq = null"
                                              >
                                                  <div class="accordion-content p-2 bg-primary/5 rounded-md mt-1">
                                                       <p class="text-primary/80 leading-relaxed text-sm md:text-base">${info.value}</p>
@@ -1028,6 +1033,24 @@ class MapComponent {
             this.map.remove();
         }
     }
+
+    fixZoomButtonsAccessibility() {
+        setTimeout(() => {
+            const zoomControl = document.querySelector(".leaflet-control-zoom");
+            if (zoomControl) {
+                const zoomIn = zoomControl.querySelector(".leaflet-control-zoom-in");
+                const zoomOut = zoomControl.querySelector(".leaflet-control-zoom-out");
+                if (zoomIn) {
+                    zoomIn.setAttribute("aria-label", "Aproximar mapa");
+                    zoomIn.removeAttribute("aria-disabled");
+                }
+                if (zoomOut) {
+                    zoomOut.setAttribute("aria-label", "Afastar mapa");
+                    zoomOut.removeAttribute("aria-disabled");
+                }
+            }
+        }, 100);
+    }
 }
 
 window.closeMapCard = function () {
@@ -1040,11 +1063,22 @@ window.closeMapCard = function () {
 window.centerMapOnLocation = function (lat, lng) {
     const mapComponent = window.mapComponentInstance;
     if (mapComponent) {
+        mapComponent.closeMapCard();
         mapComponent.setView(lat, lng, 18);
     }
 };
 
 window.highlightLocationInSidebar = function (locationId) {
+    const sidebar = document.querySelector('aside[aria-label="Painel de pesquisa e filtros"]');
+    if (sidebar?.classList.contains("-translate-x-full")) {
+        Livewire.dispatch("toggle-sidebar");
+    }
+
+    const mapComponent = window.mapComponentInstance;
+    if (mapComponent) {
+        mapComponent.closeMapCard();
+    }
+
     document.dispatchEvent(
         new CustomEvent("highlight-sidebar-location", {
             detail: { locationId },
