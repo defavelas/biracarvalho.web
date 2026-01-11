@@ -51,8 +51,8 @@ final class ImportAllLocationsCommand extends Command
             ];
 
             // Determine which imports to run
-            $importAccessible = !$this->option('only-non-accessible');
-            $importNonAccessible = !$this->option('only-accessible');
+            $importAccessible = ! $this->option('only-non-accessible');
+            $importNonAccessible = ! $this->option('only-accessible');
 
             // Validate Kobo connections before proceeding
             $this->info('Validating Kobo API connections...');
@@ -121,7 +121,7 @@ final class ImportAllLocationsCommand extends Command
         AccessibleLocationsProcess $accessibleProcessor,
         NonAccessibleLocationsProcess $nonAccessibleProcessor,
         bool $importAccessible,
-        bool $importNonAccessible
+        bool $importNonAccessible,
     ): array {
         $accessibleStats = [];
         $nonAccessibleStats = [];

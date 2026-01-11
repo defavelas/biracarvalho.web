@@ -1,15 +1,11 @@
-<!-- Mobile: Floating search bar -->
 <div class="md:hidden">
     <h1 class="sr-only">Pesquisa de Locais</h1>
-    <!-- Mobile floating search container -->
     <div class="fixed top-2 left-2 right-2 z-[1001] transform transition-all duration-300 ease-in-out translate-y-0 opacity-100"
          aria-label="Barra de pesquisa móvel"
          aria-hidden="false">
 
-        <!-- Compact search bar -->
         <div class="bg-primary rounded-lg shadow-xl border-4 border-black/15 overflow-hidden">
             <div class="bg-no-repeat bg-top" style="background-image: url('{{ asset('assets/images/search-bg.jpg') }}');">
-                <!-- Logo and search in one row -->
                 <div class="flex items-center gap-4 mb-2 p-2 pb-0">
                     <img src="{{ asset('assets/images/logo.svg') }}" alt="Logo" class="w-16 h-auto flex-shrink-0">
                     <div class="flex-1 relative">
@@ -49,7 +45,6 @@
         </div>
     </div>
 
-    <!-- Mobile search results cards (45% screen height) -->
     @if((!empty($search) || array_sum($typeFilters) > 0) && $resultsOpen)
     <div class="fixed bottom-0 left-0 right-0 h-[45vh] bg-primary/95 backdrop-blur-sm z-[999] transform transition-all duration-300 ease-in-out translate-y-0"
          style="background-image: linear-gradient(to bottom, rgba(101, 48, 137, 0.95), rgba(101, 48, 137, 0.98));"
@@ -66,7 +61,6 @@
          x-trap.inert.noscroll="true"
          x-on:keydown.escape="$wire.closeResults()">
 
-        <!-- Results header -->
         <div class="p-2.5 bg-black/20">
             <div class="flex items-center justify-between">
                 <div>
@@ -100,7 +94,6 @@
             </div>
         </div>
 
-        <!-- Scrollable results container -->
         <div class="flex-1 overflow-y-auto soft-scrollbar" style="height: calc(50vh - 70px);"
              x-data="{ 
                currentIndex: -1,
@@ -192,7 +185,6 @@
     </div>
     @endif
 
-    <!-- Results indicator when closed -->
     @if((!empty($search) || array_sum($typeFilters) > 0) && !$resultsOpen && $totalResults > 0)
     <div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[998]" id="mobile-results-indicator">
         <button wire:click="openResults"

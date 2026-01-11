@@ -18,7 +18,7 @@ final class AccessibleLocationAdapter
     public function transform(array $koboData): ?array
     {
         // Validate perspective question - skip record if empty
-        if (!$this->isValidPerspectiveQuestion($koboData)) {
+        if ( ! $this->isValidPerspectiveQuestion($koboData)) {
             return null;
         }
 
@@ -289,7 +289,7 @@ final class AccessibleLocationAdapter
             $decodedParts = [];
 
             foreach ($parts as $part) {
-                if ('' !== trim($part)) {
+                if ('' !== mb_trim($part)) {
                     $decodedParts[] = $mappings[$part] ?? $this->fallbackDecode($part);
                 }
             }

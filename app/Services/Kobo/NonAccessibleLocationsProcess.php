@@ -256,7 +256,7 @@ final class NonAccessibleLocationsProcess
                 'Authorization' => 'Bearer ' . config('kobo.api_token'),
             ])->timeout(30)->get($url);
 
-            if (!$response->successful()) {
+            if ( ! $response->successful()) {
                 $errorMessage = "Failed to download image - HTTP {$response->status()}";
                 Log::warning('Image download failed with non-200 status', [
                     'url' => $url,

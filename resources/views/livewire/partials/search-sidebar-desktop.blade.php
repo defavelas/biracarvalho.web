@@ -12,7 +12,6 @@
     aria-hidden="{{ $collapsed ? 'true' : 'false' }}">
 
     <div class="flex flex-col h-full">
-        <!-- Desktop header -->
         <header class="p-3 md:p-2 safe-area-top">
             <h1 class="sr-only">Pesquisa de Locais</h1>
             <div class="mb-4">
@@ -38,7 +37,6 @@
             </div>
         </header>
 
-        <!-- Desktop filters section -->
         <section class="px-3 py-2 md:p-2.5 bg-no-repeat bg-top bg-black/20 relative">
             <fieldset class="flex items-center space-y-3 md:space-y-2 mb-3 md:mb-2">
                 <legend class="flex items-center justify-between text-base font-semibold text-white mb-3">
@@ -77,7 +75,6 @@
             </div>
         </section>
 
-        <!-- Desktop results section -->
         <main class="flex-1 overflow-y-auto soft-scrollbar p-2 md:p-2 safe-area-bottom"
               x-data="{
                 currentIndex: -1,

@@ -17,7 +17,6 @@
         </div>
     </div>
 
-    <!-- Filters Section -->
     <div class="bg-black/15 p-4 mb-4 rounded-md">
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
             <x-input
@@ -62,7 +61,6 @@
         </div>
     </div>
 
-    <!-- Table Section -->
     <div class="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-white/10">
@@ -199,15 +197,12 @@
         </div>
     </div>
 
-    <!-- Pagination -->
     <div class="mt-8 flex justify-center">
         <div class="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
             {{ $locations->links() }}
         </div>
     </div>
 
-
-    <!-- Delete Confirmation Modal -->
     @if($showDeleteModal && $selectedLocation)
         <div class="fixed inset-0 z-50 overflow-y-auto" x-data>
             <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
