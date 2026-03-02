@@ -19,7 +19,9 @@ A plataforma integra-se com o [KoboToolbox](https://www.kobotoolbox.org/) para c
 
 ## Mapeamento de Acessibilidade
 
-*Seção em construção - será preenchida futuramente com detalhes sobre a metodologia de mapeamento.*
+O Programa Bira Carvalho – Território, Acessibilidade e Tecnologia na Maré desenvolve uma iniciativa de mapeamento colaborativo voltada ao fortalecimento da acessibilidade e da mobilidade urbana no território da Maré. Nas etapas de conceitualização e planejamento, são realizados encontros de mobilização, acolhimento e qualificação das equipes envolvidas — pesquisadores, consultoria em acessibilidade, desenvolvimento tecnológico, comunicação e produção audiovisual — garantindo alinhamento metodológico, integração entre as frentes e clareza quanto aos objetivos e entregas do projeto. A construção dos instrumentos de coleta ocorre de forma colaborativa, priorizando critérios de acessibilidade e aplicabilidade em campo. O mapeamento participativo é conduzido com jovens pesquisadores do território, promovendo escuta ativa, valorização do conhecimento local e mobilização de pessoas com deficiência em articulação com parceiros comunitários.
+
+Na fase de desenvolvimento, o programa consolida a sistematização dos dados coletados por meio da integração do KoboToolbox à plataforma digital georreferenciada, já lançada e em funcionamento. A ferramenta disponibiliza informações sobre condições de acessibilidade e mobilidade urbana, ampliando a visibilidade das demandas das pessoas com deficiência na Maré. O projeto também realiza a produção de conteúdos digitais e audiovisuais, ações de comunicação e estratégias de incidência voltadas à formulação e ao aprimoramento de políticas públicas inclusivas em favelas e periferias urbanas. Dessa forma, articula tecnologia social, participação comunitária e inovação digital para promover inclusão e justiça territorial.
 
 ## Estrutura do Repositório
 
