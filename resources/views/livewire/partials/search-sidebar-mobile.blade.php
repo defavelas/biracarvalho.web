@@ -27,10 +27,26 @@
                     Digite para pesquisar por nome de locais. Pressione Escape para sair do campo de pesquisa.
                 </div>
 
-                <fieldset class="flex flex-col p-2 bg-black/20" wire:key="filter-toggles">
-                    <legend class="text-sm font-semibold text-white pb-1">
-                        Filtrar por
+                @php($activeFilterCount = array_sum($typeFilters))
+
+                <fieldset class="flex flex-col gap-2 p-2 bg-black/20" wire:key="filter-toggles" aria-labelledby="mobile-filters-legend">
+                    <legend id="mobile-filters-legend" class="text-sm font-semibold text-white pb-1">
+                        Filtrar por acessibilidade
                     </legend>
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold {{ $activeFilterCount > 0 ? 'bg-secondary text-primary shadow-sm' : 'bg-white/10 text-white/80' }}">
+                            {{ $activeFilterCount > 0 ? $activeFilterCount . ' ' . ($activeFilterCount === 1 ? 'filtro ativo' : 'filtros ativos') : 'Nenhum filtro ativo' }}
+                        </span>
+
+                        @if ($activeFilterCount > 0 || !empty($search))
+                            <button wire:click="clearFilters"
+                                class="inline-flex items-center justify-center rounded-full bg-black/30 p-2 text-white transition-all duration-200 hover:bg-black/50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+                                aria-label="Limpar todos os filtros">
+                                @svg('heroicon-o-trash', 'w-4 h-4')
+                            </button>
+                        @endif
+                    </div>
+
                     <div class="flex items-center gap-x-4">
                         <x-toggle-button wire:model.live="typeFilters.accessible" :value="$typeFilters['accessible']"
                             label="Acessível" trackClass="bg-black/20 border-white" thumbClass="bg-green-500"
@@ -47,6 +63,7 @@
 
     @if((!empty($search) || array_sum($typeFilters) > 0) && $resultsOpen)
     <div class="fixed bottom-0 left-0 right-0 h-[45vh] bg-primary/95 backdrop-blur-sm z-[999] transform transition-all duration-300 ease-in-out translate-y-0"
+         id="mobile-results-panel"
          style="background-image: linear-gradient(to bottom, rgba(101, 48, 137, 0.95), rgba(101, 48, 137, 0.98));"
          aria-modal="true"
          role="dialog"
@@ -78,15 +95,10 @@
                 </span>
                 </div>
                 <div class="flex items-center gap-2">
-                    @if (array_sum($typeFilters) > 0 || !empty($search))
-                        <button wire:click="clearFilters"
-                            class="flex items-center justify-center w-8 h-8 bg-black/30 hover:bg-black/50 rounded-full text-white/70 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-1"
-                            aria-label="Limpar todos os filtros">
-                            @svg('heroicon-o-trash', 'w-4 h-4')
-                        </button>
-                    @endif
                     <button wire:click="closeResults"
-                        class="flex items-center justify-center w-8 h-8 bg-black/30 hover:bg-black/50 rounded-full text-white/70 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-1"
+                        class="flex items-center justify-center w-8 h-8 bg-black/30 hover:bg-black/50 rounded-full text-white/70 hover:text-white transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+                        aria-controls="mobile-results-panel"
+                        aria-expanded="true"
                         aria-label="Fechar resultados para melhor navegação no mapa">
                         @svg('heroicon-o-arrow-down', 'w-4 h-4')
                     </button>
@@ -114,8 +126,9 @@
             <div class="p-2 space-y-2">
                 @forelse($results as $result)
                     <article
-                        class="text-white border-b border-black/30 p-2 {{ $selectedLocationId == $result['id'] ? 'bg-white rounded-lg border-0 !text-primary' : '' }} last:border-0 group cursor-pointer focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-primary rounded-lg transition-all duration-200"
+                        class="text-white border-b border-black/30 p-2 {{ $selectedLocationId == $result['id'] ? 'bg-white rounded-lg border-0 !text-primary ring-2 ring-secondary shadow-sm' : '' }} last:border-0 group cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary rounded-lg transition-all duration-200"
                         data-location-id="{{ $result['id'] }}"
+                        data-sidebar-result="true"
                         role="button"
                         tabindex="0"
                         aria-label="Visualizar {{ $result['name'] }} no mapa. Tipo: {{ $result['typeLabel'] }}. {{ isset($result['description']) ? \Str::limit($result['description'], 60) : 'Clique para mais detalhes.' }}"
@@ -188,7 +201,9 @@
     @if((!empty($search) || array_sum($typeFilters) > 0) && !$resultsOpen && $totalResults > 0)
     <div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-[998]" id="mobile-results-indicator">
         <button wire:click="openResults"
-            class="flex items-center gap-2 bg-secondary text-primary px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            class="flex items-center gap-2 bg-secondary text-primary px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 text-sm font-semibold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary focus-visible:ring-offset-2"
+            aria-controls="mobile-results-panel"
+            aria-expanded="false"
             aria-label="Mostrar {{ $totalResults }} {{ $totalResults === 1 ? 'resultado' : 'resultados' }}">
             @svg('heroicon-o-arrow-up', 'w-4 h-4')
             <span>{{ $totalResults }} {{ $totalResults === 1 ? 'resultado' : 'resultados' }}</span>

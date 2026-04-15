@@ -1,5 +1,6 @@
 <!-- Desktop: Full sidebar -->
 <aside
+    id="desktop-search-sidebar"
     class="hidden md:block absolute
            md:top-2 md:left-2 md:bottom-2 md:right-auto md:w-96 md:h-auto
            bg-primary bg-no-repeat bg-top border-0 md:border-4 border-black/15 z-[100] shadow-xl
@@ -38,20 +39,28 @@
         </header>
 
         <section class="px-3 py-2 md:p-2.5 bg-no-repeat bg-top bg-black/20 relative">
-            <fieldset class="flex items-center space-y-3 md:space-y-2 mb-3 md:mb-2">
-                <legend class="flex items-center justify-between text-base font-semibold text-white mb-3">
-                    Filtrar por
+            @php($activeFilterCount = array_sum($typeFilters))
+
+            <fieldset class="space-y-3 md:space-y-2 mb-3 md:mb-2" aria-labelledby="desktop-filters-legend">
+                <legend id="desktop-filters-legend" class="text-base font-semibold text-white">
+                    Filtrar por acessibilidade
                 </legend>
 
-                @if (array_sum($typeFilters) > 0 || !empty($search))
-                    <button wire:click="clearFilters"
-                        class="absolute top-2 right-2 w-8 h-8 md:w-auto md:h-auto text-sm text-primary font-semibold hover:underline cursor-pointer focus:outline-none focus:underline focus:ring-2 focus:ring-secondary focus:ring-offset-1 rounded"
-                        aria-label="Limpar todos os filtros">
-                        @svg('heroicon-o-trash', 'w-5 h-5 text-white/80')
-                    </button>
-                @endif
+                <div class="flex items-center justify-between gap-3">
+                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold {{ $activeFilterCount > 0 ? 'bg-secondary text-primary shadow-sm' : 'bg-white/10 text-white/80' }}">
+                        {{ $activeFilterCount > 0 ? $activeFilterCount . ' ' . ($activeFilterCount === 1 ? 'filtro ativo' : 'filtros ativos') : 'Nenhum filtro ativo' }}
+                    </span>
 
-                <div class="flex items-center gap-x-4" wire:key="filter-toggles">
+                    @if ($activeFilterCount > 0 || !empty($search))
+                        <button wire:click="clearFilters"
+                            class="inline-flex items-center justify-center rounded-full bg-white/10 p-2 text-white transition-colors duration-200 hover:bg-white/20 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+                            aria-label="Limpar todos os filtros">
+                            @svg('heroicon-o-trash', 'w-4 h-4')
+                        </button>
+                    @endif
+                </div>
+
+                <div class="flex flex-wrap items-center gap-4" wire:key="filter-toggles">
                     <x-toggle-button wire:model.live="typeFilters.accessible" :value="$typeFilters['accessible']"
                         label="Acessível" trackClass="bg-black/20 border-white" thumbClass="bg-green-500"
                         labelClass="text-white text-sm" />
@@ -96,8 +105,9 @@
             <div class="space-y-2" wire:key="results-{{ md5(json_encode($typeFilters) . $search) }}">
                 @forelse($results as $result)
                     <article
-                        class="text-white border-b border-black/30 p-2 pb-4 {{ $selectedLocationId == $result['id'] ? 'bg-white rounded-lg border-0 !text-primary' : '' }} last:border-0 group cursor-pointer focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-primary rounded-lg transition-all duration-200"
+                        class="text-white border-b border-black/30 p-2 pb-4 {{ $selectedLocationId == $result['id'] ? 'bg-white rounded-lg border-0 !text-primary ring-2 ring-secondary shadow-sm' : '' }} last:border-0 group cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary rounded-lg transition-all duration-200"
                         data-location-id="{{ $result['id'] }}" role="button" tabindex="0"
+                        data-sidebar-result="true"
                         aria-label="Visualizar {{ $result['name'] }} no mapa. Tipo: {{ $result['typeLabel'] }}. {{ isset($result['description']) ? \Str::limit($result['description'], 60) : 'Clique para mais detalhes.' }}"
                         aria-describedby="result-{{ $result['id'] }}-desc"
                         wire:click="focusLocation('{{ $result['id'] }}')"

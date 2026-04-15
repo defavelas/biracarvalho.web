@@ -19,17 +19,17 @@
     <div class="relative">
         <input type="checkbox" id="{{ $id }}" name="{{ $name }}" value="1"
             {{ $isChecked ? 'checked' : '' }} {{ $disabled ? 'disabled' : '' }}
-            {{ $attributes->whereStartsWith('wire:') }} class="sr-only" role="switch"
+            {{ $attributes->whereStartsWith('wire:') }} class="peer sr-only" role="switch"
             aria-checked="{{ $isChecked ? 'true' : 'false' }}"
             aria-describedby="{{ $id }}-description">
         <div
-            class="w-8 h-5 md:w-[29px] md:h-4 rounded-full border-1 transition-colors duration-200 ease-in-out {{ $trackClass }} {{ $isChecked ? 'bg-opacity-100 ring-2 ring-secondary/50 ring-offset-1' : 'bg-opacity-50' }} relative flex items-center focus-within:ring-2 focus-within:ring-secondary focus-within:ring-offset-2">
+            class="w-10 h-6 md:w-[34px] md:h-[18px] rounded-full border transition-all duration-200 ease-in-out {{ $trackClass }} {{ $isChecked ? 'bg-secondary border-secondary shadow-[0_0_0_3px_rgba(206,216,66,0.25)]' : 'bg-black/10 border-white/70' }} relative flex items-center peer-focus-visible:ring-4 peer-focus-visible:ring-secondary peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-primary">
             <div
-                class="absolute left-0.5 w-3.5 h-3.5 md:w-2.5 md:h-2.5 border-1 border-transparent rounded-full transition-transform duration-200 ease-in-out {{ $thumbClass }} {{ $isChecked ? 'transform translate-x-3 md:translate-x-3' : 'transform translate-x-0' }} shadow-sm">
+                class="absolute left-0.5 w-4.5 h-4.5 md:w-3.5 md:h-3.5 border border-transparent rounded-full transition-transform duration-200 ease-in-out {{ $thumbClass }} {{ $isChecked ? 'translate-x-5 md:translate-x-3.5 shadow-md' : 'translate-x-0 shadow-sm' }}">
             </div>
         </div>
     </div>
-    <span class="{{ $labelClass }}">{{ $label }}</span>
+    <span class="{{ $labelClass }} {{ $isChecked ? 'font-semibold text-secondary' : 'text-white/90' }}">{{ $label }}</span>
     <span id="{{ $id }}-description" class="sr-only">
         Filtro {{ $isChecked ? 'ativado' : 'desativado' }}. Pressione espaço ou enter para alternar.
     </span>
