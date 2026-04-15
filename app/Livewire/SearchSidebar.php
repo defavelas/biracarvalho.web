@@ -41,7 +41,16 @@ final class SearchSidebar extends Component
     #[On('highlight-sidebar-location')]
     public function highlightLocation($locationId): void
     {
-        $this->selectedLocationId = $locationId;
+        $this->revealLocationInSidebar($locationId);
+    }
+
+    #[On('reveal-location-in-sidebar')]
+    public function revealLocationInSidebar($locationId): void
+    {
+        $this->selectedLocationId = (string) $locationId;
+        $this->resultsOpen = true;
+
+        $this->dispatch('sidebar-location-revealed', locationId: (string) $locationId);
     }
 
     /**

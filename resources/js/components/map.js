@@ -9,8 +9,13 @@ class MapComponent {
         this.markers = new Map();
         this.markerLayer = null;
         this.currentMapCard = null;
+        this.currentMapDialog = null;
         this.currentCloseButton = null;
         this.selectedLocationId = null;
+        this.zoomControl = null;
+        this.zoomObserver = null;
+        this.focusTrapHandler = null;
+        this.previouslyFocusedElement = null;
 
         this.options = {
             center: [-22.8666, -43.2338],
@@ -39,7 +44,7 @@ class MapComponent {
             attributionControl: true,
         });
 
-        L.control
+        this.zoomControl = L.control
             .zoom({
                 position: "bottomright",
                 zoomInTitle: "Aproximar mapa",
@@ -49,7 +54,8 @@ class MapComponent {
             })
             .addTo(this.map);
 
-        this.fixZoomButtonsAccessibility();
+        this.syncZoomButtonsAccessibility();
+        this.observeZoomButtons();
 
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -75,9 +81,9 @@ class MapComponent {
         // Load initial data from API
         this.loadMapData();
 
-        this.map.on("zoomend", () => {});
-
-        this.map.on("moveend", () => {});
+        this.map.on("zoomend", () => {
+            this.syncZoomButtonsAccessibility();
+        });
 
         this.map.on("click", (e) => {
             if (!e.originalEvent.defaultPrevented) {
@@ -132,9 +138,6 @@ class MapComponent {
                     this.map.zoomOut(zoomStep);
                 }
                 break;
-            case "Tab":
-                this.cycleMarkers(e.shiftKey);
-                break;
             case "Enter":
             case "Space":
                 if (this.selectedLocationId) {
@@ -182,18 +185,8 @@ class MapComponent {
     }
 
     announceLocation(location) {
-        // Create or update live region for screen reader announcements
-        let liveRegion = document.getElementById("map-live-region");
-        if (!liveRegion) {
-            liveRegion = document.createElement("div");
-            liveRegion.id = "map-live-region";
-            liveRegion.setAttribute("aria-live", "polite");
-            liveRegion.setAttribute("aria-atomic", "true");
-            liveRegion.className = "sr-only";
-            document.body.appendChild(liveRegion);
-        }
-
-        liveRegion.textContent = `Focalizando ${location.name}. ${location.typeLabel}. Pressione Enter para abrir detalhes.`;
+        this.getLiveRegion().textContent =
+            `Focalizando ${location.name}. ${location.typeLabel}. Pressione Enter para abrir detalhes.`;
     }
 
     async loadMapData() {
@@ -288,65 +281,27 @@ class MapComponent {
     showMapCard(location) {
         this.closeMapCard();
 
-        const mapContainer = document.getElementById(this.containerId);
-        if (!mapContainer) {
-            console.error("Map container not found:", this.containerId);
+        const portal = this.getMapCardPortal();
+        if (!portal) {
+            console.error("Map card portal not found");
             return;
         }
 
         const cardHtml = this.createMapCardHTML(location);
-        const isMobile = window.innerWidth < 768;
+        this.previouslyFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
-        mapContainer.insertAdjacentHTML("afterend", cardHtml);
-
-        // Only add external close buttons for desktop
-        if (!isMobile) {
-            const closeButtonHtml = this.createCloseButtonHTML(location);
-            mapContainer.insertAdjacentHTML("afterend", closeButtonHtml);
-            this.currentCloseButton = document.getElementById("map-card-buttons");
-        }
-
+        portal.innerHTML = cardHtml;
         this.currentMapCard = document.getElementById("map-card-container");
+        this.currentMapDialog = document.getElementById("map-card");
+        this.currentCloseButton = document.getElementById("map-card-buttons");
 
         if (this.currentMapCard) {
-            // Use requestAnimationFrame to ensure DOM is fully updated before positioning
+            this.initializeMapCardInteractions(location);
             requestAnimationFrame(() => {
                 this.positionMapCard(location);
+                this.activateFocusTrap();
+                this.focusMapCard();
             });
-        } else {
-            console.error("Map card container not found after insertion");
-        }
-
-        // Initialize Alpine for the map card (Livewire provides Alpine)
-        if (this.currentMapCard) {
-            // Wait for Livewire's Alpine to be available and force initialization
-            const initAlpine = () => {
-                if (typeof Alpine !== "undefined" && Alpine.initTree) {
-                    try {
-                        Alpine.initTree(this.currentMapCard);
-                        console.log("Alpine initialized for map card");
-
-                        // Debug: check if elements are properly initialized
-                        const imageSlideshow = this.currentMapCard.querySelector('[x-data*="currentSlide"]');
-                        const faqSection = this.currentMapCard.querySelector('[x-data*="openFaq"]');
-
-                        if (imageSlideshow) {
-                            console.log("Image slideshow found and should be working");
-                        }
-                        if (faqSection) {
-                            console.log("FAQ section found and should be working");
-                        }
-                    } catch (error) {
-                        console.error("Alpine initialization error:", error);
-                    }
-                } else {
-                    console.warn("Alpine not available yet, retrying...");
-                    setTimeout(initAlpine, 100);
-                }
-            };
-
-            // Give Livewire time to load Alpine
-            requestAnimationFrame(initAlpine);
         }
     }
 
@@ -535,16 +490,6 @@ class MapComponent {
             this.currentMapCard.style.display = "block";
             this.currentMapCard.style.zIndex = "150"; // Above sidebar (z-[100])
 
-            console.log(`Card positioned ${placement}:`, {
-                finalX,
-                finalY,
-                cardHeight,
-                placement,
-                sidebarOpen: sidebarState.isOpen,
-                availableWidth: availableArea.width,
-                sidebarOffset: sidebarState.isOpen ? availableArea.left : 0,
-            });
-
             // Position close button relative to the card
             this.positionCloseButton(finalX, finalY, cardWidth, cardHeight);
         });
@@ -590,16 +535,18 @@ class MapComponent {
         this.currentMapCard.style.display = "block";
         this.currentMapCard.style.zIndex = "150"; // Above sidebar
 
-        console.log("Fallback positioning (sidebar-aware):", {
-            cardLeft,
-            cardTop,
-            sidebarOpen: sidebarState.isOpen,
-            availableWidth: availableArea.width,
-        });
-
         if (this.currentCloseButton) {
             this.positionCloseButton(cardLeft, cardTop, cardWidth, cardHeight);
         }
+    }
+
+    escapeHtml(value) {
+        return String(value ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
     }
 
     createMapCardHTML(location) {
@@ -607,29 +554,47 @@ class MapComponent {
         const hasImages = images.length > 0;
         const infos = location.infos || [];
         const hasInfos = infos.length > 0;
+        const isMobile = window.innerWidth < 768;
+        const maxImages = Math.min(images.length, 5);
+        const safeName = this.escapeHtml(location.name || "Local sem nome");
+        const safeDescription = this.escapeHtml(location.description || "Sem descrição disponível");
+        const safeTypeLabel = this.escapeHtml(location.typeLabel || "Tipo não informado");
+        const safeAuthors = this.escapeHtml(location.authors ? `Contribuição ${location.authors}` : "Contribuição anônima");
+        const locationId = String(location.id);
 
-        let imagesHtml = "";
-        if (hasImages) {
-            const maxImages = Math.min(images.length, 5);
-            imagesHtml = `
-                <div class="relative">
-                    <div class="relative h-56 md:h-64 bg-black/25 rounded-lg overflow-hidden group">
+        let formattedDate = "";
+        if (location.createdAt) {
+            try {
+                const date = new Date(location.createdAt);
+                formattedDate = this.escapeHtml(
+                    isNaN(date.getTime()) ? location.createdAt : date.toLocaleDateString("pt-BR"),
+                );
+            } catch {
+                formattedDate = this.escapeHtml(location.createdAt);
+            }
+        }
+
+        const imagesHtml = hasImages
+            ? `
+                <div class="relative" data-map-slideshow data-total-slides="${maxImages}">
+                    <div class="relative h-56 md:h-64 overflow-hidden rounded-lg bg-black/25">
                         ${images
                             .slice(0, maxImages)
                             .map(
                                 (image, index) => `
-                            <div
-                                class="absolute inset-0 transition-opacity duration-150"
-                                x-show="currentSlide === ${index}"
-                            >
-                                <img
-                                    src="${image.url}"
-                                    alt="${location.name} - Imagem ${index + 1} de ${maxImages}"
-                                    class="w-full h-full object-cover"
-                                    loading="lazy"
+                                <div
+                                    class="absolute inset-0 transition-opacity duration-150 ${index === 0 ? "" : "hidden"}"
+                                    data-map-slide="${index}"
+                                    aria-hidden="${index === 0 ? "false" : "true"}"
                                 >
-                            </div>
-                        `,
+                                    <img
+                                        src="${image.url}"
+                                        alt="${this.escapeHtml(image.alt || `${safeName} - Imagem ${index + 1} de ${maxImages}`)}"
+                                        class="h-full w-full object-cover"
+                                        loading="lazy"
+                                    >
+                                </div>
+                            `,
                             )
                             .join("")}
 
@@ -638,36 +603,36 @@ class MapComponent {
                                 ? `
                             <button
                                 type="button"
-                                @click="currentSlide = currentSlide === 0 ? totalSlides - 1 : currentSlide - 1"
-                                class="absolute left-2 top-1/2 transform -translate-y-1/2 w-10 h-10 md:w-8 md:h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
+                                data-map-slide-prev
+                                class="absolute left-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white transition-colors duration-200 hover:bg-black/75 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-black/40"
                                 aria-label="Imagem anterior"
                             >
-                                <svg class="w-5 h-5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                                 </svg>
                             </button>
                             <button
                                 type="button"
-                                @click="currentSlide = currentSlide === totalSlides - 1 ? 0 : currentSlide + 1"
-                                class="absolute right-2 top-1/2 transform -translate-y-1/2 w-10 h-10 md:w-8 md:h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
+                                data-map-slide-next
+                                class="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white transition-colors duration-200 hover:bg-black/75 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-black/40"
                                 aria-label="Próxima imagem"
                             >
-                                <svg class="w-5 h-5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                 </svg>
                             </button>
-                            <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
+                            <div class="absolute bottom-2 left-1/2 flex -translate-x-1/2 items-center gap-2">
                                 ${Array.from(
                                     { length: maxImages },
-                                    (_, i) => `
-                                    <button
-                                        type="button"
-                                        @click="currentSlide = ${i}"
-                                        class="w-3 h-3 md:w-2 md:h-2 rounded-full transition-all duration-200 cursor-pointer"
-                                        :class="currentSlide === ${i} ? 'bg-primary' : 'bg-white/50 hover:bg-white/75'"
-                                        aria-label="Ir para imagem ${i + 1}"
-                                    ></button>
-                                `,
+                                    (_, index) => `
+                                        <button
+                                            type="button"
+                                            data-map-slide-dot="${index}"
+                                            class="h-3 w-3 rounded-full transition-colors duration-200 ${index === 0 ? "bg-primary" : "bg-white/60 hover:bg-white"}"
+                                            aria-label="Ir para imagem ${index + 1} de ${maxImages}"
+                                            aria-pressed="${index === 0 ? "true" : "false"}"
+                                        ></button>
+                                    `,
                                 ).join("")}
                             </div>
                         `
@@ -675,301 +640,455 @@ class MapComponent {
                         }
                     </div>
                 </div>
-            `;
-        }
+            `
+            : "";
 
-        // Detect if mobile
-        const isMobile = window.innerWidth < 768;
+        const accordionHtml = hasInfos
+            ? infos
+                  .map((info, index) => {
+                      const buttonId = `faq-button-${locationId}-${index}`;
+                      const panelId = `faq-panel-${locationId}-${index}`;
 
-        return `
-            <div id="map-card-container">
-                <div
-                    id="map-card"
-                    class="w-[460px] max-w-[460px] bg-white rounded-lg shadow-xl pb-2 border-4 border-secondary flex flex-col max-h-[80vh] min-h-[300px] overflow-y-auto overflow-x-hidden relative"
-                    role="dialog"
-                    aria-labelledby="map-card-title"
-                    aria-describedby="map-card-description"
-                     x-data="{ currentSlide: 0, totalSlides: ${hasImages ? Math.min(images.length, 5) : 0}, openFaq: null, scrollToContent(accordionId) { const element = document.getElementById(accordionId); if (element) { element.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); const cardContainer = document.getElementById('map-card'); if (cardContainer) { cardContainer.scrollTop = element.offsetTop - 10; } } } }"
-                >
-                    <!-- Close Button (Full-rounded, external positioning) -->
+                      return `
+                        <div class="border-b border-primary/10 last:border-b-0">
+                            <button
+                                type="button"
+                                id="${buttonId}"
+                                data-accordion-button
+                                aria-expanded="false"
+                                aria-controls="${panelId}"
+                                class="map-card-accordion-button flex w-full items-center justify-between gap-4 rounded-lg py-2 text-left transition-colors duration-200 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-secondary focus-visible:ring-offset-2"
+                            >
+                                <span class="font-semibold text-primary text-sm md:text-base">${this.escapeHtml(info.title)}</span>
+                                <svg
+                                    data-accordion-icon
+                                    class="h-4 w-4 shrink-0 text-primary/70 transition-transform duration-200"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    aria-hidden="true"
+                                >
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div
+                                id="${panelId}"
+                                data-accordion-panel
+                                class="accordion-transition hidden"
+                                aria-hidden="true"
+                                role="region"
+                                aria-labelledby="${buttonId}"
+                            >
+                                <div class="accordion-content mt-1 rounded-md bg-primary/5 p-2">
+                                    <p class="text-sm leading-relaxed text-primary/80 md:text-base">${this.escapeHtml(info.value)}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                  })
+                  .join("")
+            : "";
+
+        const desktopActions = !isMobile
+            ? `
+                <div id="map-card-buttons" class="flex flex-col gap-2">
                     <button
                         type="button"
-                        onclick="closeMapCard()"
-                        class="button-close absolute right-0 top-0 md:hidden w-12 h-12 bg-secondary shadow-lg border-4 border-white rounded-full cursor-pointer flex items-center justify-center transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5 z-50"
+                        data-map-card-action="close"
+                        class="flex h-12 w-12 items-center justify-center rounded-full bg-secondary text-primary shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary focus-visible:ring-offset-2"
                         aria-label="Fechar detalhes do local"
                     >
-                        <svg class="w-6 h-6 text-primary transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
+                    <button
+                        type="button"
+                        data-map-card-action="center"
+                        data-location-lat="${location.latitude}"
+                        data-location-lng="${location.longitude}"
+                        class="flex h-12 w-12 items-center justify-center rounded-full bg-secondary text-primary shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary focus-visible:ring-offset-2"
+                        aria-label="Centralizar no mapa"
+                    >
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                    </button>
+                    <button
+                        type="button"
+                        data-map-card-action="sidebar"
+                        data-location-id="${locationId}"
+                        class="flex h-12 w-12 items-center justify-center rounded-full bg-secondary text-primary shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary focus-visible:ring-offset-2"
+                        aria-label="Ver na lista"
+                    >
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            `
+            : "";
+
+        return `
+            <div id="map-card-container" class="pointer-events-auto">
+                ${desktopActions}
+                <div
+                    id="map-card"
+                    class="relative flex max-h-[80vh] min-h-[300px] w-[460px] max-w-[460px] flex-col overflow-y-auto overflow-x-hidden rounded-lg border-4 border-secondary bg-white pb-2 shadow-xl"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="map-card-title"
+                    aria-describedby="map-card-description"
+                    tabindex="-1"
+                >
+                    <button
+                        type="button"
+                        data-map-card-action="close"
+                        class="button-close absolute right-0 top-0 z-50 flex h-12 w-12 items-center justify-center rounded-full border-4 border-white bg-secondary shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary focus-visible:ring-offset-2 md:hidden"
+                        aria-label="Fechar detalhes do local"
+                    >
+                        <svg class="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+
                     ${
                         hasImages
                             ? `
-                    <div class="p-2 pb-0 mobile-compact-spacing relative">
-                        <span class="text-left inline-block px-4 py-0.5 rounded-full shadow absolute top-4 left-4 z-50 text-white" style="background-color: ${location.typeColor}">
-                            ${location.typeLabel}
-                        </span>
-                        ${imagesHtml}
-                    </div>
+                        <div class="relative p-2 pb-0 mobile-compact-spacing">
+                            <span class="absolute left-4 top-4 z-50 inline-block rounded-full px-4 py-0.5 text-left text-white shadow" style="background-color: ${location.typeColor}">
+                                ${safeTypeLabel}
+                            </span>
+                            ${imagesHtml}
+                        </div>
                     `
                             : ""
                     }
-                    <!-- Fixed Header -->
-                    <div class="pt-2.5 px-2 flex-shrink-0">
+
+                    <div class="flex-shrink-0 px-2 pt-2.5">
                         ${
                             !hasImages
                                 ? `
-                        <span class="inline-block px-3 py-1 rounded-full shadow  text-white mb-3" style="background-color: ${location.typeColor}">
-                            ${location.typeLabel}
-                        </span>
+                            <span class="mb-3 inline-block rounded-full px-3 py-1 text-white shadow" style="background-color: ${location.typeColor}">
+                                ${safeTypeLabel}
+                            </span>
                         `
                                 : ""
                         }
-                        <div class="flex items-center justify-between">
-                            <h3 id="map-card-title" class="text-lg font-semibold text-primary leading-tight mb-1">
-                                ${location.name}
-                            </h3>
 
-                        </div>
-                        <p class="text-base text-primary/80 mb-2">
-                            ${location.description || "Sem descrição disponível"}
+                        <h3 id="map-card-title" class="mb-1 text-lg font-semibold leading-tight text-primary">
+                            ${safeName}
+                        </h3>
+                        <p id="map-card-description" class="mb-2 text-base text-primary/80">
+                            ${safeDescription}
                         </p>
-                        <div class="text-sm text-primary/80 leading-tight mb-4 flex justify-between items-center">
-                            <span class="text-left">
-                                ${location.authors ? `Contribuição ${location.authors}` : "Contribuição anônima"}
-                            </span>
-                            <span class="text-right">
-                                ${
-                                    location.createdAt
-                                        ? (() => {
-                                              try {
-                                                  const date = new Date(location.createdAt);
-                                                  return isNaN(date.getTime())
-                                                      ? location.createdAt
-                                                      : date.toLocaleDateString("pt-BR");
-                                              } catch {
-                                                  return location.createdAt;
-                                              }
-                                          })()
-                                        : ""
-                                }
-                            </span>
+                        <div class="mb-4 flex items-center justify-between text-sm leading-tight text-primary/80">
+                            <span class="text-left">${safeAuthors}</span>
+                            <span class="text-right">${formattedDate}</span>
                         </div>
 
-                        <!-- Accordion Section Label (Fixed in Header) -->
                         ${
                             hasInfos
-                                ? `<strong class="text-base md:text-lg font-semibold text-primary block">Informações do local</strong>`
+                                ? `<strong class="block text-base font-semibold text-primary md:text-lg">Informações do local</strong>`
                                 : ""
                         }
                     </div>
 
-                    <!-- Content -->
-                    <div class="flex-1 px-2 space-y-3">
+                    <div class="flex-1 space-y-3 px-2">
                         ${
                             hasInfos
                                 ? `
-                             <div class="max-h-48 overflow-y-auto soft-scrollbar relative group" style="max-height: 12rem; overflow: hidden;">
-                                     ${infos
-                                         .map(
-                                             (info, index) => `
-                                        <div>
-                                            <button
-                                                type="button"
-                                                 @click="openFaq = openFaq === ${index} ? null : ${index};
-                                                          $nextTick(() => {
-                                                            scrollToContent('faq-content-${index}');
-                                                            // Force card height recalculation
-                                                            const cardContainer = document.getElementById('map-card');
-
-                                                            if (cardContainer) {
-                                                              // Only scroll card if content exceeds viewport
-                                                              const cardRect = cardContainer.getBoundingClientRect();
-                                                              const viewportHeight = window.innerHeight;
-                                                              if (cardRect.bottom > viewportHeight) {
-                                                                cardContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                                                              }
-                                                            }
-                                                          })"
-                                                class="w-full py-2 text-left flex items-center justify-between focus:outline-none cursor-pointer"
-                                            >
-                                                 <span class="font-semibold text-primary text-sm md:text-base">${info.title}</span>
-                                                <svg
-                                                    class="w-4 h-4 text-primary/70 transition-transform duration-200"
-                                                    :class="{ 'rotate-180': openFaq === ${index} }"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                                </svg>
-                                            </button>
-                                             <div
-                                                 x-show="openFaq === ${index}"
-                                                 x-transition:enter="transition ease-out duration-300"
-                                                 x-transition:enter-start="opacity-0 max-h-0 overflow-hidden"
-                                                  x-transition:enter-end="opacity-100 max-h-48 overflow-hidden"
-                                                  x-transition:leave="transition ease-in duration-300"
-                                                  x-transition:leave-start="opacity-100 max-h-48 overflow-hidden"
-                                                 x-transition:leave-end="opacity-0 max-h-0 overflow-hidden"
-                                                 id="faq-content-${index}"
-                                                 class="accordion-transition"
-                                             >
-                                                 <div class="accordion-content p-2 bg-primary/5 rounded-md mt-1">
-                                                      <p class="text-primary/80 leading-relaxed text-sm md:text-base">${info.value}</p>
-                                                 </div>
-                                             </div>
-                                        </div>
-                                    `,
-                                         )
-                                         .join("")}
-                                 </div>
-                             </div>
-                         `
+                            <div class="relative max-h-48 overflow-y-auto soft-scrollbar" style="max-height: 12rem;">
+                                ${accordionHtml}
+                            </div>
+                        `
                                 : ""
                         }
                     </div>
-                  </div>
-             </div>
-         `;
-    }
-
-    createCloseButtonHTML(location) {
-        return `
-            <div id="map-card-buttons" class="flex flex-col gap-2" style="position: relative; z-index: 1003; display: flex; flex-direction: column; gap: 8px;">
-                <button
-                    id="map-card-close-button"
-                    type="button"
-                    onclick="closeMapCard()"
-                    style="
-                        width: 48px;
-                        height: 48px;
-                        border-radius: 50%;
-                        background-color: #CED842;
-                        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-                        cursor: pointer;
-                        transition: all 300ms ease-in-out;
-                        border: none;
-                        padding: 0;
-                        margin: 0;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                    "
-                    onmouseover="this.style.boxShadow='0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'; this.style.transform='translateY(-2px)';"
-                    onmouseout="this.style.boxShadow='0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)'; this.style.transform='translateY(0)';"
-                    aria-label="Fechar detalhes do local"
-                >
-                    <svg
-                        width="22"
-                        height="22"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="#653089"
-                        style="
-                            stroke-width: 2;
-                            stroke-linecap: round;
-                            stroke-linejoin: round;
-                        "
-                    >
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-
-                <button
-                    type="button"
-                    onclick="centerMapOnLocation(${location.latitude}, ${location.longitude})"
-                    style="
-                        width: 48px;
-                        height: 48px;
-                        border-radius: 50%;
-                        background-color: #CED842;
-                        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-                        cursor: pointer;
-                        transition: all 300ms ease-in-out;
-                        border: none;
-                        padding: 0;
-                        margin: 0;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                    "
-                    onmouseover="this.style.boxShadow='0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'; this.style.transform='translateY(-2px)';"
-                    onmouseout="this.style.boxShadow='0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)'; this.style.transform='translateY(0)';"
-                    aria-label="Centralizar no mapa"
-                >
-                    <svg
-                        width="22"
-                        height="22"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="#653089"
-                        style="
-                            stroke-width: 2;
-                            stroke-linecap: round;
-                            stroke-linejoin: round;
-                        "
-                    >
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                        <circle cx="12" cy="10" r="3"></circle>
-                    </svg>
-                </button>
-
-                <button
-                    type="button"
-                    onclick="highlightLocationInSidebar('${location.id}')"
-                    style="
-                        width: 48px;
-                        height: 48px;
-                        border-radius: 50%;
-                        background-color: #CED842;
-                        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-                        cursor: pointer;
-                        transition: all 300ms ease-in-out;
-                        border: none;
-                        padding: 0;
-                        margin: 0;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                    "
-                    onmouseover="this.style.boxShadow='0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'; this.style.transform='translateY(-2px)';"
-                    onmouseout="this.style.boxShadow='0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)'; this.style.transform='translateY(0)';"
-                    aria-label="Ver na lista"
-                >
-                    <svg
-                        width="22"
-                        height="22"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="#653089"
-                        style="
-                            stroke-width: 2;
-                            stroke-linecap: round;
-                            stroke-linejoin: round;
-                        "
-                    >
-                        <line x1="3" y1="6" x2="21" y2="6"></line>
-                        <line x1="3" y1="12" x2="21" y2="12"></line>
-                        <line x1="3" y1="18" x2="21" y2="18"></line>
-                    </svg>
-                </button>
+                </div>
             </div>
         `;
     }
 
-    closeMapCard() {
+    getMapCardPortal() {
+        return document.getElementById("map-card-portal");
+    }
+
+    initializeMapCardInteractions(location) {
+        if (!this.currentMapCard) {
+            return;
+        }
+
+        this.currentMapCard.querySelectorAll("[data-map-card-action]").forEach((button) => {
+            button.addEventListener("click", () => {
+                const action = button.getAttribute("data-map-card-action");
+
+                if (action === "close") {
+                    this.closeMapCard();
+                    return;
+                }
+
+                if (action === "center") {
+                    this.closeMapCard({ restoreFocus: false, clearSelection: false });
+                    this.setView(Number(location.latitude), Number(location.longitude), 18);
+                    return;
+                }
+
+                if (action === "sidebar") {
+                    this.closeMapCard({ restoreFocus: false, clearSelection: false });
+                    window.highlightLocationInSidebar(location.id);
+                }
+            });
+        });
+
+        this.initializeSlideshow();
+        this.initializeAccordions(location);
+    }
+
+    initializeSlideshow() {
+        if (!this.currentMapCard) {
+            return;
+        }
+
+        const slideshow = this.currentMapCard.querySelector("[data-map-slideshow]");
+        if (!slideshow) {
+            return;
+        }
+
+        const slides = Array.from(slideshow.querySelectorAll("[data-map-slide]"));
+        const dots = Array.from(slideshow.querySelectorAll("[data-map-slide-dot]"));
+        const prevButton = slideshow.querySelector("[data-map-slide-prev]");
+        const nextButton = slideshow.querySelector("[data-map-slide-next]");
+
+        if (slides.length <= 1) {
+            return;
+        }
+
+        const setSlide = (index) => {
+            slides.forEach((slide) => {
+                const slideIndex = Number(slide.getAttribute("data-map-slide"));
+                const isActive = slideIndex === index;
+
+                slide.classList.toggle("hidden", !isActive);
+                slide.setAttribute("aria-hidden", isActive ? "false" : "true");
+            });
+
+            dots.forEach((dot) => {
+                const dotIndex = Number(dot.getAttribute("data-map-slide-dot"));
+                const isActive = dotIndex === index;
+
+                dot.setAttribute("aria-pressed", isActive ? "true" : "false");
+                dot.classList.toggle("bg-primary", isActive);
+                dot.classList.toggle("bg-white/60", !isActive);
+            });
+
+            slideshow.setAttribute("data-current-slide", String(index));
+        };
+
+        const getCurrentSlide = () => Number(slideshow.getAttribute("data-current-slide") || "0");
+        setSlide(0);
+
+        prevButton?.addEventListener("click", () => {
+            const currentIndex = getCurrentSlide();
+            setSlide(currentIndex === 0 ? slides.length - 1 : currentIndex - 1);
+        });
+
+        nextButton?.addEventListener("click", () => {
+            const currentIndex = getCurrentSlide();
+            setSlide(currentIndex === slides.length - 1 ? 0 : currentIndex + 1);
+        });
+
+        dots.forEach((dot) => {
+            dot.addEventListener("click", () => {
+                setSlide(Number(dot.getAttribute("data-map-slide-dot")));
+            });
+        });
+    }
+
+    initializeAccordions(location) {
+        if (!this.currentMapCard) {
+            return;
+        }
+
+        const buttons = Array.from(this.currentMapCard.querySelectorAll("[data-accordion-button]"));
+
+        buttons.forEach((button) => {
+            button.addEventListener("click", () => {
+                const willExpand = button.getAttribute("aria-expanded") !== "true";
+                const panelId = button.getAttribute("aria-controls");
+
+                buttons.forEach((otherButton) => {
+                    const otherPanel = document.getElementById(otherButton.getAttribute("aria-controls"));
+                    const shouldExpand = otherButton === button ? willExpand : false;
+
+                    this.setAccordionState(otherButton, otherPanel, shouldExpand);
+                });
+
+                this.repositionCurrentMapCard(location);
+
+                if (willExpand) {
+                    const panel = document.getElementById(panelId);
+                    this.scrollAccordionIntoView(panel);
+                }
+            });
+        });
+    }
+
+    setAccordionState(button, panel, expanded) {
+        if (!button || !panel) {
+            return;
+        }
+
+        button.setAttribute("aria-expanded", expanded ? "true" : "false");
+        button.classList.toggle("bg-primary/5", expanded);
+
+        const icon = button.querySelector("[data-accordion-icon]");
+        if (icon) {
+            icon.classList.toggle("rotate-180", expanded);
+        }
+
+        panel.hidden = !expanded;
+        panel.classList.toggle("hidden", !expanded);
+        panel.setAttribute("aria-hidden", expanded ? "false" : "true");
+    }
+
+    scrollAccordionIntoView(panel) {
+        if (!panel || !this.currentMapDialog) {
+            return;
+        }
+
+        requestAnimationFrame(() => {
+            panel.scrollIntoView({
+                behavior: "smooth",
+                block: "nearest",
+            });
+
+            this.currentMapDialog.scrollTop = Math.max(panel.offsetTop - 12, 0);
+        });
+    }
+
+    repositionCurrentMapCard(location = null) {
+        const currentLocation = location ?? this.getLocationById(this.selectedLocationId);
+        if (!currentLocation || !this.currentMapCard) {
+            return;
+        }
+
+        requestAnimationFrame(() => {
+            this.positionMapCard(currentLocation);
+        });
+    }
+
+    activateFocusTrap() {
+        if (!this.currentMapCard) {
+            return;
+        }
+
+        this.deactivateFocusTrap();
+
+        this.focusTrapHandler = (event) => {
+            if (event.key === "Escape") {
+                event.preventDefault();
+                this.closeMapCard();
+                return;
+            }
+
+            if (event.key !== "Tab") {
+                return;
+            }
+
+            const focusableElements = this.getFocusableMapCardElements();
+            if (focusableElements.length === 0) {
+                event.preventDefault();
+                this.currentMapDialog?.focus();
+                return;
+            }
+
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+
+            if (event.shiftKey && document.activeElement === firstElement) {
+                event.preventDefault();
+                lastElement.focus();
+                return;
+            }
+
+            if (!event.shiftKey && document.activeElement === lastElement) {
+                event.preventDefault();
+                firstElement.focus();
+            }
+        };
+
+        this.currentMapCard.addEventListener("keydown", this.focusTrapHandler);
+    }
+
+    deactivateFocusTrap() {
+        if (this.currentMapCard && this.focusTrapHandler) {
+            this.currentMapCard.removeEventListener("keydown", this.focusTrapHandler);
+        }
+
+        this.focusTrapHandler = null;
+    }
+
+    getFocusableMapCardElements() {
+        if (!this.currentMapCard) {
+            return [];
+        }
+
+        return Array.from(
+            this.currentMapCard.querySelectorAll(
+                'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+            ),
+        ).filter((element) => !element.hidden && element.getClientRects().length > 0);
+    }
+
+    focusMapCard() {
+        const focusableElements = this.getFocusableMapCardElements();
+        const preferredElement = focusableElements[0] ?? this.currentMapDialog;
+
+        preferredElement?.focus({ preventScroll: true });
+    }
+
+    restorePreviousFocus() {
+        if (
+            this.previouslyFocusedElement &&
+            document.contains(this.previouslyFocusedElement) &&
+            typeof this.previouslyFocusedElement.focus === "function"
+        ) {
+            this.previouslyFocusedElement.focus({ preventScroll: true });
+        }
+
+        this.previouslyFocusedElement = null;
+    }
+
+    closeMapCard({ restoreFocus = true, clearSelection = true } = {}) {
+        this.deactivateFocusTrap();
+
         if (this.currentMapCard) {
             this.currentMapCard.remove();
             this.currentMapCard = null;
         }
-        if (this.currentCloseButton) {
-            this.currentCloseButton.remove();
-            this.currentCloseButton = null;
+
+        this.currentMapDialog = null;
+        this.currentCloseButton = null;
+
+        const portal = this.getMapCardPortal();
+        if (portal) {
+            portal.innerHTML = "";
         }
-        this.selectedLocationId = null;
-        this.updateMarkerStyles();
+
+        if (clearSelection) {
+            this.selectedLocationId = null;
+            this.updateMarkerStyles();
+        }
+
+        if (restoreFocus) {
+            this.restorePreviousFocus();
+        } else {
+            this.previouslyFocusedElement = null;
+        }
     }
 
     updateMarkerStyles() {
@@ -1027,63 +1146,122 @@ class MapComponent {
         return this.map;
     }
 
+    getLiveRegion() {
+        let liveRegion = document.getElementById("map-live-region");
+        if (!liveRegion) {
+            liveRegion = document.createElement("div");
+            liveRegion.id = "map-live-region";
+            liveRegion.setAttribute("aria-live", "polite");
+            liveRegion.setAttribute("aria-atomic", "true");
+            liveRegion.className = "sr-only";
+            document.body.appendChild(liveRegion);
+        }
+
+        return liveRegion;
+    }
+
+    clearLiveRegionAnnouncement() {
+        this.getLiveRegion().textContent = "";
+    }
+
+    observeZoomButtons() {
+        if (!this.map || this.zoomObserver) {
+            return;
+        }
+
+        const zoomControl = this.map.getContainer().querySelector(".leaflet-control-zoom");
+        if (!zoomControl) {
+            return;
+        }
+
+        this.zoomObserver = new MutationObserver(() => {
+            this.syncZoomButtonsAccessibility();
+        });
+
+        this.zoomObserver.observe(zoomControl, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ["class"],
+        });
+    }
+
+    syncZoomButtonsAccessibility() {
+        const zoomControl = this.map?.getContainer().querySelector(".leaflet-control-zoom");
+        if (!zoomControl) {
+            return;
+        }
+
+        const zoomIn = zoomControl.querySelector(".leaflet-control-zoom-in");
+        const zoomOut = zoomControl.querySelector(".leaflet-control-zoom-out");
+
+        this.updateZoomButtonAccessibility(zoomIn, "Aproximar mapa");
+        this.updateZoomButtonAccessibility(zoomOut, "Afastar mapa");
+    }
+
+    updateZoomButtonAccessibility(button, label) {
+        if (!button) {
+            return;
+        }
+
+        const isDisabled = button.classList.contains("leaflet-disabled");
+
+        button.setAttribute("title", label);
+        button.setAttribute("aria-label", label);
+        button.setAttribute("role", "button");
+        button.setAttribute("lang", "pt-BR");
+
+        if (isDisabled) {
+            button.setAttribute("aria-disabled", "true");
+            button.setAttribute("tabindex", "-1");
+        } else {
+            button.removeAttribute("aria-disabled");
+            button.setAttribute("tabindex", "0");
+        }
+
+        if (button.dataset.accessibilityBound !== "true") {
+            button.addEventListener("focus", () => {
+                this.clearLiveRegionAnnouncement();
+            });
+
+            button.dataset.accessibilityBound = "true";
+        }
+    }
+
     destroy() {
         this.closeMapCard();
+        if (this.zoomObserver) {
+            this.zoomObserver.disconnect();
+            this.zoomObserver = null;
+        }
         if (this.map) {
             this.map.remove();
         }
     }
-
-    fixZoomButtonsAccessibility() {
-        setTimeout(() => {
-            const zoomControl = document.querySelector(".leaflet-control-zoom");
-            if (zoomControl) {
-                const zoomIn = zoomControl.querySelector(".leaflet-control-zoom-in");
-                const zoomOut = zoomControl.querySelector(".leaflet-control-zoom-out");
-                if (zoomIn) {
-                    zoomIn.setAttribute("aria-label", "Aproximar mapa");
-                    zoomIn.removeAttribute("aria-disabled");
-                }
-                if (zoomOut) {
-                    zoomOut.setAttribute("aria-label", "Afastar mapa");
-                    zoomOut.removeAttribute("aria-disabled");
-                }
-            }
-        }, 100);
-    }
 }
 
-window.closeMapCard = function () {
+window.closeMapCard = function (options = {}) {
     const mapComponent = window.mapComponentInstance;
     if (mapComponent) {
-        mapComponent.closeMapCard();
+        mapComponent.closeMapCard(options);
     }
 };
 
 window.centerMapOnLocation = function (lat, lng) {
     const mapComponent = window.mapComponentInstance;
     if (mapComponent) {
-        mapComponent.closeMapCard();
+        mapComponent.closeMapCard({ restoreFocus: false, clearSelection: false });
         mapComponent.setView(lat, lng, 18);
     }
 };
 
 window.highlightLocationInSidebar = function (locationId) {
-    const sidebar = document.querySelector('aside[aria-label="Painel de pesquisa e filtros"]');
-    if (sidebar?.classList.contains("-translate-x-full")) {
-        Livewire.dispatch("toggle-sidebar");
+    if (typeof Livewire !== "undefined") {
+        Livewire.dispatch("open-sidebar");
+        Livewire.dispatch("reveal-location-in-sidebar", {
+            locationId: String(locationId),
+        });
     }
-
-    const mapComponent = window.mapComponentInstance;
-    if (mapComponent) {
-        mapComponent.closeMapCard();
-    }
-
-    document.dispatchEvent(
-        new CustomEvent("highlight-sidebar-location", {
-            detail: { locationId },
-        }),
-    );
 };
 
 window.MapComponent = MapComponent;

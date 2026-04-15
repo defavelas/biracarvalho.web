@@ -9,6 +9,7 @@ use App\Models\Location;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 final class LocationService
 {
@@ -132,6 +133,8 @@ final class LocationService
      */
     public function transformForMap(Location $location): array
     {
+        $imageAltTexts = $this->buildImageAltTexts($location);
+
         return [
             'id' => $location->id,
             'name' => $location->name,
@@ -148,6 +151,7 @@ final class LocationService
                 'id' => $image->id,
                 'path' => $image->image_path,
                 'url' => asset('storage/' . $image->image_path),
+                'alt' => $imageAltTexts[$image->id] ?? $this->buildFallbackImageAltText($location),
             ])->toArray(),
             'infos' => $location->infos->map(fn($info) => [
                 'id' => $info->id,
@@ -198,5 +202,88 @@ final class LocationService
         $categoriesHash = md5(implode(',', $categories));
 
         return "locations.search.{$searchHash}.{$categoriesHash}";
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function buildImageAltTexts(Location $location): array
+    {
+        $images = $location->images->values();
+        $totalImages = $images->count();
+        $infoSummaries = $this->buildInfoSummaries($location);
+
+        return $images->mapWithKeys(function ($image, int $index) use ($location, $totalImages, $infoSummaries): array {
+            $parts = [
+                sprintf(
+                    'Foto %d de %d do local %s',
+                    $index + 1,
+                    $totalImages,
+                    $location->name,
+                ),
+            ];
+
+            if ($scene = $this->buildSceneContext($location)) {
+                $parts[] = $scene;
+            }
+
+            $parts[] = 'Registro do mapeamento de acessibilidade';
+
+            if ($detail = $infoSummaries[$index] ?? $infoSummaries[0] ?? null) {
+                $parts[] = 'com destaque para ' . $detail;
+            } else {
+                $parts[] = 'no contexto de ' . Str::lower($location->type->label());
+            }
+
+            return [
+                $image->id => implode('. ', $parts) . '.',
+            ];
+        })->toArray();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function buildInfoSummaries(Location $location): array
+    {
+        return $location->infos
+            ->map(function ($info): ?string {
+                $title = trim((string) $info->title);
+                $value = trim((string) $info->value);
+
+                if ('' === $title || '' === $value) {
+                    return null;
+                }
+
+                return Str::limit("{$title}: {$value}", 140, '...');
+            })
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    private function buildSceneContext(Location $location): ?string
+    {
+        $description = trim((string) $location->description);
+
+        if ('' === $description) {
+            return null;
+        }
+
+        return 'Contexto do local: ' . Str::lower(Str::limit($description, 90, '...'));
+    }
+
+    private function buildFallbackImageAltText(Location $location): string
+    {
+        $parts = [
+            "Foto do local {$location->name}",
+            'registro do mapeamento de acessibilidade',
+        ];
+
+        if ($scene = $this->buildSceneContext($location)) {
+            $parts[] = $scene;
+        }
+
+        return implode('. ', $parts) . '.';
     }
 }

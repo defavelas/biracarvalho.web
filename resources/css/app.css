@@ -50,6 +50,14 @@
 @utility result-highlighted {
     background-color: #f3f4f6;
     border-left: 4px solid #ced842;
+    box-shadow: inset 0 0 0 2px rgba(206, 216, 66, 0.35);
+}
+
+.result-highlighted:focus-visible {
+    outline: none;
+    box-shadow:
+        inset 0 0 0 2px rgba(206, 216, 66, 0.35),
+        0 0 0 4px rgba(206, 216, 66, 0.55);
 }
 
 .soft-scrollbar::-webkit-scrollbar {
@@ -215,9 +223,31 @@
     color: #ced842 !important;
 }
 
+.leaflet-control-zoom a:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(206, 216, 66, 0.45) !important;
+}
+
+.leaflet-control-zoom a[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
 #map-card-container {
     position: absolute;
     z-index: 200;
+    pointer-events: auto;
+}
+
+#map-card:focus-visible {
+    outline: none;
+    box-shadow:
+        0 0 0 4px rgba(206, 216, 66, 0.55),
+        0 20px 40px rgba(0, 0, 0, 0.18) !important;
+}
+
+[data-accordion-panel][hidden] {
+    display: none !important;
 }
 
 /* Map card responsive styles and scrolling improvements */

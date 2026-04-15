@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 final class App extends Component
@@ -17,6 +18,15 @@ final class App extends Component
         $this->sidebarCollapsed = ! $this->sidebarCollapsed;
 
         $this->dispatch('sidebar-toggled', collapsed: $this->sidebarCollapsed);
+    }
+
+    #[On('open-sidebar')]
+    public function openSidebar(): void
+    {
+        if ($this->sidebarCollapsed) {
+            $this->sidebarCollapsed = false;
+            $this->dispatch('sidebar-toggled', collapsed: false);
+        }
     }
 
     public function openAccessibilityModal(): void

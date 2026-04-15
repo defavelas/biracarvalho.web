@@ -1,5 +1,6 @@
 <!-- Desktop: Full sidebar -->
 <aside
+    id="desktop-search-sidebar"
     class="hidden md:block absolute
            md:top-2 md:left-2 md:bottom-2 md:right-auto md:w-96 md:h-auto
            bg-primary bg-no-repeat bg-top border-0 md:border-4 border-black/15 z-[100] shadow-xl
@@ -24,9 +25,6 @@
                     placeholder="Pesquisar locais..."
                     class="bg-white w-full px-4 py-3 pr-10 text-sm md:text-base border-2 border-primary rounded-lg focus:outline-none focus:ring-4 focus:ring-black/25 focus:ring-offset-2 transition-all duration-200"
                     aria-describedby="search-help"
-                    autofocus
-                    x-data
-                    x-init="$el.focus()"
                     x-on:keydown.escape="$el.blur()">
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                     @svg('heroicon-o-magnifying-glass', 'w-5 h-5 text-primary')
@@ -38,20 +36,28 @@
         </header>
 
         <section class="px-3 py-2 md:p-2.5 bg-no-repeat bg-top bg-black/20 relative">
-            <fieldset class="flex items-center space-y-3 md:space-y-2 mb-3 md:mb-2">
-                <legend class="flex items-center justify-between text-base font-semibold text-white mb-3">
-                    Filtrar por
+            @php($activeFilterCount = array_sum($typeFilters))
+
+            <fieldset class="space-y-3 md:space-y-2 mb-3 md:mb-2" aria-labelledby="desktop-filters-legend">
+                <legend id="desktop-filters-legend" class="text-base font-semibold text-white">
+                    Filtrar por acessibilidade
                 </legend>
 
-                @if (array_sum($typeFilters) > 0 || !empty($search))
-                    <button wire:click="clearFilters"
-                        class="absolute top-2 right-2 w-8 h-8 md:w-auto md:h-auto text-sm text-primary font-semibold hover:underline cursor-pointer focus:outline-none focus:underline focus:ring-2 focus:ring-secondary focus:ring-offset-1 rounded"
-                        aria-label="Limpar todos os filtros">
-                        @svg('heroicon-o-trash', 'w-5 h-5 text-white/80')
-                    </button>
-                @endif
+                <div class="flex items-center justify-between gap-3">
+                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold {{ $activeFilterCount > 0 ? 'bg-secondary text-primary shadow-sm' : 'bg-white/10 text-white/80' }}">
+                        {{ $activeFilterCount > 0 ? $activeFilterCount . ' ' . ($activeFilterCount === 1 ? 'filtro ativo' : 'filtros ativos') : 'Nenhum filtro ativo' }}
+                    </span>
 
-                <div class="flex items-center gap-x-4" wire:key="filter-toggles">
+                    @if ($activeFilterCount > 0 || !empty($search))
+                        <button wire:click="clearFilters"
+                            class="inline-flex items-center justify-center rounded-full bg-white/10 p-2 text-white transition-colors duration-200 hover:bg-white/20 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+                            aria-label="Limpar todos os filtros">
+                            @svg('heroicon-o-trash', 'w-4 h-4')
+                        </button>
+                    @endif
+                </div>
+
+                <div class="flex flex-wrap items-center gap-4" wire:key="filter-toggles">
                     <x-toggle-button wire:model.live="typeFilters.accessible" :value="$typeFilters['accessible']"
                         label="Acessível" trackClass="bg-black/20 border-white" thumbClass="bg-green-500"
                         labelClass="text-white text-sm" />
@@ -96,8 +102,9 @@
             <div class="space-y-2" wire:key="results-{{ md5(json_encode($typeFilters) . $search) }}">
                 @forelse($results as $result)
                     <article
-                        class="text-white border-b border-black/30 p-2 pb-4 {{ $selectedLocationId == $result['id'] ? 'bg-white rounded-lg border-0 !text-primary' : '' }} last:border-0 group cursor-pointer focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-primary rounded-lg transition-all duration-200"
+                        class="text-white border-b border-black/30 p-2 pb-4 {{ $selectedLocationId == $result['id'] ? 'bg-white rounded-lg border-0 !text-primary ring-2 ring-secondary shadow-sm' : '' }} last:border-0 group cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary rounded-lg transition-all duration-200"
                         data-location-id="{{ $result['id'] }}" role="button" tabindex="0"
+                        data-sidebar-result="true"
                         aria-label="Visualizar {{ $result['name'] }} no mapa. Tipo: {{ $result['typeLabel'] }}. {{ isset($result['description']) ? \Str::limit($result['description'], 60) : 'Clique para mais detalhes.' }}"
                         aria-describedby="result-{{ $result['id'] }}-desc"
                         wire:click="focusLocation('{{ $result['id'] }}')"
@@ -123,7 +130,7 @@
                                         @foreach (array_slice($result['images'], 0, 2) as $index => $image)
                                             <div class="w-8 h-8 rounded-full overflow-hidden bg-black/25 border-2 {{$selectedLocationId == $result['id'] ? 'border-white' : 'border-primary'}} flex-shrink-0">
                                                 <img src="{{ $image['url'] }}"
-                                                    alt="Imagem {{ $index + 1 }} de {{ $result['name'] }}"
+                                                    alt="{{ $image['alt'] ?? 'Prévia fotográfica de ' . $result['name'] }}"
                                                     class="w-full h-full object-cover" loading="lazy"
                                                     onerror="this.style.display='block'; this.style.backgroundColor='rgba(0,0,0,0.3)'; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjNjUzMDg5IiBmaWxsLW9wYWNpdHk9IjAuNSIvPgo8cGF0aCBkPSJNOCAxMkw0IDE2TDggMjBNMjQgMTJMMjggMTZMMjQgMjAiIHN0cm9rZT0iI0NFRDg0MiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+Cg==';">
                                             </div>

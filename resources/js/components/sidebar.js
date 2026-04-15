@@ -1,166 +1,113 @@
 /**
- * Sidebar Component for Maré Accessibility Mapping
- * Handles sidebar toggle and UI interactions
+ * Sidebar accessibility helpers.
+ * Syncs Livewire state changes with focus and result reveal behavior.
  */
-
 class SidebarComponent {
     constructor() {
         this.sidebar = null;
         this.toggleButton = null;
         this.isCollapsed = false;
-        
+        this.pendingLocationId = null;
+
         this.init();
     }
-    
+
     init() {
-        // Find sidebar and toggle button
-        this.sidebar = document.querySelector('aside[role="complementary"]');
-        this.toggleButton = document.querySelector('button[aria-label*="painel de pesquisa"]');
-        
-        if (!this.sidebar) {
-            console.warn('Sidebar not found');
+        this.syncElements();
+        this.setupEventListeners();
+    }
+
+    syncElements() {
+        this.sidebar = document.getElementById("desktop-search-sidebar");
+        this.toggleButton = document.querySelector('button[aria-controls="desktop-search-sidebar"]');
+    }
+
+    setupEventListeners() {
+        document.addEventListener("livewire:init", () => {
+            Livewire.on("sidebar-toggled", (event) => {
+                this.syncElements();
+                this.isCollapsed = Boolean(event.collapsed);
+                this.syncSidebarAttributes();
+
+                if (!this.isCollapsed && this.pendingLocationId) {
+                    requestAnimationFrame(() => {
+                        this.focusSidebarResult(this.pendingLocationId);
+                    });
+                    return;
+                }
+
+                if (!this.isCollapsed) {
+                    requestAnimationFrame(() => {
+                        this.focusSearchInput();
+                    });
+                }
+            });
+
+            Livewire.on("sidebar-location-revealed", (event) => {
+                this.focusSidebarResult(event.locationId);
+            });
+        });
+    }
+
+    syncSidebarAttributes() {
+        if (!this.sidebar || !this.toggleButton) {
             return;
         }
-        
-        // Setup event listeners
-        this.setupEventListeners();
-        
-        console.log('Sidebar component initialized');
+
+        this.sidebar.setAttribute("aria-hidden", this.isCollapsed ? "true" : "false");
+        this.toggleButton.setAttribute("aria-expanded", this.isCollapsed ? "false" : "true");
     }
-    
-    setupEventListeners() {
-        // Toggle button click
-        if (this.toggleButton) {
-            this.toggleButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.toggle();
-            });
+
+    getVisibleResult(locationId) {
+        const selector = `[data-sidebar-result="true"][data-location-id="${locationId}"]`;
+        const results = Array.from(document.querySelectorAll(selector));
+
+        return (
+            results.find((result) => {
+                const element = result;
+
+                return !element.hasAttribute("hidden") && element.offsetParent !== null;
+            }) ?? null
+        );
+    }
+
+    focusSidebarResult(locationId) {
+        const resultElement = this.getVisibleResult(locationId);
+
+        if (!resultElement) {
+            this.pendingLocationId = locationId;
+            return;
         }
-        
-        // Keyboard accessibility - ESC to close sidebar
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !this.isCollapsed) {
-                this.collapse();
-            }
-        });
-        
-        // Listen for Livewire events to sync state
-        document.addEventListener('livewire:init', () => {
-            Livewire.on('sidebar-toggled', (event) => {
-                this.isCollapsed = event.collapsed;
-                this.updateUI();
-            });
-        });
-        
-        // Handle marker clicks to highlight results
-        document.addEventListener('marker-clicked', (e) => {
-            this.highlightResult(e.detail.id);
+
+        this.pendingLocationId = null;
+
+        document.querySelectorAll(".result-highlighted").forEach((element) => {
+            element.classList.remove("result-highlighted");
         });
 
-        // Handle highlight requests from map card
-        document.addEventListener('highlight-sidebar-location', (e) => {
-            if (typeof Livewire !== 'undefined') {
-                Livewire.dispatch('highlight-sidebar-location', { locationId: e.detail.locationId });
-            }
+        resultElement.classList.add("result-highlighted");
+        resultElement.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+        });
+
+        requestAnimationFrame(() => {
+            resultElement.focus({ preventScroll: true });
         });
     }
-    
-    toggle() {
-        if (this.isCollapsed) {
-            this.expand();
-        } else {
-            this.collapse();
-        }
-        
-        // Dispatch Livewire event to sync state
-        if (window.Livewire) {
-            Livewire.dispatch('toggle-sidebar');
-        }
-    }
-    
-    collapse() {
-        this.isCollapsed = true;
-        this.updateUI();
-        this.updateToggleButtonIcon();
-        
-        // Update aria attributes for accessibility
-        this.sidebar.setAttribute('aria-hidden', 'true');
-        
-        // Focus management - move focus to toggle button
-        if (this.toggleButton) {
-            this.toggleButton.focus();
-        }
-    }
-    
-    expand() {
-        this.isCollapsed = false;
-        this.updateUI();
-        this.updateToggleButtonIcon();
-        
-        // Update aria attributes for accessibility
-        this.sidebar.setAttribute('aria-hidden', 'false');
-        
-        // Focus management - move focus to search input
-        setTimeout(() => {
-            const searchInput = this.sidebar.querySelector('#search-input');
-            if (searchInput) {
-                searchInput.focus();
-            }
-        }, 300); // Wait for animation to complete
-    }
-    
-    updateUI() {
-        if (!this.sidebar) return;
-        
-        if (this.isCollapsed) {
-            this.sidebar.classList.add('-translate-x-full');
-            this.sidebar.classList.remove('translate-x-0');
-        } else {
-            this.sidebar.classList.add('translate-x-0');
-            this.sidebar.classList.remove('-translate-x-full');
-        }
-    }
-    
-    updateToggleButtonIcon() {
-        if (!this.toggleButton) return;
-        
-        const icon = this.isCollapsed ? '☰' : '✕';
-        const ariaLabel = this.isCollapsed ? 'Abrir painel de pesquisa' : 'Fechar painel de pesquisa';
-        
-        this.toggleButton.innerHTML = `<span style="font-size: 18px;">${icon}</span>`;
-        this.toggleButton.setAttribute('aria-label', ariaLabel);
-    }
-    
-    highlightResult(locationId) {
-        // Remove existing highlights
-        const existingHighlights = this.sidebar.querySelectorAll('.result-highlighted');
-        existingHighlights.forEach(el => el.classList.remove('result-highlighted'));
-        
-        // Add highlight to clicked result
-        const resultElement = this.sidebar.querySelector(`[data-location-id="${locationId}"]`);
-        if (resultElement) {
-            resultElement.classList.add('result-highlighted');
-            
-            // Scroll to the highlighted result
-            resultElement.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-            });
-        }
-    }
-    
-    // Public methods
-    getState() {
-        return {
-            isCollapsed: this.isCollapsed
-        };
+
+    focusSearchInput() {
+        const searchInput =
+            document.getElementById("search-input")?.offsetParent !== null
+                ? document.getElementById("search-input")
+                : document.getElementById("mobile-search-input");
+
+        searchInput?.focus({ preventScroll: true });
     }
 }
 
-// Initialize sidebar component when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
     window.sidebarComponent = new SidebarComponent();
 });
 
-// Export for use in other modules
-window.SidebarComponent = SidebarComponent; 
+window.SidebarComponent = SidebarComponent;
