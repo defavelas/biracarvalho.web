@@ -33,6 +33,13 @@ class SidebarComponent {
                     requestAnimationFrame(() => {
                         this.focusSidebarResult(this.pendingLocationId);
                     });
+                    return;
+                }
+
+                if (!this.isCollapsed) {
+                    requestAnimationFrame(() => {
+                        this.focusSearchInput();
+                    });
                 }
             });
 
@@ -87,6 +94,15 @@ class SidebarComponent {
         requestAnimationFrame(() => {
             resultElement.focus({ preventScroll: true });
         });
+    }
+
+    focusSearchInput() {
+        const searchInput =
+            document.getElementById("search-input")?.offsetParent !== null
+                ? document.getElementById("search-input")
+                : document.getElementById("mobile-search-input");
+
+        searchInput?.focus({ preventScroll: true });
     }
 }
 

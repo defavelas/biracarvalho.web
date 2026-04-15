@@ -14,9 +14,6 @@
                             placeholder="Pesquisar locais..."
                             class="bg-white w-full px-3 py-2 pr-8 text-base border-2 border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-black/25 focus:ring-offset-1 transition-all duration-200"
                             aria-describedby="mobile-search-help"
-                            autofocus
-                            x-data
-                            x-init="$el.focus()"
                             x-on:keydown.escape="$el.blur()">
                         <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                             @svg('heroicon-o-magnifying-glass', 'w-6 h-6 text-primary')

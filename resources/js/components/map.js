@@ -138,9 +138,6 @@ class MapComponent {
                     this.map.zoomOut(zoomStep);
                 }
                 break;
-            case "Tab":
-                this.cycleMarkers(e.shiftKey);
-                break;
             case "Enter":
             case "Space":
                 if (this.selectedLocationId) {
