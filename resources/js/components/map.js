@@ -589,7 +589,7 @@ class MapComponent {
                                 >
                                     <img
                                         src="${image.url}"
-                                        alt="${safeName} - Imagem ${index + 1} de ${maxImages}"
+                                        alt="${this.escapeHtml(image.alt || `${safeName} - Imagem ${index + 1} de ${maxImages}`)}"
                                         class="h-full w-full object-cover"
                                         loading="lazy"
                                     >

@@ -14,6 +14,12 @@
 <div class="relative group" x-data="{ currentSlide: 0, totalSlides: {{ $totalImages }} }">
     <div class="relative h-32 bg-black/25 rounded-lg overflow-hidden">
         @foreach($displayImages as $index => $image)
+            @php
+                $imageUrl = is_array($image) ? ($image['url'] ?? $image['path'] ?? '') : $image;
+                $imageAlt = is_array($image)
+                    ? ($image['alt'] ?? $alt)
+                    : $alt . ' - Imagem ' . ($index + 1) . ' de ' . $totalImages;
+            @endphp
             <div
                 class="absolute inset-0 transition-opacity duration-300"
                 x-show="currentSlide === {{ $index }}"
@@ -25,8 +31,8 @@
                 x-transition:leave-end="opacity-0"
             >
                 <img
-                    src="{{ $image }}"
-                    alt="{{ $alt }} - Imagem {{ $index + 1 }} de {{ $totalImages }}"
+                    src="{{ $imageUrl }}"
+                    alt="{{ $imageAlt }}"
                     class="w-full h-full object-cover"
                     loading="lazy"
                 >

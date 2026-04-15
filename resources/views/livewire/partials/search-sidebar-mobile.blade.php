@@ -154,7 +154,7 @@
                                         @foreach (array_slice($result['images'], 0, 2) as $index => $image)
                                             <div class="w-8 h-8 md:w-6 md:h-6 rounded-full overflow-hidden bg-black/25 border-2 {{$selectedLocationId == $result['id'] ? 'border-white' : 'border-primary'}} flex-shrink-0">
                                                 <img src="{{ $image['url'] }}"
-                                                    alt="Imagem {{ $index + 1 }} de {{ $result['name'] }}"
+                                                    alt="{{ $image['alt'] ?? 'Prévia fotográfica de ' . $result['name'] }}"
                                                     class="w-full h-full object-cover" loading="lazy"
                                                     onerror="this.style.display='block'; this.style.backgroundColor='rgba(0,0,0,0.3)'; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjNjUzMDg5IiBmaWxsLW9wYWNpdHk9IjAuNSIvPgo8cGF0aCBkPSJNOCAxMkw0IDE2TDggMjBNMjQgMTJMMjggMTZMMjQgMjAiIHN0cm9rZT0iI0NFRDg0MiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+Cg==';">
                                             </div>
