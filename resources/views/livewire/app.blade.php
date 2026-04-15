@@ -13,6 +13,8 @@
         />
     </main>
 
+    <div id="map-card-portal" class="absolute inset-0 z-[150] pointer-events-none" aria-live="polite"></div>
+
     <livewire:search-sidebar :collapsed="$sidebarCollapsed" />
 
     <button
@@ -20,6 +22,8 @@
         class="hidden md:flex absolute z-[1002] w-12 h-12 rounded-full bg-secondary shadow-lg border-0 cursor-pointer items-center justify-center transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5
                top-5 {{ $sidebarCollapsed ? 'left-5' : 'left-[25.5rem]' }}"
         wire:click="toggleSidebar"
+        aria-controls="desktop-search-sidebar"
+        aria-expanded="{{ $sidebarCollapsed ? 'false' : 'true' }}"
         aria-label="{{ $sidebarCollapsed ? 'Abrir painel de pesquisa' : 'Fechar painel de pesquisa' }}"
     >
         @if($sidebarCollapsed)

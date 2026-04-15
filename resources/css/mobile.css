@@ -1,7 +1,8 @@
 /* Mobile-specific styles for map and touch interactions */
 @media (max-width: 768px) {
     /* Ensure natural content flow */
-    #map-card [x-data*="currentSlide"] {
+    #map-card [x-data*="currentSlide"],
+    #map-card [data-map-slideshow] {
         position: relative !important;
         margin-bottom: 1rem !important;
         width: 100% !important;
@@ -98,7 +99,8 @@
     }
 
     /* Reduce mobile image height for better space utilization */
-    #map-card [x-data*="currentSlide"] {
+    #map-card [x-data*="currentSlide"],
+    #map-card [data-map-slideshow] {
         height: 120px !important;
         min-height: 120px !important;
         max-height: 120px !important;
@@ -435,14 +437,16 @@
     }
 
     /* Ensure slideshow elements are always visible on mobile */
-    #map-card [x-data*="currentSlide"] {
+    #map-card [x-data*="currentSlide"],
+    #map-card [data-map-slideshow] {
         display: block !important;
         visibility: visible !important;
         opacity: 1 !important;
         position: relative !important;
     }
 
-    #map-card [x-data*="currentSlide"] .absolute {
+    #map-card [x-data*="currentSlide"] .absolute,
+    #map-card [data-map-slideshow] .absolute {
         display: block !important;
         position: absolute !important;
         visibility: visible !important;
@@ -452,7 +456,8 @@
         width: auto !important;
     }
 
-    #map-card [x-data*="currentSlide"] button {
+    #map-card [x-data*="currentSlide"] button,
+    #map-card [data-map-slideshow] button {
         display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
@@ -461,7 +466,8 @@
         width: auto !important;
     }
 
-    #map-card [x-data*="currentSlide"] .inset-0 {
+    #map-card [x-data*="currentSlide"] .inset-0,
+    #map-card [data-map-slideshow] .inset-0 {
         display: block !important;
         position: absolute !important;
         top: 0 !important;
@@ -487,6 +493,8 @@
     #map-card [x-data*="openFaq"],
     #map-card [x-data*="openFaq"] button,
     #map-card [x-data*="openFaq"] div,
+    #map-card [data-accordion-button],
+    #map-card [data-accordion-panel],
     #map-card [x-show],
     #map-card [id*="faq-content"] {
         display: block !important;
