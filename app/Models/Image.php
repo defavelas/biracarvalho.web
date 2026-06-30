@@ -20,6 +20,7 @@ final class Image extends Model
     protected $fillable = [
         'location_id',
         'image_path',
+        'description',
         'published_at',
     ];
 

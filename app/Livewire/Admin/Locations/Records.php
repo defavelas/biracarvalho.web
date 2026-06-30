@@ -26,6 +26,16 @@ final class Records extends Component
     public bool $showDeleteModal = false;
     public ?Location $selectedLocation = null;
 
+    public bool $showImagesModal = false;
+    public ?Location $imagesLocation = null;
+
+    /**
+     * Per-image descriptions keyed by image id (used as alt text).
+     *
+     * @var array<string, string>
+     */
+    public array $imageDescriptions = [];
+
     public function updatingSearch(): void
     {
         $this->resetPage();
@@ -65,6 +75,50 @@ final class Records extends Component
     {
         $this->showDeleteModal = false;
         $this->selectedLocation = null;
+
+        $this->showImagesModal = false;
+        $this->imagesLocation = null;
+        $this->imageDescriptions = [];
+    }
+
+    /**
+     * Open the image-description manager for a location.
+     */
+    public function manageImages(Location $location): void
+    {
+        $this->imagesLocation = $location->load('images');
+
+        $this->imageDescriptions = $this->imagesLocation->images
+            ->mapWithKeys(fn($image): array => [$image->id => (string) ($image->description ?? '')])
+            ->toArray();
+
+        $this->showImagesModal = true;
+    }
+
+    /**
+     * Persist the per-image descriptions (used as alt text on the public map).
+     */
+    public function saveImageDescriptions(): void
+    {
+        if ( ! $this->imagesLocation) {
+            return;
+        }
+
+        foreach ($this->imagesLocation->images as $image) {
+            $description = trim((string) ($this->imageDescriptions[$image->id] ?? ''));
+
+            $image->update([
+                'description' => '' === $description ? null : $description,
+            ]);
+        }
+
+        app(\App\Services\LocationService::class)->clearCache();
+
+        $this->showImagesModal = false;
+        $this->imagesLocation = null;
+        $this->imageDescriptions = [];
+
+        session()->flash('message', 'Descrições das imagens salvas com sucesso.');
     }
 
     public function approve(Location $location): void
