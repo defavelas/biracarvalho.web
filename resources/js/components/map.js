@@ -223,13 +223,23 @@ class MapComponent {
     }
 
     addMarker(location) {
-        const { id, name, type, latitude, longitude, typeColor } = location;
+        const { id, name, type, latitude, longitude, typeColor, typeLabel } = location;
 
         const locationId = String(id);
 
         const icon = this.createAccessibilityIcon(type, typeColor, locationId === this.selectedLocationId);
 
-        const marker = L.marker([latitude, longitude], { icon }).addTo(this.markerLayer);
+        // Descriptive accessible name so screen readers announce the location
+        // instead of the generic "marker" repeated for every pin.
+        const accessibleName = typeLabel ? `${name} — ${typeLabel}` : name;
+
+        const marker = L.marker([latitude, longitude], {
+            icon,
+            alt: accessibleName,
+            title: accessibleName,
+            keyboard: true,
+            riseOnHover: true,
+        }).addTo(this.markerLayer);
 
         marker.locationData = location;
 
@@ -715,19 +725,6 @@ class MapComponent {
                             <circle cx="12" cy="10" r="3"></circle>
                         </svg>
                     </button>
-                    <button
-                        type="button"
-                        data-map-card-action="sidebar"
-                        data-location-id="${locationId}"
-                        class="flex h-12 w-12 items-center justify-center rounded-full bg-secondary text-primary shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary focus-visible:ring-offset-2"
-                        aria-label="Ver na lista"
-                    >
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <line x1="3" y1="6" x2="21" y2="6"></line>
-                            <line x1="3" y1="12" x2="21" y2="12"></line>
-                            <line x1="3" y1="18" x2="21" y2="18"></line>
-                        </svg>
-                    </button>
                 </div>
             `
             : "";
@@ -834,12 +831,6 @@ class MapComponent {
                 if (action === "center") {
                     this.closeMapCard({ restoreFocus: false, clearSelection: false });
                     this.setView(Number(location.latitude), Number(location.longitude), 18);
-                    return;
-                }
-
-                if (action === "sidebar") {
-                    this.closeMapCard({ restoreFocus: false, clearSelection: false });
-                    window.highlightLocationInSidebar(location.id);
                 }
             });
         });
