@@ -151,7 +151,11 @@ final class LocationService
                 'id' => $image->id,
                 'path' => $image->image_path,
                 'url' => asset('storage/' . $image->image_path),
-                'alt' => $imageAltTexts[$image->id] ?? $this->buildFallbackImageAltText($location),
+                // Prefer the admin-provided description; otherwise fall back to
+                // the contextual alt text generated from location + infos data.
+                'alt' => filled($image->description)
+                    ? $image->description
+                    : ($imageAltTexts[$image->id] ?? $this->buildFallbackImageAltText($location)),
             ])->toArray(),
             'infos' => $location->infos->map(fn($info) => [
                 'id' => $info->id,

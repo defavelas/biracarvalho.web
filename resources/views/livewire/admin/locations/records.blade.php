@@ -158,6 +158,14 @@
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end space-x-2">
+                                    <button wire:click="manageImages('{{ $location->id }}')"
+                                            class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-secondary hover:text-white bg-secondary/10 hover:bg-secondary/20 rounded-lg border border-secondary/30 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary/40"
+                                            aria-label="Gerenciar descrições das imagens de {{ $location->name }}">
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                        Imagens
+                                    </button>
                                     @if($location->isPending())
                                         <button wire:click="approve('{{ $location->id }}')"
                                                 wire:confirm="Tem certeza que deseja aprovar este registro?"
@@ -241,6 +249,100 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                             </svg>
                             Confirmar Exclusão
+                        </button>
+                        <button wire:click="closeModals"
+                                type="button"
+                                class="inline-flex items-center justify-center rounded-lg px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-medium text-sm border border-white/20 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-white/25">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if($showImagesModal && $imagesLocation)
+        <div class="fixed inset-0 z-50 overflow-y-auto"
+             x-data
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="images-modal-title"
+             x-trap.noscroll="true"
+             x-on:keydown.escape.window="$wire.closeModals()">
+            <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
+                     wire:click="closeModals"
+                     x-transition:enter="ease-out duration-300"
+                     x-transition:enter-start="opacity-0"
+                     x-transition:enter-end="opacity-100"></div>
+
+                <div class="inline-block align-bottom bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full"
+                     x-transition:enter="ease-out duration-400"
+                     x-transition:enter-start="opacity-0 translate-y-8 scale-95"
+                     x-transition:enter-end="opacity-100 translate-y-0 scale-100">
+                    <div class="p-6">
+                        <div class="flex items-start justify-between gap-4 mb-4">
+                            <div>
+                                <h3 id="images-modal-title" class="text-lg leading-6 font-semibold text-white mb-1">
+                                    Descrições das imagens
+                                </h3>
+                                <p class="text-sm text-white/70">
+                                    Local: <strong class="text-secondary">{{ $imagesLocation->name }}</strong>
+                                </p>
+                            </div>
+                            <button wire:click="closeModals"
+                                    type="button"
+                                    class="flex-shrink-0 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white/40"
+                                    aria-label="Fechar gerenciador de imagens">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <p id="images-modal-hint" class="text-xs text-white/60 mb-4">
+                            Descreva objetivamente o que aparece em cada imagem (ex.: "Rampa de acesso na entrada
+                            com corrimão", "Piso tátil ao longo da calçada") para que leitores de tela transmitam o
+                            conteúdo a pessoas com deficiência visual. Deixe em branco para usar a descrição
+                            automática.
+                        </p>
+
+                        <div class="space-y-4 max-h-[50vh] overflow-y-auto soft-scrollbar pr-1">
+                            @forelse($imagesLocation->images as $index => $image)
+                                <div class="flex gap-4 items-start bg-white/5 rounded-lg p-3 border border-white/10">
+                                    <img src="{{ asset('storage/' . $image->image_path) }}"
+                                         alt="Imagem {{ $index + 1 }} do local {{ $imagesLocation->name }}"
+                                         class="w-20 h-20 object-cover rounded-md flex-shrink-0 bg-black/25"
+                                         loading="lazy">
+                                    <div class="flex-1 min-w-0">
+                                        <label for="image-desc-{{ $image->id }}" class="block text-sm font-medium text-white/90 mb-1">
+                                            Descrição da imagem {{ $index + 1 }}
+                                        </label>
+                                        <textarea id="image-desc-{{ $image->id }}"
+                                                  wire:model="imageDescriptions.{{ $image->id }}"
+                                                  rows="2"
+                                                  aria-describedby="images-modal-hint"
+                                                  placeholder="Ex.: Rampa de acesso na entrada com corrimão"
+                                                  class="w-full px-3 py-2 text-sm bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary/50 transition-all duration-200"></textarea>
+                                    </div>
+                                </div>
+                            @empty
+                                <p class="text-sm text-white/60 text-center py-8">
+                                    Este local ainda não possui imagens cadastradas.
+                                </p>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    <div class="bg-white/5 px-6 py-4 flex flex-row-reverse gap-3">
+                        <button wire:click="saveImageDescriptions"
+                                type="button"
+                                @disabled($imagesLocation->images->isEmpty())
+                                class="inline-flex items-center justify-center rounded-lg px-6 py-3 bg-secondary hover:bg-secondary/90 text-primary font-semibold text-sm shadow-lg transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-secondary/25 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Salvar descrições
                         </button>
                         <button wire:click="closeModals"
                                 type="button"

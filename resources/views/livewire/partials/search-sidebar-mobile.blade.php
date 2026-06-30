@@ -1,6 +1,7 @@
 <div class="md:hidden">
     <h1 class="sr-only">Pesquisa de Locais</h1>
     <div class="fixed top-2 left-2 right-2 z-[1001] transform transition-all duration-300 ease-in-out translate-y-0 opacity-100"
+         role="search"
          aria-label="Barra de pesquisa móvel"
          aria-hidden="false">
 
@@ -26,7 +27,7 @@
 
                 @php($activeFilterCount = array_sum($typeFilters))
 
-                <fieldset class="flex flex-col gap-2 p-2 bg-black/20" wire:key="filter-toggles" aria-labelledby="mobile-filters-legend">
+                <fieldset class="flex flex-col gap-2 p-2 bg-black/20" wire:key="filter-toggles-mobile" aria-labelledby="mobile-filters-legend">
                     <legend id="mobile-filters-legend" class="text-sm font-semibold text-white pb-1">
                         Filtrar por acessibilidade
                     </legend>
@@ -45,15 +46,29 @@
                     </div>
 
                     <div class="flex items-center gap-x-4">
-                        <x-toggle-button wire:model.live="typeFilters.accessible" :value="$typeFilters['accessible']"
+                        <x-toggle-button id="filter-accessible-mobile" wire:model.live="typeFilters.accessible" :value="$typeFilters['accessible']"
                             label="Acessível" trackClass="bg-black/20 border-white" thumbClass="bg-green-500"
                             labelClass="text-white text-sm" />
 
-                        <x-toggle-button wire:model.live="typeFilters.non_accessible" :value="$typeFilters['non_accessible']"
+                        <x-toggle-button id="filter-non-accessible-mobile" wire:model.live="typeFilters.non_accessible" :value="$typeFilters['non_accessible']"
                             label="Não Acessível" trackClass="bg-black/20 border-white" thumbClass="bg-amber-500"
                             labelClass="text-white text-sm" />
                     </div>
                 </fieldset>
+
+                {{-- Auditory cue so screen-reader users on mobile know a results list exists and how to open it --}}
+                <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+                    @if(!empty($search) || array_sum($typeFilters) > 0)
+                        {{ $totalResults }} {{ $totalResults === 1 ? 'local encontrado' : 'locais encontrados' }}.
+                        @if($totalResults > 0)
+                            @if($resultsOpen)
+                                Lista de resultados aberta.
+                            @else
+                                Use o botão "{{ $totalResults }} {{ $totalResults === 1 ? 'resultado' : 'resultados' }}" para abrir a lista.
+                            @endif
+                        @endif
+                    @endif
+                </p>
             </div>
         </div>
     </div>

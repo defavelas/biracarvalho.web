@@ -30,11 +30,25 @@
         @endif
     </button>
 
+    @if(!empty(config('services.accessibility.repository_url')))
+        <a
+            href="{{ config('services.accessibility.repository_url') }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex absolute z-[1002] w-12 h-12 rounded-full bg-secondary shadow-lg border-0 cursor-pointer items-center justify-center transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5 top-5 right-[4.75rem] focus:outline-none focus-visible:ring-4 focus-visible:ring-primary focus-visible:ring-offset-2"
+            aria-label="Ver projeto no GitHub (abre em nova aba)"
+        >
+            <svg class="w-6 h-6 text-primary transition-transform duration-200" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+            </svg>
+        </a>
+    @endif
+
     <button
         type="button"
         class="flex absolute z-[1002] w-12 h-12 rounded-full bg-secondary shadow-lg border-0 cursor-pointer items-center justify-center transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-0.5 top-5 right-5"
         wire:click="openAccessibilityModal"
-        aria-label="Relatar problema de acessibilidade"
+        aria-label="Relatar problema de acessibilidade nesta ferramenta"
     >
         @svg('heroicon-o-flag', 'w-6 h-6 text-primary transition-transform duration-200')
     </button>
@@ -73,7 +87,7 @@
             <div class="bg-primary p-4">
                 <div class="flex items-center justify-between">
                     <h2 id="accessibility-modal-title" class="text-lg font-bold text-white">
-                        Relatar Problema de Acessibilidade
+                        Relatar problema nesta ferramenta
                     </h2>
                     <button
                         type="button"
@@ -88,7 +102,12 @@
 
             <div class="p-6 space-y-4">
                 <p class="text-primary/80 leading-relaxed">
-                    Encontrou alguma barreira de acessibilidade neste site? Sua opinião é muito importante para melhorarmos a experiência de todos os usuários.
+                    Este canal é exclusivo para relatar problemas de acessibilidade <strong>neste site/ferramenta</strong>
+                    (por exemplo, dificuldade para navegar pelo teclado, leitor de tela ou contraste).
+                </p>
+                <p class="text-primary/70 text-sm leading-relaxed">
+                    Para relatar uma barreira de acessibilidade <strong>em um local do mapa</strong>, utilize o
+                    cadastro de locais — este formulário não é destinado a esse fim.
                 </p>
 
                 <div class="bg-primary/5 rounded-lg p-4">
@@ -103,7 +122,7 @@
                 </div>
 
                 <p class="text-xs text-primary/60">
-                    Descreva o problema encontrado, a página onde ocorreu e, se possível, qual tecnologia assistiva você utiliza.
+                    Descreva o problema encontrado na ferramenta, a página onde ocorreu e, se possível, qual tecnologia assistiva você utiliza.
                 </p>
             </div>
 

@@ -57,12 +57,12 @@
                     @endif
                 </div>
 
-                <div class="flex flex-wrap items-center gap-4" wire:key="filter-toggles">
-                    <x-toggle-button wire:model.live="typeFilters.accessible" :value="$typeFilters['accessible']"
+                <div class="flex flex-wrap items-center gap-4" wire:key="filter-toggles-desktop">
+                    <x-toggle-button id="filter-accessible-desktop" wire:model.live="typeFilters.accessible" :value="$typeFilters['accessible']"
                         label="Acessível" trackClass="bg-black/20 border-white" thumbClass="bg-green-500"
                         labelClass="text-white text-sm" />
 
-                    <x-toggle-button wire:model.live="typeFilters.non_accessible" :value="$typeFilters['non_accessible']"
+                    <x-toggle-button id="filter-non-accessible-desktop" wire:model.live="typeFilters.non_accessible" :value="$typeFilters['non_accessible']"
                         label="Não Acessível" trackClass="bg-black/20 border-white" thumbClass="bg-amber-500"
                         labelClass="text-white text-sm" />
                 </div>

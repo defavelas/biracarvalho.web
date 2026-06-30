@@ -8,6 +8,7 @@ use App\Enum\Location\Type;
 use App\Services\LocationService;
 use Exception;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
 final class SearchSidebar extends Component
@@ -19,12 +20,22 @@ final class SearchSidebar extends Component
         'non_accessible' => false,
     ];
 
+    /**
+     * Reactive so the panel re-renders when the parent App component toggles
+     * the sidebar (otherwise the collapse class never updates after mount).
+     */
+    #[Reactive]
     public bool $collapsed = false;
     public bool $resultsOpen = true;
 
     public array $results = [];
     public int $totalResults = 0;
     public ?string $selectedLocationId = null;
+
+    /**
+     * Screen-reader announcement for filter changes (auditory feedback).
+     */
+    public string $filterAnnouncement = '';
 
     /**
      * Initialize the component with optional collapsed state.
@@ -66,22 +77,43 @@ final class SearchSidebar extends Component
 
     /**
      * Handle type filter updates.
+     *
+     * @param mixed $value The new toggle value.
+     * @param string|null $key The filter key that changed (e.g. "accessible").
      */
-    public function updatedTypeFilters(): void
+    public function updatedTypeFilters($value, $key = null): void
     {
         $this->loadResults();
         $this->dispatch('results-updated', results: $this->results);
+
         if (array_sum($this->typeFilters) > 0) {
             $this->resultsOpen = true;
         }
+
+        $this->announceFilterChange($key);
     }
 
     /**
-     * Toggle the sidebar collapsed state.
+     * Build the auditory feedback message for a toggled filter.
      */
-    public function toggleSidebar(): void
+    private function announceFilterChange(?string $key): void
     {
-        $this->collapsed = ! $this->collapsed;
+        $labels = [
+            'accessible' => 'Acessível',
+            'non_accessible' => 'Não Acessível',
+        ];
+
+        if (null === $key || ! isset($labels[$key])) {
+            return;
+        }
+
+        $active = (bool) ($this->typeFilters[$key] ?? false);
+
+        $this->filterAnnouncement = sprintf(
+            'Filtro %s %s.',
+            $labels[$key],
+            $active ? 'ativado' : 'desativado',
+        );
     }
 
     /**
@@ -97,6 +129,7 @@ final class SearchSidebar extends Component
         $this->search = '';
         $this->selectedLocationId = null;
         $this->resultsOpen = false;
+        $this->filterAnnouncement = 'Filtros limpos.';
 
         $this->loadResults();
 
